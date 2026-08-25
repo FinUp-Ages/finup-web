@@ -1,0 +1,4 @@
+# Substituir @arquitetura pelo time/usuario responsavel na organizacao do GitHub.
+/src/config/     @arquitetura
+/src/services/   @arquitetura
+/src/types/      @arquitetura

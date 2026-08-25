@@ -1,0 +1,5 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos globais e variaveis de tema entram aqui, depois dos design tokens do Figma. */
