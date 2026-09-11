@@ -1,10 +1,12 @@
-# finup-web
+# finup-web (variante Feature-Driven)
 
 Painel administrativo do projeto **FinUp** — AGES 2026/2.
 
 React 18 · Vite 6 · TypeScript · Tailwind CSS · React Router 7 · TanStack Query · Axios
 
-> Esqueleto do projeto. As pastas e os arquivos de fronteira estão criados e vazios — nenhuma tela ou regra de negócio foi implementada ainda.
+> **Variante para comparação.** Este projeto é um clone do `finup-web` organizado por **funcionalidade (Feature-Driven)** em vez de por camada (MVVM). Stack, scripts, configurações e telas são idênticos — muda apenas onde cada arquivo mora e as regras de dependência entre pastas.
+>
+> Esqueleto do projeto: nenhuma tela ou regra de negócio foi implementada ainda.
 
 ---
 
@@ -21,7 +23,7 @@ npm install
 npm run dev
 ```
 
-A aplicação sobe em http://localhost:5173.
+A aplicação sobe em http://localhost:5173. Se a versão MVVM já estiver rodando nessa porta, o Vite usa automaticamente a próxima livre (5174) — confira a URL no terminal.
 
 O backend precisa estar rodando em paralelo (`finup-backend`, porta 8080) para as chamadas de API funcionarem. A URL fica em `VITE_API_BASE_URL`.
 
@@ -44,46 +46,80 @@ Antes de abrir um PR, rode `npm run lint && npm run typecheck && npm run build` 
 
 ```
 src/
-├── main.tsx              bootstrap do React
-├── App.tsx               providers globais + rotas
-├── vite-env.d.ts         tipagem das variáveis de ambiente
-├── assets/               imagens, ícones, fontes
-├── components/
-│   ├── ui/               componentes visuais genéricos (Button, Input, Card, Table)
-│   └── common/           componentes compostos do painel (Header, Sidebar, DataTable)
-├── pages/                uma tela por pasta/arquivo
-├── layouts/              esqueletos de página (AuthLayout, DashboardLayout)
-├── routes/               árvore de rotas, rota protegida e constantes de caminho
-├── services/             uma função por endpoint da API
-├── hooks/                hooks customizados, incluindo os de TanStack Query
-├── contexts/             contextos globais (sessão, tema)
-├── types/                tipos e interfaces compartilhados
-├── utils/                funções puras (formatação de moeda, data, máscaras)
-├── config/               axios, QueryClient e leitura de variáveis de ambiente
-└── styles/               CSS global e diretivas do Tailwind
+├── main.tsx                   bootstrap do React
+├── vite-env.d.ts              tipagem das variáveis de ambiente
+├── app/                       o que "liga" a aplicação
+│   ├── App.tsx                providers globais + rotas
+│   ├── routes/                árvore de rotas, rota protegida e constantes de caminho
+│   ├── providers/             providers globais (QueryClient, sessão, tema)
+│   └── styles/                CSS global e diretivas do Tailwind
+├── features/                  uma pasta por funcionalidade de negócio
+│   ├── welcome/               tela inicial (rota "/")
+│   │   ├── pages/             WelcomePage.tsx
+│   │   └── index.ts           API pública da feature
+│   └── example/               feature de referência, com dados da API
+│       ├── api/               chamadas HTTP da feature (getExample.ts)
+│       ├── hooks/             hooks de dados com TanStack Query (useExample.ts)
+│       ├── components/        componentes usados só nesta feature (ExampleList.tsx)
+│       ├── pages/             telas da feature (ExamplePage.tsx)
+│       ├── types.ts           tipos da feature
+│       └── index.ts           API pública da feature
+└── shared/                    código usado por mais de uma feature
+    ├── components/
+    │   ├── ui/                componentes visuais genéricos (Button, Input, Card, Table)
+    │   └── common/            componentes compostos do painel (Header, Sidebar, DataTable)
+    ├── layouts/               esqueletos de página (AuthLayout, DashboardLayout)
+    ├── hooks/                 hooks genéricos, sem regra de negócio (useDebounce)
+    ├── config/                axios, QueryClient e leitura de variáveis de ambiente
+    ├── types/                 tipos e interfaces compartilhados entre features
+    ├── utils/                 funções puras (formatação de moeda, data, máscaras)
+    └── assets/                imagens, ícones, fontes
 ```
 
 Pastas ainda vazias têm um `.gitkeep` com uma linha descrevendo o que vai dentro — o Git não versiona diretório vazio. **Apague o `.gitkeep` quando a pasta receber o primeiro arquivo.**
 
-### Fluxo de dados — a regra mais importante
+### Regras de dependência — a regra mais importante
 
 ```
-page  →  hook (TanStack Query)  →  service  →  httpClient (axios)  →  API
+app  →  features  →  shared
 ```
 
-- **`config/httpClient.ts`** é a única instância do Axios do projeto. Concentra `baseURL`, injeção do token, tratamento de 401 e normalização de erro. **Nenhum outro arquivo importa `axios` diretamente.**
-- **`services/`** tem uma função por endpoint, tipada. É o único lugar que conhece rotas da API (`/transacoes`, `/usuarios`).
-- **`hooks/`** envolve os services em `useQuery` / `useMutation`. É daqui que as telas consomem dados — já com cache, loading e erro resolvidos.
-- **`pages/`** monta a tela. Não sabe que existe rede.
+1. **Sentido único.** `app/` importa `features/` e `shared/`; `features/` importa `shared/`; `shared/` **nunca** importa `features/` nem `app/`.
+2. **Features isoladas.** Uma feature não importa o interior de outra. Quando for inevitável, importe só pela API pública (`@/features/example`), nunca `@/features/example/hooks/useExample`. Muita dependência entre duas features é sinal de que elas são uma só, ou de que algo deveria estar em `shared/`.
+3. **Imports.** Dentro da própria feature, caminho relativo (`../api/getExample`); fora dela, alias `@/`.
+4. **Promoção para `shared/`.** Um componente, hook ou tipo nasce dentro da feature e só sobe para `shared/` quando uma segunda feature precisar dele.
 
-Quebrar essa cadeia (uma page chamando axios direto, por exemplo) é o tipo de coisa que o code review deve barrar: espalha URL e tratamento de erro pelo projeto inteiro.
+### Fluxo de dados dentro de uma feature
+
+```
+pages  →  hooks (TanStack Query)  →  api  →  shared/config/httpClient (axios)  →  API
+```
+
+- **`shared/config/httpClient.ts`** é a única instância do Axios do projeto. Concentra `baseURL`, injeção do token, tratamento de 401 e normalização de erro. **Nenhum outro arquivo importa `axios` diretamente.**
+- **`features/<nome>/api/`** tem uma função por endpoint, tipada. É o único lugar da feature que conhece rotas da API (`/transacoes`, `/usuarios`).
+- **`features/<nome>/hooks/`** envolve as funções de `api/` em `useQuery` / `useMutation` e entrega o dado pronto para a tela — já com cache, loading e erro resolvidos.
+- **`features/<nome>/pages/`** monta a tela com `components/` da feature e de `shared/`. Não sabe que existe rede.
+
+A feature `example/` é a referência completa do padrão.
+
+### Equivalência com a versão MVVM
+
+| MVVM (`finup-web`) | Feature-Driven (este projeto) |
+|---|---|
+| `models/exampleModel.ts` | `features/example/api/getExample.ts` |
+| `viewmodels/useExampleViewModel.ts` | `features/example/hooks/useExample.ts` |
+| `views/ExampleView.tsx` | `features/example/pages/ExamplePage.tsx` (+ `components/ExampleList.tsx`) |
+| `views/WelcomeView.tsx` | `features/welcome/pages/WelcomePage.tsx` |
+| `routes/` · `App.tsx` · `styles/` | `app/routes/` · `app/App.tsx` · `app/styles/` |
+| `contexts/` | `app/providers/` (sessão tende a virar `features/auth/`) |
+| `components/` · `layouts/` · `config/` · `types/` · `utils/` · `assets/` | mesmas pastas, dentro de `shared/` |
 
 ### Convenções
 
-- **Import alias `@/`** configurado: use `@/components/ui/Button` em vez de `../../../components/ui/Button`.
+- **Import alias `@/`** configurado: use `@/shared/components/ui/Button` em vez de `../../../shared/components/ui/Button`.
 - **TypeScript em modo `strict`**, com `noUnusedLocals` e `noUnusedParameters`. Não relaxe essas flags — retroagir depois é caro.
 - **Nenhum segredo em variável `VITE_`.** Tudo com esse prefixo é embutido no bundle e fica visível para qualquer usuário. Chave de API, credencial ou token de terceiro passam pelo backend, nunca pelo front.
-- Componentes em `PascalCase.tsx`; hooks em `useAlgumaCoisa.ts`; utilitários em `camelCase.ts`.
+- Pastas de feature em `kebab-case`; telas em `XPage.tsx`; componentes em `PascalCase.tsx`; hooks em `useX.ts`; funções de API com verbo (`getX.ts`, `createX.ts`); utilitários em `camelCase.ts`.
 
 ---
 
@@ -94,9 +130,8 @@ Quebrar essa cadeia (uma page chamando axios direto, por exemplo) é o tipo de c
 | **Design tokens** (cores, tipografia, espaçamento) | `tailwind.config.js` está com `theme.extend` vazio, aguardando o Figma do AGES IV |
 | **Testes** (Vitest + Testing Library) | fora do escopo desta primeira versão, a incluir quando o time decidir |
 | **Formulários** (React Hook Form + Zod) | idem — o painel é majoritariamente formulário, então provavelmente entra cedo |
-| **Biblioteca de componentes** | `components/ui/` será construída à mão, sobre Tailwind |
-| **Autenticação** | `routes/ProtectedRoute.tsx` e `contexts/` estão criados e vazios, aguardando a definição do fluxo de login no backend |
-
+| **Biblioteca de componentes** | `shared/components/ui/` será construída à mão, sobre Tailwind |
+| **Autenticação** | `app/routes/ProtectedRoute.tsx` e `app/providers/` estão criados e vazios, aguardando a definição do fluxo de login no backend (a lógica tende a virar `features/auth/`) |
 ---
 
 ## Estrutura de suporte
@@ -105,7 +140,7 @@ Quebrar essa cadeia (uma page chamando axios direto, por exemplo) é o tipo de c
 .github/
 ├── workflows/ci.yml          lint + typecheck + build em todo PR
 ├── PULL_REQUEST_TEMPLATE.md  inclui campo de evidência visual
-└── CODEOWNERS                revisão obrigatória em config/, services/ e types/
+└── CODEOWNERS                revisão obrigatória em shared/config/, features/*/api/ e shared/types/
 eslint.config.js · .prettierrc · .editorconfig · .nvmrc
 ```
 

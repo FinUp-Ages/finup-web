@@ -1,0 +1,1 @@
+# Hooks genericos, sem regra de negocio e sem chamada de API (useDebounce, useMediaQuery). Hooks de dados ficam em features/<nome>/hooks/.
