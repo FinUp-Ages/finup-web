@@ -1,4 +1,4 @@
-import finupLogo from '../../assets/finUp-logo.png';
+import finupLogo from '../../../assets/finUp-logo.png';
 
 function Header() {
   return (
