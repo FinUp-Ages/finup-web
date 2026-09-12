@@ -17,3 +17,5 @@ npm-debug.log*
 *.suo
 *.sw?
 .DS_Store
+
+*.tsbuildinfo
