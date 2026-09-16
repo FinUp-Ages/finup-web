@@ -116,6 +116,13 @@ body {
   text-align: right;
 }
 
+.input-message.success-message {
+  color: rgba(22, 163, 74, 1);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
 .primeiro-acesso {
   width: min(100% - 42px, 320px);
   margin-top: 20px;
