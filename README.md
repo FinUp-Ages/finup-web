@@ -27,6 +27,25 @@ A aplicação sobe em http://localhost:5173. Se a versão MVVM já estiver rodan
 
 O backend precisa estar rodando em paralelo (`finup-backend`, porta 8080) para as chamadas de API funcionarem. A URL fica em `VITE_API_BASE_URL`.
 
+## Docker
+
+No PowerShell, primeiro carregue `VITE_API_BASE_URL` na sessão atual usando o mesmo valor definido em `.env.development`. Por exemplo, se o arquivo contém `VITE_API_BASE_URL=http://localhost:8080`, execute:
+
+```powershell
+$env:VITE_API_BASE_URL = "http://localhost:8080"
+```
+
+Depois, gere e execute a imagem:
+
+```powershell
+docker build --build-arg VITE_API_BASE_URL="$env:VITE_API_BASE_URL" -t finup-web .
+docker run --rm -p 5173:80 finup-web
+```
+
+Acesse http://localhost:5173. A imagem usa Node.js 22 para compilar a aplicação e Nginx para servir os arquivos, com suporte às rotas do React Router.
+
+A variável definida com `$env:` permanece disponível apenas na sessão atual do PowerShell. O Docker recebe seu valor pelo argumento `--build-arg`; ele não lê o arquivo `.env.development` automaticamente. A pipeline poderá fornecer o valor correspondente a cada ambiente ao gerar a imagem. Como o Vite incorpora variáveis no bundle durante o build, a URL deve ser acessível pelo navegador do usuário e não pode conter segredos.
+
 ## Scripts
 
 | Comando | O que faz |
