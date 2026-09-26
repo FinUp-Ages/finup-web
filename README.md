@@ -42,9 +42,9 @@ docker build --build-arg VITE_API_BASE_URL="$env:VITE_API_BASE_URL" -t finup-web
 docker run --rm -p 5173:80 finup-web
 ```
 
-Acesse http://localhost:5173. A imagem usa Node.js 22 para compilar a aplicação e Nginx para servir os arquivos, com suporte às rotas do React Router.
+Acesse http://localhost:5173. A imagem usa Node.js 20 (mesma versão do `.nvmrc` e da CI) para compilar a aplicação e Nginx para servir os arquivos, com suporte às rotas do React Router.
 
-A variável definida com `$env:` permanece disponível apenas na sessão atual do PowerShell. O Docker recebe seu valor pelo argumento `--build-arg`; ele não lê o arquivo `.env.development` automaticamente. A pipeline poderá fornecer o valor correspondente a cada ambiente ao gerar a imagem. Como o Vite incorpora variáveis no bundle durante o build, a URL deve ser acessível pelo navegador do usuário e não pode conter segredos.
+A variável definida com `$env:` permanece disponível apenas na sessão atual do PowerShell. O Docker recebe seu valor pelo argumento `--build-arg`; ele não lê o arquivo `.env.development` automaticamente. O argumento é obrigatório: sem ele, o build falha. A pipeline poderá fornecer o valor correspondente a cada ambiente ao gerar a imagem. Como o Vite incorpora variáveis no bundle durante o build, a URL deve ser acessível pelo navegador do usuário e não pode conter segredos.
 
 ## Scripts
 
