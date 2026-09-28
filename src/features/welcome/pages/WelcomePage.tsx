@@ -1,10 +1,12 @@
-import Header from '@/shared/components/common/Header';
-import HeaderDuolingo from '@/shared/components/common/HeaderDuolingo';
-import PrimeiroAcesso from '@/shared/components/common/PrimeiroAcesso';
-import UsuarioLogin from '@/shared/components/common/UsuarioLogin';
-import ButtonDuolingo from '@/shared/components/ui/ButtonDuolingo';
-import graficos from '@/assets/graficos.png';
-import pilhasLivros from '@/assets/pilhasLivros.png';
+import {
+  ButtonDestaque,
+  graficos,
+  Header,
+  HeaderDestaque,
+  PrimeiroAcesso,
+  pilhasLivros,
+  UsuarioLogin,
+} from '@/features/auth';
 
 export function WelcomePage() {
   return (
@@ -15,11 +17,11 @@ export function WelcomePage() {
         <PrimeiroAcesso />
       </main>
 
-      <div className="auth-panel-duolingo">
-        <img className="duolingo-graphs" src={graficos} alt="" />
-        <HeaderDuolingo />
-        <ButtonDuolingo type="submit">Baixe o app</ButtonDuolingo>
-        <img className="duolingo-books" src={pilhasLivros} alt="" />
+      <div className="auth-panel-destaque">
+        <img className="destaque-graphs" src={graficos} alt="" />
+        <HeaderDestaque />
+        <ButtonDestaque type="submit">Baixe o app</ButtonDestaque>
+        <img className="destaque-books" src={pilhasLivros} alt="" />
       </div>
     </div>
   );

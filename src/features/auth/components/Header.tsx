@@ -1,6 +1,6 @@
-import finupLogo from '../../../assets/finUp-logo.png';
+import finupLogo from '@/shared/assets/finUp-logo.png';
 
-function Header() {
+export function Header() {
   return (
     <header className="auth-header flex items-start gap-6 bg-white p-6">
       <img src={finupLogo} alt="Logo da FinUp" className="h-20 w-auto" />
@@ -15,5 +15,3 @@ function Header() {
     </header>
   );
 }
-
-export default Header;

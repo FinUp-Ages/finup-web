@@ -1,4 +1,4 @@
-function PrimeiroAcesso() {
+export function PrimeiroAcesso() {
   return (
     <footer className="primeiro-acesso">
       <h2>Primeiro acesso?</h2>
@@ -6,5 +6,3 @@ function PrimeiroAcesso() {
     </footer>
   );
 }
-
-export default PrimeiroAcesso;

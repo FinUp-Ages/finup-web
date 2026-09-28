@@ -5,10 +5,12 @@
  */
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { paths } from '@/app/routes/paths';
+import { LoginPage } from '@/features/auth';
 import { WelcomePage } from '@/features/welcome';
 
 const router = createBrowserRouter([
   { path: paths.home, element: <WelcomePage /> },
+  { path: paths.login, element: <LoginPage /> },
   // TODO: implementar em tarefa futura — demais rotas e rotas protegidas (ProtectedRoute + shared/layouts/).
 ]);
 

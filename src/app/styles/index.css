@@ -28,7 +28,7 @@ body {
   background: rgba(255, 255, 255, 1);
 }
 
-.auth-panel-duolingo {
+.auth-panel-destaque {
   position: relative;
   overflow: hidden;
   display: flex;
@@ -41,7 +41,7 @@ body {
   background: linear-gradient(135deg, rgba(1, 75, 144, 1), rgba(0, 22, 42, 1));
 }
 
-.duolingo-graphs {
+.destaque-graphs {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -50,11 +50,11 @@ body {
   pointer-events: none;
 }
 
-.header-duolingo {
+.header-destaque {
   text-align: center;
 }
 
-.header-duolingo h1 {
+.header-destaque h1 {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -65,16 +65,16 @@ body {
   font-weight: 400;
 }
 
-.header-duolingo h1 span {
+.header-destaque h1 span {
   color: rgba(255, 255, 255, 0.75);
 }
 
-.header-duolingo h1 strong {
+.header-destaque h1 strong {
   color: rgba(255, 255, 255, 1);
   font-weight: 700;
 }
 
-.duolingo-books {
+.destaque-books {
   position: absolute;
   z-index: 1;
   right: -26%;
@@ -151,13 +151,13 @@ body {
     width: 100%;
   }
 
-  .auth-panel-duolingo {
+  .auth-panel-destaque {
     width: 100%;
     min-height: 520px;
     padding-top: 86px;
   }
 
-  .duolingo-books {
+  .destaque-books {
     right: -22%;
     bottom: -14%;
     width: min(86%, 420px);
@@ -216,7 +216,7 @@ body {
   outline-offset: 3px;
 }
 
-.login-button-duolingo {
+.login-button-destaque {
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -236,11 +236,11 @@ body {
   font-weight: 400;
 }
 
-.login-button-duolingo:hover {
+.login-button-destaque:hover {
   background: rgba(255, 255, 255, 0.18);
 }
 
-.login-button-duolingo:focus-visible {
+.login-button-destaque:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 1);
   outline-offset: 3px;
 }

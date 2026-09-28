@@ -1,6 +1,6 @@
-function HeaderDuolingo() {
+export function HeaderDestaque() {
   return (
-    <header className="header-duolingo">
+    <header className="header-destaque">
       <h1>
         <span>Tipo Duolingo</span>
         <strong>para finanças</strong>
@@ -8,5 +8,3 @@ function HeaderDuolingo() {
     </header>
   );
 }
-
-export default HeaderDuolingo;

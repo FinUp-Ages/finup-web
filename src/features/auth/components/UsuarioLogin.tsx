@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
+import Button from '@/shared/components/ui/Button';
+import Input from '@/shared/components/ui/Input';
 
 function validarEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -22,7 +22,7 @@ function validarSenha(senha: string) {
  * submit. A rota e o formato da resposta devem seguir o contrato do Swagger.
  * Em caso de erro, o componente devera exibir uma mensagem generica.
  */
-function UsuarioLogin() {
+export function UsuarioLogin() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState({ email: '', senha: '' });
@@ -106,5 +106,3 @@ function UsuarioLogin() {
     </div>
   );
 }
-
-export default UsuarioLogin;

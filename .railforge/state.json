@@ -1,9 +1,24 @@
 {
   "stage": "COMPLETED",
-  "task": null,
-  "objective": "Executar a CI em pushes para qualquer branch.",
-  "files_in_scope": [".github/workflows/ci.yml"],
-  "validation": {"git diff --check": "passed"},
+  "task": "Criar feature auth sem substituir a WelcomePage.",
+  "objective": "Adicionar a rota /login, mover componentes exclusivos da autenticação para features/auth e reorganizar/otimizar seus assets.",
+  "files_in_scope": [
+    "src/app/routes/paths.ts",
+    "src/app/routes/index.tsx",
+    "src/app/styles/index.css",
+    "src/features/auth/",
+    "src/features/welcome/pages/WelcomePage.tsx",
+    "src/shared/assets/",
+    "src/shared/components/common/",
+    "src/shared/components/ui/",
+    ".railforge/state.json"
+  ],
+  "validation": {
+    "npm run typecheck": "passed",
+    "npm run build": "passed",
+    "npm run lint": "passed",
+    "desktop routes / and /login": "passed; validation and success states verified; WebP loaded at 768x768"
+  },
   "review": "approved",
-  "updated_at": "2026-09-13"
+  "updated_at": "2026-09-27"
 }
