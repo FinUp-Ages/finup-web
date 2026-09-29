@@ -1,24 +1,18 @@
 {
   "stage": "COMPLETED",
-  "task": "Criar feature auth sem substituir a WelcomePage.",
-  "objective": "Adicionar a rota /login, mover componentes exclusivos da autenticação para features/auth e reorganizar/otimizar seus assets.",
+  "task": "Corrigir semântica e validação do login.",
+  "objective": "Permitir submit por Enter, rotular os campos para acessibilidade, validar apenas preenchimento da senha no login e impedir que Baixe o app envie formulário.",
   "files_in_scope": [
-    "src/app/routes/paths.ts",
-    "src/app/routes/index.tsx",
-    "src/app/styles/index.css",
-    "src/features/auth/",
+    "src/features/auth/components/UsuarioLogin.tsx",
     "src/features/welcome/pages/WelcomePage.tsx",
-    "src/shared/assets/",
-    "src/shared/components/common/",
-    "src/shared/components/ui/",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run typecheck": "passed",
     "npm run build": "passed",
     "npm run lint": "passed",
-    "desktop routes / and /login": "passed; validation and success states verified; WebP loaded at 768x768"
+    "editor diagnostics": "passed; no errors in changed components",
+    "desktop browser flow": "passed; labels present, Enter submits a simple password, success appears, and app-download button has type=button"
   },
   "review": "approved",
-  "updated_at": "2026-09-27"
+  "updated_at": "2026-09-29"
 }

@@ -1,13 +1,9 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import Button from '@/shared/components/ui/Button';
 import Input from '@/shared/components/ui/Input';
 
 function validarEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function validarSenha(senha: string) {
-  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9\s]).{8,}$/.test(senha);
 }
 
 /*
@@ -18,7 +14,7 @@ function validarSenha(senha: string) {
  *   return resposta.data;
  * }
  *
- * A funcao devera ser movida para features/example/api/ e chamada pelo fluxo de
+ * A funcao devera ser movida para features/auth/api/ e chamada pelo fluxo de
  * submit. A rota e o formato da resposta devem seguir o contrato do Swagger.
  * Em caso de erro, o componente devera exibir uma mensagem generica.
  */
@@ -28,18 +24,16 @@ export function UsuarioLogin() {
   const [mensagem, setMensagem] = useState({ email: '', senha: '' });
   const [sucesso, setSucesso] = useState('');
 
-  const novaMensagem = () => {
+  const novaMensagem = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     const mensagens = {
       email: !email.trim()
         ? 'Digite seu e-mail.'
         : !validarEmail(email)
           ? 'Digite um e-mail válido.'
           : '',
-      senha: !senha.trim()
-        ? 'Digite sua senha.'
-        : !validarSenha(senha)
-          ? 'A senha deve ter 8 caracteres, maiúscula, minúscula e especial.'
-          : '',
+      senha: !senha.trim() ? 'Digite sua senha.' : '',
     };
 
     setMensagem(mensagens);
@@ -67,11 +61,18 @@ export function UsuarioLogin() {
   };
 
   return (
-    <div className="login-form">
-      <div className="input-group">
+    <form
+      onSubmit={novaMensagem}
+      className="mx-auto flex w-[min(calc(100%-42px),320px)] flex-col gap-3"
+    >
+      <div className="flex flex-col gap-1">
+        <label htmlFor="login-email" className="sr-only">
+          E-mail
+        </label>
         <Input
+          id="login-email"
           type="email"
-          className={mensagem.email ? 'input-error' : ''}
+          className={`h-10 w-full rounded-[5px] border-0 bg-login-field px-4 text-xs text-black outline-none placeholder:text-black placeholder:opacity-100 focus:shadow-[0_0_0_2px_rgba(2,23,54,0.2)] ${mensagem.email ? 'shadow-[0_0_0_1px_rgba(220,38,38,1)]' : ''}`}
           placeholder="E-mail"
           value={email}
           onChange={(event) => {
@@ -80,13 +81,19 @@ export function UsuarioLogin() {
             setSucesso('');
           }}
         />
-        <span className="input-message">{mensagem.email}</span>
+        <span className="min-h-[14px] text-right text-[10px] leading-[1.3] text-login-error">
+          {mensagem.email}
+        </span>
       </div>
 
-      <div className="input-group">
+      <div className="flex flex-col gap-1">
+        <label htmlFor="login-password" className="sr-only">
+          Senha
+        </label>
         <Input
+          id="login-password"
           type="password"
-          className={mensagem.senha ? 'input-error' : ''}
+          className={`h-10 w-full rounded-[5px] border-0 bg-login-field px-4 text-xs text-black outline-none placeholder:text-black placeholder:opacity-100 focus:shadow-[0_0_0_2px_rgba(2,23,54,0.2)] ${mensagem.senha ? 'shadow-[0_0_0_1px_rgba(220,38,38,1)]' : ''}`}
           placeholder="Senha"
           value={senha}
           onChange={(event) => {
@@ -95,14 +102,18 @@ export function UsuarioLogin() {
             setSucesso('');
           }}
         />
-        <span className="input-message">{mensagem.senha}</span>
+        <span className="min-h-[14px] text-right text-[10px] leading-[1.3] text-login-error">
+          {mensagem.senha}
+        </span>
       </div>
 
-      {sucesso && <span className="input-message success-message">{sucesso}</span>}
+      {sucesso && (
+        <span className="min-h-[14px] text-center text-xs font-bold text-login-success">
+          {sucesso}
+        </span>
+      )}
 
-      <Button onClick={novaMensagem} type="submit">
-        Entrar
-      </Button>
-    </div>
+      <Button type="submit">Entrar</Button>
+    </form>
   );
 }

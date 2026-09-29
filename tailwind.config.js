@@ -3,9 +3,12 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
-      // TODO: preencher com os design tokens do Figma (AGES IV):
-      // colors, fontFamily, spacing, borderRadius.
-      colors: {},
+      colors: {
+        navy: 'rgba(2, 23, 54, 1)',
+        'login-field': 'rgba(240, 240, 240, 1)',
+        'login-error': 'rgba(220, 38, 38, 1)',
+        'login-success': 'rgba(22, 163, 74, 1)',
+      },
     },
   },
   plugins: [],
