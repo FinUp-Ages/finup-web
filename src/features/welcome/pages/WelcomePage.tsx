@@ -1,36 +1,28 @@
-import {
-  ButtonDestaque,
-  graficos,
-  Header,
-  HeaderDestaque,
-  PrimeiroAcesso,
-  pilhasLivros,
-  UsuarioLogin,
-} from '@/features/auth';
+/**
+ * Tela de boas-vindas (rota "/"), ponto de partida para os desenvolvedores.
+ *
+ * Tela estatica: nao exibe dado da API, por isso a feature nao tem api/ nem hooks/.
+ * Quando uma tela precisar de dados, siga a feature de referencia: features/example/.
+ *
+ * O logotipo em texto e branco com fundo transparente: so aparece sobre fundo escuro.
+ */
+import finupIcon from '@/shared/assets/finup-logo-icon.png';
+import finupTextLogo from '@/shared/assets/finup-logo-text.png';
 
 export function WelcomePage() {
   return (
-    <div className="flex min-h-screen">
-      <main className="flex min-h-screen w-1/2 flex-col items-center justify-center bg-white p-6">
-        <Header />
-        <UsuarioLogin />
-        <PrimeiroAcesso />
-      </main>
-
-      <div className="relative flex min-h-screen w-1/2 flex-col items-center justify-start overflow-hidden bg-[linear-gradient(135deg,rgba(1,75,144,1),rgba(0,22,42,1))] px-6 pb-6 pt-[clamp(92px,17vh,148px)]">
-        <img
-          className="pointer-events-none absolute right-0 bottom-0 h-[80%] w-full"
-          src={graficos}
-          alt=""
-        />
-        <HeaderDestaque />
-        <ButtonDestaque type="button">Baixe o app</ButtonDestaque>
-        <img
-          className="pointer-events-none absolute right-[-26%] bottom-[-25%] z-[1] w-[min(88%,540px)]"
-          src={pilhasLivros}
-          alt=""
-        />
-      </div>
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-900 p-6 text-center">
+      {/* O PNG do icone tem margem transparente (padrao de icone Android); a margem negativa compensa. */}
+      <img src={finupIcon} alt="" className="-my-12 h-44 w-44" />
+      <img src={finupTextLogo} alt="FinUp" className="h-14 w-auto" />
+      <p className="text-lg text-slate-300">Painel administrativo</p>
+      <p className="text-sm text-slate-400">
+        Edite{' '}
+        <code className="break-all rounded bg-slate-800 px-1 py-0.5 text-slate-200">
+          src/features/welcome/pages/WelcomePage.tsx
+        </code>{' '}
+        para começar.
+      </p>
+    </main>
   );
 }

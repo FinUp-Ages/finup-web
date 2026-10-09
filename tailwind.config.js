@@ -9,6 +9,9 @@ export default {
         'login-error': 'rgba(220, 38, 38, 1)',
         'login-success': 'rgba(22, 163, 74, 1)',
       },
+      fontFamily: {
+        destaque: ['"Trebuchet MS"', 'sans-serif'],
+      },
     },
   },
   plugins: [],

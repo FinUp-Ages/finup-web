@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import Button from '@/shared/components/ui/Button';
-import Input from '@/shared/components/ui/Input';
+import { Button } from '@/shared/components/ui/Button';
+import { Input } from '@/shared/components/ui/Input';
 
 function validarEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -113,7 +113,9 @@ export function UsuarioLogin() {
         </span>
       )}
 
-      <Button type="submit">Entrar</Button>
+      <Button type="submit" className="mt-[14px]">
+        Entrar
+      </Button>
     </form>
   );
 }

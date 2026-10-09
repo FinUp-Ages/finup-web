@@ -1,18 +1,22 @@
 {
   "stage": "COMPLETED",
-  "task": "Corrigir semântica e validação do login.",
-  "objective": "Permitir submit por Enter, rotular os campos para acessibilidade, validar apenas preenchimento da senha no login e impedir que Baixe o app envie formulário.",
+  "task": "Ajustar a tela de login conforme a revisão do PR #4.",
+  "objective": "Restaurar a WelcomePage, limitar a API pública da feature auth ao LoginPage, corrigir a fonte de destaque e alinhar imports, exports e componentes compartilhados aos padrões do projeto.",
   "files_in_scope": [
-    "src/features/auth/components/UsuarioLogin.tsx",
     "src/features/welcome/pages/WelcomePage.tsx",
+    "src/features/auth/",
+    "src/shared/components/ui/",
+    "src/shared/assets/",
+    "src/app/styles/index.css",
+    "tailwind.config.js",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run build": "passed",
     "npm run lint": "passed",
-    "editor diagnostics": "passed; no errors in changed components",
-    "desktop browser flow": "passed; labels present, Enter submits a simple password, success appears, and app-download button has type=button"
+    "npm run typecheck": "passed",
+    "npm run build": "passed",
+    "desktop browser flow": "passed; / shows the original WelcomePage, /login shows the login screen with Trebuchet MS applied, empty submit shows both messages, valid submit shows success, single h1, app-download button has type=button"
   },
-  "review": "approved",
-  "updated_at": "2026-09-29"
+  "review": "pending",
+  "updated_at": "2026-10-09"
 }

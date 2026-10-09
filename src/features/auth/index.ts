@@ -1,8 +1,6 @@
-export { ButtonDestaque } from './components/ButtonDestaque';
-export { Header } from './components/Header';
-export { HeaderDestaque } from './components/HeaderDestaque';
-export { PrimeiroAcesso } from './components/PrimeiroAcesso';
-export { UsuarioLogin } from './components/UsuarioLogin';
+/**
+ * API publica da feature "auth".
+ * Rotas e outras features importam somente daqui (@/features/auth),
+ * nunca de arquivos internos (components/, pages/).
+ */
 export { LoginPage } from './pages/LoginPage';
-export { default as graficos } from '../../shared/assets/graficos.png';
-export { default as pilhasLivros } from '../../shared/assets/pilhasLivros.webp';

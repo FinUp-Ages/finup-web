@@ -1,9 +1,5 @@
 import type { InputHTMLAttributes } from 'react';
 
-function Input(props: Readonly<InputHTMLAttributes<HTMLInputElement>>) {
-  const { className = '', ...inputProps } = props;
-
-  return <input className={className} {...inputProps} />;
+export function Input({ className = '', ...props }: Readonly<InputHTMLAttributes<HTMLInputElement>>) {
+  return <input className={className} {...props} />;
 }
-
-export default Input;
