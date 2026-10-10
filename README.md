@@ -76,6 +76,10 @@ src/
 │   ├── welcome/               tela inicial (rota "/")
 │   │   ├── pages/             WelcomePage.tsx
 │   │   └── index.ts           API pública da feature
+│   ├── auth/                  tela de login (rota "/login")
+│   │   ├── components/        componentes usados só no login (UsuarioLogin.tsx)
+│   │   ├── pages/             LoginPage.tsx
+│   │   └── index.ts           API pública da feature
 │   └── example/               feature de referência, com dados da API
 │       ├── api/               chamadas HTTP da feature (getExample.ts)
 │       ├── hooks/             hooks de dados com TanStack Query (useExample.ts)
