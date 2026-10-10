@@ -1,8 +1,8 @@
-import { ButtonDestaque } from '@/features/auth/components/ButtonDestaque';
-import { Header } from '@/features/auth/components/Header';
-import { HeaderDestaque } from '@/features/auth/components/HeaderDestaque';
-import { PrimeiroAcesso } from '@/features/auth/components/PrimeiroAcesso';
-import { UsuarioLogin } from '@/features/auth/components/UsuarioLogin';
+import { ButtonDestaque } from '../components/ButtonDestaque';
+import { Header } from '../components/Header';
+import { HeaderDestaque } from '../components/HeaderDestaque';
+import { PrimeiroAcesso } from '../components/PrimeiroAcesso';
+import { UsuarioLogin } from '../components/UsuarioLogin';
 import graficos from '@/shared/assets/graficos.png';
 import pilhasLivros from '@/shared/assets/pilhasLivros.webp';
 

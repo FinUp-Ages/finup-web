@@ -9,6 +9,7 @@
     "src/shared/assets/",
     "src/app/styles/index.css",
     "tailwind.config.js",
+    "README.md",
     ".railforge/state.json"
   ],
   "validation": {
