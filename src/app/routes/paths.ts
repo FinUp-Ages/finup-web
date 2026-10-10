@@ -5,4 +5,9 @@
 export const paths = {
   home: '/',
   login: '/login',
+  admin: '/app',
+  team: '/app/team',
+  analytics: '/app/analytics',
+  costs: '/app/costs',
+  studies: '/app/studies',
 } as const;

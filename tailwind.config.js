@@ -11,6 +11,7 @@ export default {
       },
       fontFamily: {
         destaque: ['"Trebuchet MS"', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
       },
     },
   },
