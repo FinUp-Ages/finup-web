@@ -11,10 +11,17 @@ import {
 } from '../components/GraficoCrescimentoUsuario';
 import { useUserGrowth } from '../hooks/useUserGrowth';
 
-const opcoesPeriodo: OpcaoPeriodo[] = [{ meses: 6, rotulo: 'Últimos 6 meses' }];
+const opcoesPeriodo: OpcaoPeriodo[] = [
+  { meses: 3, rotulo: 'Últimos 3 meses' },
+  { meses: 6, rotulo: 'Últimos 6 meses' },
+  { meses: 12, rotulo: 'Últimos 12 meses' },
+];
+
+/** Padrao da tarefa e do Figma. */
+const PERIODO_PADRAO = 6;
 
 export function DashboardPage() {
-  const [periodo, setPeriodo] = useState(opcoesPeriodo[0].meses);
+  const [periodo, setPeriodo] = useState(PERIODO_PADRAO);
   const { dados, isLoading, errorMessage, reload } = useUserGrowth(periodo);
 
   return (

@@ -21,11 +21,11 @@
     "npm run lint": "passed",
     "npm run typecheck": "passed",
     "npm run build": "passed",
-    "desktop browser flow": "passed; /dashboard with VITE_USE_MOCKS=true shows 278%, 6 monthly points (Fev-Jul) with computed Y axis and Inter font; with VITE_USE_MOCKS=false and no backend shows loading, then error with 'Tentar novamente' (type=button) that refetches"
+    "desktop browser flow": "passed; /dashboard with VITE_USE_MOCKS=true shows 278%, 6 monthly points (Fev-Jul) with computed Y axis and Inter font; with VITE_USE_MOCKS=false and no backend shows loading, then error with 'Tentar novamente' (type=button) that refetches; period select switches 3/6/12 months (57,5% / 278% / 845% with mock) keeping the previous chart while loading"
   },
   "open_questions": [
     "Figma usa DM Sans e eixo Y em R$; a tarefa pede fonte Inter e a métrica é de usuários — seguida a tarefa.",
-    "Opções do seletor de período além de 'Últimos 6 meses' não estão definidas.",
+    "Filtro com 3, 6 (padrão) e 12 meses a pedido do usuário; a tarefa e o Figma só definem 6 — confirmar com o backend (86e3m95k0) que months=3 e 12 são aceitos.",
     "Linha usa totalUsers; newUsers aparece só no texto acessível."
   ],
   "review": "pending",

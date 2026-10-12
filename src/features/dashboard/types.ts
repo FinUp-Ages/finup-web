@@ -19,6 +19,8 @@ export interface UserGrowthDTO {
 
 /** Ponto pronto para exibicao no grafico. */
 export interface PontoCrescimento {
+  /** Mes no formato "AAAA-MM", unico na serie. */
+  mes: string;
   rotulo: string;
   totalUsuarios: number;
   novosUsuarios: number;

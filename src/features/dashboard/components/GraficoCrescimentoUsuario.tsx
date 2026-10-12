@@ -41,6 +41,7 @@ export function GraficoCrescimentoUsuario({
   const temPontos = dados !== null && dados.pontos.length > 0;
   const coordenadas = temPontos
     ? dados.pontos.map((pontoGrafico, indice) => ({
+        mes: pontoGrafico.mes,
         x: toPosicaoX(indice, dados.pontos.length),
         y: (1 - Math.min(pontoGrafico.totalUsuarios / dados.valorMaximo, 1)) * 100,
       }))
@@ -132,8 +133,8 @@ export function GraficoCrescimentoUsuario({
                 />
               </svg>
 
-              {coordenadas.map(({ x, y }, indice) => (
-                <span key={indice} className="absolute" style={{ left: `${x}%`, top: `${y}%` }}>
+              {coordenadas.map(({ mes, x, y }) => (
+                <span key={mes} className="absolute" style={{ left: `${x}%`, top: `${y}%` }}>
                   <img
                     src={pontoHalo}
                     alt=""
@@ -159,7 +160,7 @@ export function GraficoCrescimentoUsuario({
             <div className="relative h-[15px]">
               {dados.pontos.map((pontoGrafico, indice) => (
                 <span
-                  key={pontoGrafico.rotulo}
+                  key={pontoGrafico.mes}
                   className="absolute top-0 -translate-x-1/2 leading-[15px]"
                   style={{ left: `${toPosicaoX(indice, dados.pontos.length)}%` }}
                 >
@@ -174,7 +175,7 @@ export function GraficoCrescimentoUsuario({
       {temPontos && (
         <ul className="sr-only">
           {dados.pontos.map((pontoGrafico) => (
-            <li key={pontoGrafico.rotulo}>
+            <li key={pontoGrafico.mes}>
               {`${pontoGrafico.rotulo}: ${pontoGrafico.totalUsuarios} usuários, ${pontoGrafico.novosUsuarios} novos`}
             </li>
           ))}

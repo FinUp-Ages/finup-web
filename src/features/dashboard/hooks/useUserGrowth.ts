@@ -4,7 +4,7 @@
  * Envolve a chamada de API no TanStack Query, mantem loading/erro/dado
  * e entrega o dado ja no formato que a tela exibe. Nunca importa nem retorna JSX.
  */
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { getUserGrowth } from '../api/getUserGrowth';
 import type { CrescimentoUsuario, UserGrowthDTO } from '../types';
 
@@ -41,6 +41,7 @@ function toCrescimentoUsuario(dto: UserGrowthDTO): CrescimentoUsuario {
   return {
     crescimento: `${formatoPercentual.format(dto.growthPct)}%`,
     pontos: dto.points.map((ponto) => ({
+      mes: ponto.month,
       rotulo: toRotuloMes(ponto.month),
       totalUsuarios: ponto.totalUsers,
       novosUsuarios: ponto.newUsers,
@@ -57,6 +58,8 @@ export function useUserGrowth(months: number) {
     queryKey: ['dashboard', 'user-growth', months],
     queryFn: () => getUserGrowth(months),
     select: toCrescimentoUsuario,
+    // Ao trocar o periodo, mantem o grafico anterior ate o novo chegar (sem piscar "Carregando...").
+    placeholderData: keepPreviousData,
   });
 
   return {
