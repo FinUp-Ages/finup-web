@@ -76,6 +76,13 @@ src/
 │   ├── welcome/               tela inicial (rota "/")
 │   │   ├── pages/             WelcomePage.tsx
 │   │   └── index.ts           API pública da feature
+│   ├── dashboard/             painel inicial (rota "/dashboard")
+│   │   ├── api/               getUserGrowth.ts + mock (VITE_USE_MOCKS)
+│   │   ├── hooks/             useUserGrowth.ts
+│   │   ├── components/        GraficoCrescimentoUsuario.tsx
+│   │   ├── pages/             DashboardPage.tsx
+│   │   ├── types.ts           tipos da feature
+│   │   └── index.ts           API pública da feature
 │   ├── auth/                  tela de login (rota "/login")
 │   │   ├── components/        componentes usados só no login (UsuarioLogin.tsx)
 │   │   ├── pages/             LoginPage.tsx
@@ -141,6 +148,7 @@ A feature `example/` é a referência completa do padrão.
 
 - **Import alias `@/`** configurado: use `@/shared/components/ui/Button` em vez de `../../../shared/components/ui/Button`.
 - **TypeScript em modo `strict`**, com `noUnusedLocals` e `noUnusedParameters`. Não relaxe essas flags — retroagir depois é caro.
+- **Mocks.** Com `VITE_USE_MOCKS=true` (padrão do `.env.example`), as funções de `api/` devolvem os dados simulados da própria feature em vez de chamar o backend. Use enquanto o endpoint não existir.
 - **Nenhum segredo em variável `VITE_`.** Tudo com esse prefixo é embutido no bundle e fica visível para qualquer usuário. Chave de API, credencial ou token de terceiro passam pelo backend, nunca pelo front.
 - Pastas de feature em `kebab-case`; telas em `XPage.tsx`; componentes em `PascalCase.tsx`; hooks em `useX.ts`; funções de API com verbo (`getX.ts`, `createX.ts`); utilitários em `camelCase.ts`.
 

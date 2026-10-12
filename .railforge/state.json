@@ -1,14 +1,19 @@
 {
   "stage": "COMPLETED",
-  "task": "Ajustar a tela de login conforme a revisão do PR #4.",
-  "objective": "Restaurar a WelcomePage, limitar a API pública da feature auth ao LoginPage, corrigir a fonte de destaque e alinhar imports, exports e componentes compartilhados aos padrões do projeto.",
+  "task": "ClickUp 86e3m985x — [ Frontend ] - Gráfico \"Crescimento do usuário\" (contrato C3 user-growth).",
+  "objective": "Card de linha mensal com filtro 'Últimos 6 meses', consumindo GET /api/v1/admin/metrics/user-growth?months=6 (mock via VITE_USE_MOCKS), conforme Figma nó 191-2583 e fonte Inter pedida na tarefa.",
   "files_in_scope": [
-    "src/features/welcome/pages/WelcomePage.tsx",
-    "src/features/auth/",
-    "src/shared/components/ui/",
-    "src/shared/assets/",
-    "src/app/styles/index.css",
+    "src/features/dashboard/",
+    "src/shared/assets/dashboard/",
+    "src/shared/config/env.ts",
+    "src/shared/config/queryClient.ts",
+    "src/vite-env.d.ts",
+    "src/app/App.tsx",
+    "src/app/routes/index.tsx",
+    "src/app/routes/paths.ts",
     "tailwind.config.js",
+    "index.html",
+    ".env.example",
     "README.md",
     ".railforge/state.json"
   ],
@@ -16,8 +21,13 @@
     "npm run lint": "passed",
     "npm run typecheck": "passed",
     "npm run build": "passed",
-    "desktop browser flow": "passed; / shows the original WelcomePage, /login shows the login screen with Trebuchet MS applied, empty submit shows both messages, valid submit shows success, single h1, app-download button has type=button"
+    "desktop browser flow": "passed; /dashboard with VITE_USE_MOCKS=true shows 278%, 6 monthly points (Fev-Jul) with computed Y axis and Inter font; with VITE_USE_MOCKS=false and no backend shows loading, then error with 'Tentar novamente' (type=button) that refetches"
   },
+  "open_questions": [
+    "Figma usa DM Sans e eixo Y em R$; a tarefa pede fonte Inter e a métrica é de usuários — seguida a tarefa.",
+    "Opções do seletor de período além de 'Últimos 6 meses' não estão definidas.",
+    "Linha usa totalUsers; newUsers aparece só no texto acessível."
+  ],
   "review": "pending",
-  "updated_at": "2026-10-09"
+  "updated_at": "2026-10-12"
 }
