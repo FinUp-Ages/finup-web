@@ -8,8 +8,15 @@ export default {
         'login-field': 'rgba(240, 240, 240, 1)',
         'login-error': 'rgba(220, 38, 38, 1)',
         'login-success': 'rgba(22, 163, 74, 1)',
-        'dashboard-valor': 'rgba(2, 42, 77, 1)',
-        'dashboard-grafico': 'rgba(243, 245, 249, 1)',
+        // Mesmos nomes e valores do finup-mobile (src/theme/colors.ts), em kebab-case.
+        background: '#ffffff',
+        error: '#ef4444',
+        icon: '#334155',
+        'surface-light': '#f5f5f5',
+        // Grafico de linha do dashboard (Figma: card "Crescimento do usuário", nó 191-2583).
+        'chart-line': '#7086fd',
+        'chart-surface': '#f3f5f9',
+        'chart-value': '#022a4d',
       },
       fontFamily: {
         destaque: ['"Trebuchet MS"', 'sans-serif'],

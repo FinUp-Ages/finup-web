@@ -4,7 +4,6 @@
   "objective": "Card de linha mensal com filtro 'Últimos 6 meses', consumindo GET /api/v1/admin/metrics/user-growth?months=6 (mock via VITE_USE_MOCKS), conforme Figma nó 191-2583 e fonte Inter pedida na tarefa.",
   "files_in_scope": [
     "src/features/dashboard/",
-    "src/shared/assets/dashboard/",
     "src/shared/config/env.ts",
     "src/shared/config/queryClient.ts",
     "src/vite-env.d.ts",
@@ -21,12 +20,13 @@
     "npm run lint": "passed",
     "npm run typecheck": "passed",
     "npm run build": "passed",
-    "desktop browser flow": "passed; /dashboard with VITE_USE_MOCKS=true shows 278%, 6 monthly points (Fev-Jul) with computed Y axis and Inter font; with VITE_USE_MOCKS=false and no backend shows loading, then error with 'Tentar novamente' (type=button) that refetches; period select switches 3/6/12 months (57,5% / 278% / 845% with mock) keeping the previous chart while loading"
+    "desktop browser flow": "passed; /dashboard with VITE_USE_MOCKS=true shows 278%, 6 monthly points (Fev-Jul) with computed Y axis and Inter font; with VITE_USE_MOCKS=false and no backend shows loading, then error with 'Tentar novamente' (type=button) that refetches; period select switches 3/6/12 months (57,5% / 278% / 845% with mock) keeping the previous chart while loading; computed colors match theme tokens (no hex in src/features/dashboard)"
   },
   "open_questions": [
     "Figma usa DM Sans e eixo Y em R$; a tarefa pede fonte Inter e a métrica é de usuários — seguida a tarefa.",
     "Filtro com 3, 6 (padrão) e 12 meses a pedido do usuário; a tarefa e o Figma só definem 6 — confirmar com o backend (86e3m95k0) que months=3 e 12 são aceitos.",
-    "Linha usa totalUsers; newUsers aparece só no texto acessível."
+    "Linha usa totalUsers; newUsers aparece só no texto acessível.",
+    "Cores do card vêm do tema (tailwind.config.js) com os nomes do finup-mobile (background, error, icon, surface-light) e o grupo chart-* para o que o mobile não tem; pontos em CSS no lugar dos SVGs do Figma. login-error (#dc2626) e error do mobile (#ef4444) coexistem — unificar em outra tarefa."
   ],
   "review": "pending",
   "updated_at": "2026-10-12"

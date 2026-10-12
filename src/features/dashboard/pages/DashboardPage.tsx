@@ -25,7 +25,7 @@ export function DashboardPage() {
   const { dados, isLoading, errorMessage, reload } = useUserGrowth(periodo);
 
   return (
-    <main className="flex min-h-screen items-start justify-center bg-slate-100 p-6">
+    <main className="flex min-h-screen items-start justify-center bg-surface-light p-6">
       <div className="w-full max-w-[948px]">
         <GraficoCrescimentoUsuario
           dados={dados}

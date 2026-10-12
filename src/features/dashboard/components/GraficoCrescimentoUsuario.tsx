@@ -1,13 +1,12 @@
 /**
  * Card "Crescimento do usuário" (Figma: nó 191-2583 / card 191-2560).
  *
- * Linha mensal do total de usuários. A linha e desenhada a partir dos dados, nao de uma imagem fixa.
+ * Linha mensal do total de usuários. Linha e pontos sao desenhados a partir dos dados,
+ * com as cores do tema (tailwind.config.js), sem imagem nem cor fixa.
  * Pontos e rotulos usam a mesma escala em %: x de 0 (primeiro mes) a 100 (ultimo),
  * y de 0 (valorMaximo, topo) a 100 (zero, base).
  */
 import { ChevronDown } from 'lucide-react';
-import pontoHalo from '@/shared/assets/dashboard/ponto-halo.svg';
-import ponto from '@/shared/assets/dashboard/ponto.svg';
 import type { CrescimentoUsuario } from '../types';
 
 export type OpcaoPeriodo = {
@@ -51,13 +50,11 @@ export function GraficoCrescimentoUsuario({
     : '';
 
   return (
-    <section className="flex w-full flex-col gap-6 rounded-lg bg-white p-6 font-inter tracking-[0.02em] text-navy">
+    <section className="flex w-full flex-col gap-6 rounded-lg bg-background p-6 font-inter tracking-[0.02em] text-navy">
       <header className="flex items-start justify-between">
         <div className="flex flex-col gap-1">
           <h2 className="m-0 text-xs font-medium">Crescimento do usuário</h2>
-          <p className="m-0 h-6 text-xl font-medium text-dashboard-valor">
-            {dados?.crescimento ?? ''}
-          </p>
+          <p className="m-0 h-6 text-xl font-medium text-chart-value">{dados?.crescimento ?? ''}</p>
         </div>
 
         <label className="relative flex items-center">
@@ -76,7 +73,7 @@ export function GraficoCrescimentoUsuario({
           <ChevronDown
             aria-hidden="true"
             size={16}
-            className="pointer-events-none absolute right-0 text-black"
+            className="pointer-events-none absolute right-0 text-icon"
           />
         </label>
       </header>
@@ -99,18 +96,18 @@ export function GraficoCrescimentoUsuario({
           </div>
         </div>
 
-        <div className="flex h-[239px] items-center justify-center rounded-lg bg-dashboard-grafico px-4 py-2.5">
+        <div className="flex h-[239px] items-center justify-center rounded-lg bg-chart-surface px-4 py-2.5">
           {isLoading ? (
             <p role="status" className="m-0 text-xs font-medium text-navy/50">
               Carregando...
             </p>
           ) : errorMessage ? (
             <div role="alert" className="flex flex-col items-center gap-2">
-              <p className="m-0 text-xs font-medium text-login-error">{errorMessage}</p>
+              <p className="m-0 text-xs font-medium text-error">{errorMessage}</p>
               <button
                 type="button"
                 onClick={onTentarNovamente}
-                className="cursor-pointer rounded-full border-0 bg-navy px-4 py-1.5 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-navy focus-visible:outline-offset-2"
+                className="cursor-pointer rounded-full border-0 bg-navy px-4 py-1.5 text-xs text-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-navy focus-visible:outline-offset-2"
               >
                 Tentar novamente
               </button>
@@ -127,7 +124,7 @@ export function GraficoCrescimentoUsuario({
                 <polyline
                   points={coordenadas.map(({ x, y }) => `${x},${y}`).join(' ')}
                   fill="none"
-                  stroke="#7086FD"
+                  className="stroke-chart-line"
                   strokeWidth={1}
                   vectorEffect="non-scaling-stroke"
                 />
@@ -135,20 +132,9 @@ export function GraficoCrescimentoUsuario({
 
               {coordenadas.map(({ mes, x, y }) => (
                 <span key={mes} className="absolute" style={{ left: `${x}%`, top: `${y}%` }}>
-                  <img
-                    src={pontoHalo}
-                    alt=""
-                    width={16}
-                    height={16}
-                    className="absolute left-[-8px] top-[-8px] block max-w-none"
-                  />
-                  <img
-                    src={ponto}
-                    alt=""
-                    width={8}
-                    height={8}
-                    className="absolute left-[-4px] top-[-4px] block max-w-none"
-                  />
+                  {/* Halo de 16px com 25% da cor e ponto de 8px com borda branca, como no Figma. */}
+                  <span className="absolute -left-2 -top-2 block h-4 w-4 rounded-full bg-chart-line/25" />
+                  <span className="absolute -left-1 -top-1 block h-2 w-2 rounded-full border border-background bg-chart-line" />
                 </span>
               ))}
             </div>
