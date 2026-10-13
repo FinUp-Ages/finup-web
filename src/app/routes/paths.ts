@@ -5,5 +5,5 @@
 export const paths = {
   home: '/',
   login: '/login',
-  dashboard: '/dashboard',
+  dashboard: '/app/dashboard',
 } as const;

@@ -76,7 +76,7 @@ src/
 │   ├── welcome/               tela inicial (rota "/")
 │   │   ├── pages/             WelcomePage.tsx
 │   │   └── index.ts           API pública da feature
-│   ├── dashboard/             painel inicial (rota "/dashboard")
+│   ├── dashboard/             painel inicial (rota "/app/dashboard")
 │   │   ├── api/               getUserGrowth.ts + mock (VITE_USE_MOCKS)
 │   │   ├── hooks/             useUserGrowth.ts
 │   │   ├── components/        GraficoCrescimentoUsuario.tsx

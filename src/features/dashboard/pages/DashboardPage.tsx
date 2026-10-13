@@ -1,5 +1,5 @@
 /**
- * Tela inicial do painel (rota "/dashboard").
+ * Tela inicial do painel (rota "/app/dashboard").
  *
  * Exibe o card de crescimento do usuario (GET /api/v1/admin/metrics/user-growth, contrato C3).
  * Com VITE_USE_MOCKS=true os dados vem do mock da feature, sem chamar o backend.
