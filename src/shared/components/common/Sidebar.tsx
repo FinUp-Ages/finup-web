@@ -1,6 +1,9 @@
+/**
+ * Sidebar do layout administrativo (Figma: no 191-2352).
+ * Grupos de links por rota com o item ativo destacado e o usuario no rodape.
+ */
 import { NavLink } from 'react-router-dom';
 import logo from '@/shared/assets/sidebar/logo.svg';
-import divider from '@/shared/assets/sidebar/divider.svg';
 
 export type SidebarLink = {
   label: string;
@@ -26,15 +29,13 @@ type SidebarProps = {
 
 export function Sidebar({ groups, user }: SidebarProps) {
   return (
-    <aside className="flex min-h-screen w-[332px] shrink-0 flex-col bg-navy px-6 pb-6 pt-[60px] font-inter text-[#f0f0f0]">
-      <img src={logo} alt="FinUp" className="h-[43px] w-[38.7123px] shrink-0" />
+    <aside className="flex min-h-screen w-[332px] shrink-0 flex-col bg-navy px-6 pb-6 pt-[60px] font-inter text-on-navy">
+      <img src={logo} alt="FinUp" className="h-[43px] w-auto shrink-0 self-start" />
 
       <nav aria-label="Navegação principal" className="mt-10 flex flex-col gap-6">
         {groups.map((group, index) => (
           <div key={group.label} className="flex flex-col gap-4">
-            {index > 0 && (
-              <img src={divider} alt="" className="mb-2 h-[2px] w-[284px]" />
-            )}
+            {index > 0 && <hr className="mb-2 border-0 border-t-2 border-white/10" />}
             <p className="text-sm font-normal">{group.label}</p>
             <div className="flex flex-col">
               {group.links.map((link) => (

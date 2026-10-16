@@ -1,3 +1,6 @@
+/**
+ * Page provisoria das secoes do painel (Seu time, Analytics, Custos, Trilha de estudos).
+ */
 type AdminSectionPageProps = {
   title: string;
 };

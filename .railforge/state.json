@@ -1,23 +1,36 @@
 {
-  "stage": "COMPLETED",
-  "task": "Ajustar a tela de login conforme a revisão do PR #4.",
-  "objective": "Restaurar a WelcomePage, limitar a API pública da feature auth ao LoginPage, corrigir a fonte de destaque e alinhar imports, exports e componentes compartilhados aos padrões do projeto.",
+  "stage": "REVIEWING",
+  "task": "ClickUp 86e3m985w — [ Frontend ] - Layout base: sidebar, busca e avatar (PR #6, ajustes da review).",
+  "objective": "Sidebar do Figma (nó 191-2352) com as seções Pessoas e Aplicativo, navegação por rota com item ativo destacado e usuário no rodapé, fonte Inter e tokens do projeto; integrar o /app/dashboard do PR #7 como filho do AdminLayout.",
   "files_in_scope": [
-    "src/features/welcome/pages/WelcomePage.tsx",
-    "src/features/auth/",
-    "src/shared/components/ui/",
-    "src/shared/assets/",
-    "src/app/styles/index.css",
+    "src/app/routes/index.tsx",
+    "src/app/routes/navigation.ts",
+    "src/app/routes/paths.ts",
+    "src/features/admin/",
+    "src/features/dashboard/pages/DashboardPage.tsx",
+    "src/shared/components/common/Sidebar.tsx",
+    "src/shared/layouts/AdminLayout.tsx",
+    "src/shared/assets/sidebar/",
+    "src/main.tsx",
+    "package.json",
+    "package-lock.json",
     "tailwind.config.js",
-    "README.md",
     ".railforge/state.json"
   ],
   "validation": {
     "npm run lint": "passed",
     "npm run typecheck": "passed",
     "npm run build": "passed",
-    "desktop browser flow": "passed; / shows the original WelcomePage, /login shows the login screen with Trebuchet MS applied, empty submit shows both messages, valid submit shows success, single h1, app-download button has type=button"
+    "desktop browser flow": "passed; /app redireciona para /app/costs com item ativo destacado; /app/dashboard renderiza o card com mock dentro do AdminLayout (um único <main>); divisor com border-white/10 e texto da sidebar pelo token on-navy"
   },
-  "review": "pending",
-  "updated_at": "2026-10-09"
+  "open_questions": [
+    "Busca (Figma nó 191-2350) prevista no card não foi implementada — implementar neste PR ou abrir tarefa própria.",
+    "Índice de /app redireciona para Custos; a review sugeriu o dashboard — decidir a tela inicial.",
+    "Dashboard não tem item na sidebar porque o Figma não prevê; decidir se entra.",
+    "Usuário do rodapé (previewUser) é simulado até a autenticação do painel (86e3m985y) fornecer o perfil.",
+    "/app/* ainda sem ProtectedRoute; fica para a tarefa de autenticação.",
+    "Ícones seguem em PNG exportados do Figma; trocar por lucide-react é opcional e muda o desenho."
+  ],
+  "review": "changes requested (Marco-Laimer, 2026-10-13) — ajustes aplicados, aguardando nova revisão",
+  "updated_at": "2026-10-16"
 }
