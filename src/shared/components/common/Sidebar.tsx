@@ -2,6 +2,7 @@
  * Sidebar do layout administrativo (Figma: no 191-2352).
  * Grupos de links por rota com o item ativo destacado e o usuario no rodape.
  */
+import { LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import logo from '@/shared/assets/sidebar/logo.svg';
 
@@ -25,9 +26,11 @@ export type SidebarUser = {
 type SidebarProps = {
   groups: SidebarGroup[];
   user: SidebarUser;
+  /** Mostra o botao Sair abaixo do usuario. */
+  onLogout?: () => void;
 };
 
-export function Sidebar({ groups, user }: SidebarProps) {
+export function Sidebar({ groups, user, onLogout }: SidebarProps) {
   return (
     <aside className="flex min-h-screen w-[332px] shrink-0 flex-col bg-navy px-6 pb-6 pt-[60px] font-inter text-on-navy">
       <img src={logo} alt="FinUp" className="h-[43px] w-auto shrink-0 self-start" />
@@ -70,6 +73,17 @@ export function Sidebar({ groups, user }: SidebarProps) {
           <span className="truncate text-sm font-semibold tracking-[0.28px]">{user.name}</span>
         </div>
       </div>
+
+      {onLogout && (
+        <button
+          type="button"
+          onClick={onLogout}
+          className="mt-4 flex h-[50px] cursor-pointer items-center gap-[10px] rounded-md px-5 text-sm text-white outline-none transition-colors hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+        >
+          <LogOut aria-hidden="true" size={18} />
+          <span>Sair</span>
+        </button>
+      )}
     </aside>
   );
 }

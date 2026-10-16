@@ -1,120 +1,149 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Loader2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
+import { useAuth } from '../hooks/useAuth';
+import { GENERIC_MESSAGE, LoginError } from '../session/messages';
 
 function validarEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/*
- * Previsao da funcao que sera implementada quando a integracao estiver pronta:
- *
- * async function autenticarUsuario(email: string, senha: string) {
- *   const resposta = await httpClient.post('/auth/login', { email, senha });
- *   return resposta.data;
- * }
- *
- * A funcao devera ser movida para features/auth/api/ e chamada pelo fluxo de
- * submit. A rota e o formato da resposta devem seguir o contrato do Swagger.
- * Em caso de erro, o componente devera exibir uma mensagem generica.
+type UsuarioLoginProps = {
+  /** Aviso vindo da sessao (expirada, acesso negado), mostrado ate a proxima tentativa. */
+  aviso: string | null;
+};
+
+/**
+ * Formulario de login. Valida os campos, entra pelo Cognito e deixa o redirecionamento
+ * para a LoginPage, que reage quando a sessao fica autenticada.
  */
-export function UsuarioLogin() {
+export function UsuarioLogin({ aviso }: UsuarioLoginProps) {
+  const { signIn, dismissNotice } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState({ email: '', senha: '' });
-  const [sucesso, setSucesso] = useState('');
+  const [erroLogin, setErroLogin] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const senhaRef = useRef<HTMLInputElement>(null);
 
-  const novaMensagem = (event: FormEvent<HTMLFormElement>) => {
+  // Depois de um erro, o foco volta para a senha, ja liberada para digitar de novo.
+  useEffect(() => {
+    if (erroLogin) senhaRef.current?.focus();
+  }, [erroLogin]);
+
+  const entrar = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (enviando) return;
 
     const mensagens = {
       email: !email.trim()
         ? 'Digite seu e-mail.'
-        : !validarEmail(email)
+        : !validarEmail(email.trim())
           ? 'Digite um e-mail válido.'
           : '',
-      senha: !senha.trim() ? 'Digite sua senha.' : '',
+      senha: !senha ? 'Digite sua senha.' : '',
     };
-
     setMensagem(mensagens);
+    setErroLogin('');
+    dismissNotice();
 
     if (mensagens.email || mensagens.senha) {
-      setSucesso('');
+      (mensagens.email ? emailRef : senhaRef).current?.focus();
       return;
     }
 
-    /*
-     * Fluxo futuro de integracao com o backend:
-     *
-     * 1. Enviar email e senha para a rota de login documentada no Swagger.
-     * 2. O backend valida as credenciais e consulta a base de dados.
-     * 3. Em caso de sucesso, armazenar o token retornado e liberar o acesso.
-     * 4. Em caso de erro, exibir uma mensagem generica sem revelar se o email
-     *    existe na base de dados.
-     *
-     * Essa chamada ainda nao deve ser ativada. Por enquanto, o sucesso abaixo
-     * é apenas local para manter a tela funcionando sem depender do backend.
-     */
-    setSucesso('Login bem sucedido!');
-    setEmail('');
-    setSenha('');
+    setEnviando(true);
+    try {
+      await signIn(email.trim(), senha);
+    } catch (error) {
+      setErroLogin(error instanceof LoginError ? error.message : GENERIC_MESSAGE);
+    } finally {
+      setSenha('');
+      setEnviando(false);
+    }
   };
+
+  const alerta = erroLogin || aviso;
 
   return (
     <form
-      onSubmit={novaMensagem}
-      className="mx-auto flex w-[min(calc(100%-42px),320px)] flex-col gap-3"
+      onSubmit={(event) => void entrar(event)}
+      noValidate
+      aria-busy={enviando}
+      className="flex flex-col gap-8"
     >
-      <div className="flex flex-col gap-1">
-        <label htmlFor="login-email" className="sr-only">
-          E-mail
-        </label>
-        <Input
-          id="login-email"
-          type="email"
-          className={`h-10 w-full rounded-[5px] border-0 bg-login-field px-4 text-xs text-black outline-none placeholder:text-black placeholder:opacity-100 focus:shadow-[0_0_0_2px_rgba(2,23,54,0.2)] ${mensagem.email ? 'shadow-[0_0_0_1px_rgba(220,38,38,1)]' : ''}`}
-          placeholder="E-mail"
-          value={email}
-          onChange={(event) => {
-            setEmail(event.target.value);
-            setMensagem((estadoAtual) => ({ ...estadoAtual, email: '' }));
-            setSucesso('');
-          }}
-        />
-        <span className="min-h-[14px] text-right text-[10px] leading-[1.3] text-login-error">
-          {mensagem.email}
-        </span>
+      <div>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="login-email" className="sr-only">
+              E-mail
+            </label>
+            <Input
+              ref={emailRef}
+              id="login-email"
+              name="email"
+              type="email"
+              autoComplete="username"
+              placeholder="E-mail"
+              value={email}
+              disabled={enviando}
+              aria-invalid={mensagem.email ? true : undefined}
+              aria-describedby={mensagem.email ? 'login-email-erro' : undefined}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                setMensagem((estadoAtual) => ({ ...estadoAtual, email: '' }));
+              }}
+            />
+            {mensagem.email && (
+              <span id="login-email-erro" className="text-right text-xs text-login-error">
+                {mensagem.email}
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="login-password" className="sr-only">
+              Senha
+            </label>
+            <Input
+              ref={senhaRef}
+              id="login-password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="Senha"
+              value={senha}
+              disabled={enviando}
+              aria-invalid={mensagem.senha ? true : undefined}
+              aria-describedby={mensagem.senha ? 'login-password-erro' : undefined}
+              onChange={(event) => {
+                setSenha(event.target.value);
+                setMensagem((estadoAtual) => ({ ...estadoAtual, senha: '' }));
+              }}
+            />
+            {mensagem.senha && (
+              <span id="login-password-erro" className="text-right text-xs text-login-error">
+                {mensagem.senha}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Sempre no DOM, para o leitor de tela anunciar quando a mensagem aparece. */}
+        <div role="alert" className="[&:not(:empty)]:mt-4">
+          {alerta && (
+            <p className="rounded-md bg-red-50 px-4 py-3 text-sm leading-[18px] text-login-error">
+              {alerta}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="login-password" className="sr-only">
-          Senha
-        </label>
-        <Input
-          id="login-password"
-          type="password"
-          className={`h-10 w-full rounded-[5px] border-0 bg-login-field px-4 text-xs text-black outline-none placeholder:text-black placeholder:opacity-100 focus:shadow-[0_0_0_2px_rgba(2,23,54,0.2)] ${mensagem.senha ? 'shadow-[0_0_0_1px_rgba(220,38,38,1)]' : ''}`}
-          placeholder="Senha"
-          value={senha}
-          onChange={(event) => {
-            setSenha(event.target.value);
-            setMensagem((estadoAtual) => ({ ...estadoAtual, senha: '' }));
-            setSucesso('');
-          }}
-        />
-        <span className="min-h-[14px] text-right text-[10px] leading-[1.3] text-login-error">
-          {mensagem.senha}
-        </span>
-      </div>
-
-      {sucesso && (
-        <span className="min-h-[14px] text-center text-xs font-bold text-login-success">
-          {sucesso}
-        </span>
-      )}
-
-      <Button type="submit" className="mt-[14px]">
-        Entrar
+      <Button type="submit" disabled={enviando}>
+        {enviando && <Loader2 aria-hidden="true" size={18} className="animate-spin" />}
+        {enviando ? 'Entrando…' : 'Entrar'}
       </Button>
     </form>
   );

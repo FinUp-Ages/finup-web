@@ -8,12 +8,13 @@ import { Sidebar, type SidebarGroup, type SidebarUser } from '@/shared/component
 type AdminLayoutProps = {
   navigation: SidebarGroup[];
   user: SidebarUser;
+  onLogout?: () => void;
 };
 
-export function AdminLayout({ navigation, user }: AdminLayoutProps) {
+export function AdminLayout({ navigation, user, onLogout }: AdminLayoutProps) {
   return (
     <div className="flex min-h-screen">
-      <Sidebar groups={navigation} user={user} />
+      <Sidebar groups={navigation} user={user} onLogout={onLogout} />
       <main className="min-w-0 flex-1 bg-surface-light p-10 font-inter">
         <Outlet />
       </main>

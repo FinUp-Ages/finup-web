@@ -5,13 +5,16 @@
  */
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AppRouter } from '@/app/routes';
+import { AuthProvider } from '@/features/auth';
 import { queryClient } from '@/shared/config/queryClient';
 
 export default function App() {
   // TODO: implementar em tarefa futura — demais providers globais (app/providers/).
   return (
     <QueryClientProvider client={queryClient}>
-      <AppRouter />
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
