@@ -9,6 +9,7 @@ import { paths } from '@/app/routes/paths';
 import { AdminSectionPage } from '@/features/admin';
 import { LoginPage } from '@/features/auth';
 import { DashboardPage } from '@/features/dashboard';
+import { UsersPage } from '@/features/users';
 import { WelcomePage } from '@/features/welcome';
 import { AdminLayout } from '@/shared/layouts/AdminLayout';
 
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
       { path: paths.studies, element: <AdminSectionPage title="Trilha de estudos" /> },
     ],
   },
+  { path: paths.users, element: <UsersPage /> },
 ]);
 
 export function AppRouter() {

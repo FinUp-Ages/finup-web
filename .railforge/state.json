@@ -1,5 +1,6 @@
 {
   "stage": "REVIEWING",
+<<<<<<< HEAD
   "task": "ClickUp 86e3m985w — [ Frontend ] - Layout base: sidebar, busca e avatar (PR #6, ajustes da review).",
   "objective": "Sidebar do Figma (nó 191-2352) com as seções Pessoas e Aplicativo, navegação por rota com item ativo destacado e usuário no rodapé, fonte Inter e tokens do projeto; integrar o /app/dashboard do PR #7 como filho do AdminLayout.",
   "files_in_scope": [
@@ -15,11 +16,19 @@
     "package.json",
     "package-lock.json",
     "tailwind.config.js",
+=======
+  "task": "Criar o componente reutilizável da tabela de usuários.",
+  "objective": "Implementar somente a tabela de usuários e uma página estática simples em /users para visualização manual e testes futuros do dashboard.",
+  "files_in_scope": [
+    "src/features/users/",
+    "src/app/routes/",
+>>>>>>> c7124f1 (feat: adiciona tabela de usuários)
     ".railforge/state.json"
   ],
   "validation": {
     "npm run lint": "passed",
     "npm run typecheck": "passed",
+<<<<<<< HEAD
     "npm run build": "passed",
     "desktop browser flow": "passed; /app redireciona para /app/costs com item ativo destacado; /app/dashboard renderiza o card com mock dentro do AdminLayout (um único <main>); divisor com border-white/10 e texto da sidebar pelo token on-navy"
   },
@@ -33,4 +42,11 @@
   ],
   "review": "changes requested (Marco-Laimer, 2026-10-13) — ajustes aplicados, aguardando nova revisão",
   "updated_at": "2026-10-16"
+=======
+    "npm run build": "passed; revalidate after QueryClientProvider fix",
+    "desktop browser flow": "pending; /users is the static preview route for the reusable table"
+  },
+  "review": "pending; code review and merge require the team's PR workflow",
+  "updated_at": "2026-10-15"
+>>>>>>> c7124f1 (feat: adiciona tabela de usuários)
 }
