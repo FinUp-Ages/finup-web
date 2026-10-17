@@ -6,6 +6,7 @@
  * a renovacao nao resolve) ou quando falta permissao (403). Esses dois avisos so encerram a
  * sessao de quem ja estava dentro: durante o login, o proprio signIn trata os erros.
  */
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { ApiError } from '@/shared/config/apiError';
 import { setHttpAuthHandlers } from '@/shared/config/httpClient';
@@ -59,6 +60,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [state, setState] = useState<AuthState>(() =>
     authSession.hasSession() ? { status: 'loading' } : { status: 'unauthenticated', notice: null },
   );
+
+  // Sem sessao, nada do cache de quem saiu fica visivel para a proxima pessoa na aba.
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (state.status === 'unauthenticated') {
+      queryClient.clear();
+    }
+  }, [state.status, queryClient]);
 
   // Os handlers do httpClient sao chamados fora do React: leem o status mais recente daqui.
   const statusRef = useRef(state.status);
