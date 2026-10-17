@@ -3,7 +3,7 @@ import { UsersTable } from '../components/UsersTable';
 import { useUsers } from '../hooks/useUsers';
 import type { UserStatus } from '../types';
 
-const pageSize = 20;
+const pageSize = 7;
 
 export function UsersPage() {
   const [page, setPage] = useState(0);
