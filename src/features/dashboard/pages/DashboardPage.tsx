@@ -1,5 +1,5 @@
 /**
- * Tela inicial do painel (rota "/app/dashboard").
+ * Tela inicial do painel (rota "/app/dashboard"), renderizada dentro do AdminLayout.
  *
  * Exibe o card de crescimento do usuario (GET /api/v1/admin/metrics/user-growth, contrato C3).
  * Com VITE_USE_MOCKS=true os dados vem do mock da feature, sem chamar o backend.
@@ -25,7 +25,7 @@ export function DashboardPage() {
   const { dados, isLoading, errorMessage, reload } = useUserGrowth(periodo);
 
   return (
-    <main className="flex min-h-screen items-start justify-center bg-surface-light p-6">
+    <div className="flex items-start justify-center">
       <div className="w-full max-w-[948px]">
         <GraficoCrescimentoUsuario
           dados={dados}
@@ -37,6 +37,6 @@ export function DashboardPage() {
           onPeriodoChange={setPeriodo}
         />
       </div>
-    </main>
+    </div>
   );
 }

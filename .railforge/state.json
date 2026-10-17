@@ -1,37 +1,36 @@
 {
-  "stage": "COMPLETED",
-  "task": "ClickUp 86e3m985x — [ Frontend ] - Gráfico \"Crescimento do usuário\" (contrato C3 user-growth).",
-  "objective": "Card de linha mensal com filtro 'Últimos 6 meses', consumindo GET /api/v1/admin/metrics/user-growth?months=6 (mock via VITE_USE_MOCKS), conforme Figma nó 191-2583 e fonte Inter pedida na tarefa (via @fontsource/inter, mesmo padrão do PR #6).",
+  "stage": "REVIEWING",
+  "task": "ClickUp 86e3m985w — [ Frontend ] - Layout base: sidebar, busca e avatar (PR #6, ajustes da review).",
+  "objective": "Sidebar do Figma (nó 191-2352) com as seções Pessoas e Aplicativo, navegação por rota com item ativo destacado e usuário no rodapé, fonte Inter e tokens do projeto; integrar o /app/dashboard do PR #7 como filho do AdminLayout.",
   "files_in_scope": [
-    "src/features/dashboard/",
-    "src/shared/config/env.ts",
-    "src/shared/config/queryClient.ts",
-    "src/vite-env.d.ts",
-    "src/app/App.tsx",
     "src/app/routes/index.tsx",
+    "src/app/routes/navigation.ts",
     "src/app/routes/paths.ts",
+    "src/features/admin/",
+    "src/features/dashboard/pages/DashboardPage.tsx",
+    "src/shared/components/common/Sidebar.tsx",
+    "src/shared/layouts/AdminLayout.tsx",
+    "src/shared/assets/sidebar/",
     "src/main.tsx",
     "package.json",
     "package-lock.json",
     "tailwind.config.js",
-    "index.html",
-    ".env.example",
-    "README.md",
     ".railforge/state.json"
   ],
   "validation": {
     "npm run lint": "passed",
     "npm run typecheck": "passed",
     "npm run build": "passed",
-    "desktop browser flow": "passed; /app/dashboard with VITE_USE_MOCKS=true shows 278%, 6 monthly points (Fev-Jul) with computed Y axis and Inter font; with VITE_USE_MOCKS=false and no backend shows loading, then error with 'Tentar novamente' (type=button) that refetches; period select switches 3/6/12 months (57,5% / 278% / 845% with mock) keeping the previous chart while loading; computed colors match theme tokens (no hex in src/features/dashboard)"
+    "desktop browser flow": "passed; /app redireciona para /app/costs com item ativo destacado; /app/dashboard renderiza o card com mock dentro do AdminLayout (um único <main>); divisor com border-white/10 e texto da sidebar pelo token on-navy"
   },
   "open_questions": [
-    "Figma usa DM Sans e eixo Y em R$; a tarefa pede fonte Inter e a métrica é de usuários — seguida a tarefa.",
-    "Filtro com 3, 6 (padrão) e 12 meses a pedido do usuário; a tarefa e o Figma só definem 6 — confirmar com o backend (86e3m95k0) que months=3 e 12 são aceitos.",
-    "Linha usa totalUsers; newUsers aparece só no texto acessível.",
-    "Cores do card vêm do tema (tailwind.config.js) com os nomes do finup-mobile (background, error, icon, surface-light) e o grupo chart-* para o que o mobile não tem; pontos em CSS no lugar dos SVGs do Figma. login-error (#dc2626) e error do mobile (#ef4444) coexistem — unificar em outra tarefa.",
-    "Rota /app/dashboard segue o padrão /app/* do PR #6 (sidebar). Quando o #6 entrar na develop, mover o dashboard para filho do AdminLayout e adicionar o item na sidebar."
+    "Busca (Figma nó 191-2350) prevista no card não foi implementada — implementar neste PR ou abrir tarefa própria.",
+    "Índice de /app redireciona para Custos; a review sugeriu o dashboard — decidir a tela inicial.",
+    "Dashboard não tem item na sidebar porque o Figma não prevê; decidir se entra.",
+    "Usuário do rodapé (previewUser) é simulado até a autenticação do painel (86e3m985y) fornecer o perfil.",
+    "/app/* ainda sem ProtectedRoute; fica para a tarefa de autenticação.",
+    "Ícones seguem em PNG exportados do Figma; trocar por lucide-react é opcional e muda o desenho."
   ],
-  "review": "pending",
-  "updated_at": "2026-10-13"
+  "review": "changes requested (Marco-Laimer, 2026-10-13) — ajustes aplicados, aguardando nova revisão",
+  "updated_at": "2026-10-16"
 }
