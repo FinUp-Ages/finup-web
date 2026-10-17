@@ -1,52 +1,19 @@
 {
   "stage": "REVIEWING",
-<<<<<<< HEAD
-  "task": "ClickUp 86e3m985w — [ Frontend ] - Layout base: sidebar, busca e avatar (PR #6, ajustes da review).",
-  "objective": "Sidebar do Figma (nó 191-2352) com as seções Pessoas e Aplicativo, navegação por rota com item ativo destacado e usuário no rodapé, fonte Inter e tokens do projeto; integrar o /app/dashboard do PR #7 como filho do AdminLayout.",
-  "files_in_scope": [
-    "src/app/routes/index.tsx",
-    "src/app/routes/navigation.ts",
-    "src/app/routes/paths.ts",
-    "src/features/admin/",
-    "src/features/dashboard/pages/DashboardPage.tsx",
-    "src/shared/components/common/Sidebar.tsx",
-    "src/shared/layouts/AdminLayout.tsx",
-    "src/shared/assets/sidebar/",
-    "src/main.tsx",
-    "package.json",
-    "package-lock.json",
-    "tailwind.config.js",
-=======
-  "task": "Criar o componente reutilizável da tabela de usuários.",
-  "objective": "Implementar somente a tabela de usuários e uma página estática simples em /users para visualização manual e testes futuros do dashboard.",
+  "task": "Implementar a tabela administrativa de usuários.",
+  "objective": "Criar a tabela de usuários com integração GET /api/v1/admin/users, mock via VITE_USE_MOCKS, paginação de 20 itens, busca por nome ou e-mail, filtro ACTIVE/INACTIVE, datas em pt-BR e estados de carregamento, vazio e erro.",
   "files_in_scope": [
     "src/features/users/",
     "src/app/routes/",
->>>>>>> c7124f1 (feat: adiciona tabela de usuários)
     ".railforge/state.json"
   ],
   "validation": {
     "npm run lint": "passed",
     "npm run typecheck": "passed",
-<<<<<<< HEAD
-    "npm run build": "passed",
-    "desktop browser flow": "passed; /app redireciona para /app/costs com item ativo destacado; /app/dashboard renderiza o card com mock dentro do AdminLayout (um único <main>); divisor com border-white/10 e texto da sidebar pelo token on-navy"
-  },
-  "open_questions": [
-    "Busca (Figma nó 191-2350) prevista no card não foi implementada — implementar neste PR ou abrir tarefa própria.",
-    "Índice de /app redireciona para Custos; a review sugeriu o dashboard — decidir a tela inicial.",
-    "Dashboard não tem item na sidebar porque o Figma não prevê; decidir se entra.",
-    "Usuário do rodapé (previewUser) é simulado até a autenticação do painel (86e3m985y) fornecer o perfil.",
-    "/app/* ainda sem ProtectedRoute; fica para a tarefa de autenticação.",
-    "Ícones seguem em PNG exportados do Figma; trocar por lucide-react é opcional e muda o desenho."
-  ],
-  "review": "changes requested (Marco-Laimer, 2026-10-13) — ajustes aplicados, aguardando nova revisão",
-  "updated_at": "2026-10-16"
-=======
-    "npm run build": "passed; revalidate after QueryClientProvider fix",
-    "desktop browser flow": "pending; /users is the static preview route for the reusable table"
+    "npm run build": "passed after syncing node_modules with the existing package-lock",
+    "rebase": "passed; feat/tabela-usuarios-admin rebased onto develop at 2df8d25",
+    "desktop browser flow": "passed; /users renders 20 rows, search for Carlos returns 1 result, INACTIVE filter returns 40 users across 2 pages, and pagination controls work"
   },
   "review": "pending; code review and merge require the team's PR workflow",
-  "updated_at": "2026-10-15"
->>>>>>> c7124f1 (feat: adiciona tabela de usuários)
+  "updated_at": "2026-10-17"
 }
