@@ -1,8 +1,8 @@
 export function PrimeiroAcesso() {
   return (
-    <footer className="mt-5 w-[min(calc(100%-42px),320px)] text-center text-navy">
-      <h2 className="m-0 text-xs font-bold">Primeiro acesso?</h2>
-      <p className="mt-1.5 text-xs leading-[1.35]">
+    <footer className="flex flex-col gap-2 text-center text-base leading-[21px] text-navy">
+      <h2 className="font-semibold">Primeiro acesso?</h2>
+      <p className="font-light">
         Solicite cadastro com a pessoa administradora do sistema para acessar.
       </p>
     </footer>

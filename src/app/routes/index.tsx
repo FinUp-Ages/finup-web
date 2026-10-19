@@ -1,24 +1,29 @@
 /**
  * Arvore de rotas da aplicacao.
  * Mapeia cada caminho para a page de uma feature e para o layout administrativo.
+ * Tudo sob /app exige sessao de administrador (ProtectedRoute).
  * Importa features somente pela API publica (@/features/<nome>).
  */
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
-import { navigation, previewUser } from '@/app/routes/navigation';
+import { AuthenticatedAdminLayout } from '@/app/routes/AuthenticatedAdminLayout';
+import { navigation } from '@/app/routes/navigation';
 import { paths } from '@/app/routes/paths';
+import { ProtectedRoute } from '@/app/routes/ProtectedRoute';
 import { AdminSectionPage } from '@/features/admin';
 import { LoginPage } from '@/features/auth';
 import { DashboardPage } from '@/features/dashboard';
 import { WelcomePage } from '@/features/welcome';
-import { AdminLayout } from '@/shared/layouts/AdminLayout';
 
 const router = createBrowserRouter([
   { path: paths.home, element: <WelcomePage /> },
-  { path: paths.login, element: <LoginPage /> },
+  { path: paths.login, element: <LoginPage redirectTo={paths.admin} /> },
   {
-    // TODO: implementar em tarefa futura — proteger /app/* com ProtectedRoute quando a autenticacao for integrada.
     path: paths.admin,
-    element: <AdminLayout navigation={navigation} user={previewUser} />,
+    element: (
+      <ProtectedRoute>
+        <AuthenticatedAdminLayout navigation={navigation} />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Navigate to={paths.costs} replace /> },
       { path: paths.dashboard, element: <DashboardPage /> },

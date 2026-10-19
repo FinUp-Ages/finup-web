@@ -7,7 +7,6 @@ export default {
         navy: 'rgba(2, 23, 54, 1)',
         'login-field': 'rgba(240, 240, 240, 1)',
         'login-error': 'rgba(220, 38, 38, 1)',
-        'login-success': 'rgba(22, 163, 74, 1)',
         // Texto claro sobre o fundo navy (sidebar).
         'on-navy': 'rgba(240, 240, 240, 1)',
         // Mesmos nomes e valores do finup-mobile (src/theme/colors.ts), em kebab-case.
@@ -21,7 +20,8 @@ export default {
         'chart-value': '#022a4d',
       },
       fontFamily: {
-        destaque: ['"Trebuchet MS"', 'sans-serif'],
+        // Tela de login (Figma, frame 191-2349).
+        'dm-sans': ['"DM Sans"', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
       },
     },
