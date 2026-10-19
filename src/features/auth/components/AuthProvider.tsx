@@ -10,11 +10,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { ApiError } from '@/shared/config/apiError';
 import { setHttpAuthHandlers } from '@/shared/config/httpClient';
-import { CognitoError } from '../api/cognitoClient';
 import { createCurrentUser } from '../api/createCurrentUser';
 import { getAdminMe } from '../api/getAdminMe';
 import { AuthContext, type AuthContextValue } from '../session/authContext';
-import { authSession } from '../session/authSession';
+import { authSession, isSessionEndedError } from '../session/authSession';
 import {
   LoginError,
   NETWORK_MESSAGE,
@@ -79,6 +78,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setHttpAuthHandlers({
       getAccessToken: authSession.getValidAccessToken,
       refreshAccessToken: authSession.refresh,
+      isSessionEnded: isSessionEndedError,
       onSessionExpired: () => {
         if (statusRef.current !== 'authenticated') return;
         authSession.clear();
@@ -113,9 +113,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
       .catch((error: unknown) => {
         if (!active) return;
         const expired =
-          (error instanceof CognitoError && error.code === 'NotAuthorizedException') ||
-          (error instanceof ApiError && error.status === 401);
-        authSession.clear();
+          isSessionEndedError(error) || (error instanceof ApiError && error.status === 401);
+        // Falha temporaria (sem rede, backend fora do ar) mantem o refresh token: o proximo
+        // reload tenta de novo sem pedir a senha.
+        if (expired) {
+          authSession.clear();
+        }
         setState({
           status: 'unauthenticated',
           notice: expired ? 'session-expired' : 'unavailable',

@@ -82,6 +82,17 @@ function storeAccessToken(result: AuthenticationResult): void {
   accessTokenExpiresAt = Date.now() + result.ExpiresIn * 1000;
 }
 
+/**
+ * true quando a renovacao falhou porque a sessao acabou de vez (refresh token expirado,
+ * revogado ou ausente). Outras falhas (sem rede, Cognito instavel) sao temporarias.
+ */
+export function isSessionEndedError(error: unknown): boolean {
+  return (
+    error instanceof CognitoError &&
+    (error.code === 'NotAuthorizedException' || error.code === 'NoSession')
+  );
+}
+
 async function refresh(): Promise<string> {
   const refreshToken = readRefreshToken();
   if (!refreshToken) {
@@ -97,7 +108,7 @@ async function refresh(): Promise<string> {
   } catch (error) {
     // Refresh expirado ou revogado: a sessao acabou. Outras falhas (ex.: sem rede)
     // mantem o refresh token, para tentar de novo depois.
-    if (error instanceof CognitoError && error.code === 'NotAuthorizedException') {
+    if (isSessionEndedError(error)) {
       clear();
     }
     throw error;

@@ -13,7 +13,9 @@
     "404 em /admin/me e o primeiro acesso de um admin sem registro local: o painel chama POST /api/v1/users e pergunta de novo, como descreve o README do finup-backend",
     "Branch rebaseada sobre a develop em 2026-10-17, depois do merge do #7 (12e0589) e do #6 (2df8d25, squash): o commit ee03d49 do #6 original foi descartado com rebase --onto. Navegacao vem de routes/navigation.ts (sem previewUser), /app/dashboard e filho do layout protegido e a sidebar mantem o padrao do #6 com o botao Sair",
     "Testes automatizados ficam para um PR proprio com Vitest, que depois recebe os testes do login. Escolha do solicitante em 2026-10-16",
-    "QueryClient (#7) nao repete erros 4xx (401/403 ja passam pelo httpClient) e o cache do React Query e limpo sempre que a sessao termina. Escolha do solicitante em 2026-10-17"
+    "QueryClient (#7) nao repete erros 4xx (401/403 ja passam pelo httpClient) e o cache do React Query e limpo sempre que a sessao termina. Escolha do solicitante em 2026-10-17",
+    "Review do PR #9 (2026-10-19): o mock do GET /admin/me via VITE_USE_MOCKS NAO sera implementado. O login do painel fica sempre real e atrelado ao Cognito, como no app mobile; o backend (#46) ja esta pronto. Decisao do solicitante em 2026-10-19",
+    "Falha temporaria (sem rede, Cognito ou backend fora do ar) nao encerra a sessao: so NotAuthorizedException/NoSession na renovacao ou 401 apos renovar encerram. O httpClient pergunta a feature auth (isSessionEnded) em vez de conhecer o CognitoError. Ajuste da review do PR #9 em 2026-10-19"
   ],
   "files_in_scope": [
     "src/features/auth/",
@@ -42,16 +44,17 @@
     "src/shared/config/queryClient.ts"
   ],
   "validation": {
-    "npm run lint": "passed em 2026-10-17 (apos o rebase)",
-    "npm run typecheck": "passed em 2026-10-17 (apos o rebase)",
-    "npm run build": "passed em 2026-10-17 (apos o rebase)",
+    "npm run lint": "passed em 2026-10-19",
+    "npm run typecheck": "passed em 2026-10-19",
+    "npm run build": "passed em 2026-10-19",
     "prettier": "--check --end-of-line auto sem pendencias em src/",
     "navegador (desktop, 1400x900)": "/app/costs sem sessao redireciona para /login; DM Sans carregada; campos 402x50, botao 402x55, titulo 20/26 500, banner 'Dê um up / nas suas finanças' em duas linhas como no Figma; envio vazio mostra as duas mensagens, marca aria-invalid e foca o e-mail; e-mail invalido com Enter mostra 'Digite um e-mail válido.'; refresh token ficticio no sessionStorage leva a /login com o aviso de erro e limpa a sessao",
     "nao validado": "login real contra o Cognito e o backend (exige senha de usuario real, digitada pelo solicitante): 200, 403, 404, 401 com renovacao, logout e sessao expirada no meio do uso. Sem testes automatizados nesta branch",
-    "navegador apos o rebase": "/app/dashboard sem sessao vai para /login; refresh token invalido leva a /login com aviso e limpa o sessionStorage; um unico <main>"
+    "navegador apos o rebase": "/app/dashboard sem sessao vai para /login; refresh token invalido leva a /login com aviso e limpa o sessionStorage; um unico <main>",
+    "navegador (ajuste da review)": "refresh token invalido contra o Cognito real (400 NotAuthorizedException) leva a /login com 'Sua sessao expirou' e limpa o sessionStorage; Cognito inalcancavel no reload leva a /login com 'Nao foi possivel conectar ao servidor' e mantem o refresh token. Nao validado no navegador: falha de rede na renovacao apos um 401 no meio do uso (httpClient)"
   },
-  "review": "Implementado em 2026-10-16; rebaseado sobre a develop (#6 e #7) em 2026-10-17. Pendente: validacao manual do fluxo real, revisao de design, decidir a tela inicial de /app e o item do dashboard na sidebar, abrir o PR e code review.",
-  "updated_at": "2026-10-17",
+  "review": "PR #9 com mudancas solicitadas em 2026-10-19: item 1 (mock do /admin/me) recusado por decisao do solicitante; item 2 (falha de rede derruba a sessao) corrigido. Pendente: commit, resposta ao revisor, revisao de design e nova aprovacao.",
+  "updated_at": "2026-10-19",
   "open_questions": [
     "Link do botao 'Baixe o app': nao ha URL no projeto; o botao continua sem acao",
     "Desafio NEW_PASSWORD_REQUIRED (conta criada pelo console com senha temporaria): o painel so orienta a pessoa a falar com a administracao. Concluir a troca de senha pelo painel precisa de decisao de escopo",

@@ -16,8 +16,10 @@ import { env } from '@/shared/config/env';
 export interface HttpAuthHandlers {
   /** Access token valido para o Authorization, ou null sem sessao. */
   getAccessToken: () => Promise<string | null>;
-  /** Renova o access token. Rejeita quando a sessao nao pode mais ser renovada. */
+  /** Renova o access token. Rejeita quando a renovacao falha. */
   refreshAccessToken: () => Promise<string>;
+  /** Diz se a falha da renovacao encerrou a sessao, ou se foi temporaria (ex.: sem rede). */
+  isSessionEnded: (refreshError: unknown) => boolean;
   /** O 401 continuou depois de renovar: a sessao acabou. */
   onSessionExpired: () => void;
   /** 403 de falta de permissao (ver ApiError.isAccessDenied). */
@@ -60,8 +62,11 @@ httpClient.interceptors.response.use(undefined, async (error: unknown) => {
         const token = await authHandlers.refreshAccessToken();
         config.headers.set('Authorization', `Bearer ${token}`);
         return httpClient(config);
-      } catch {
-        // cai no encerramento da sessao abaixo
+      } catch (refreshError) {
+        // Falha temporaria (ex.: sem rede): a sessao continua e so esta requisicao falha.
+        if (!authHandlers.isSessionEnded(refreshError)) {
+          return Promise.reject(apiError);
+        }
       }
     }
     authHandlers.onSessionExpired();
