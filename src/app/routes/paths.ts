@@ -6,7 +6,6 @@ export const paths = {
   home: '/',
   login: '/login',
   admin: '/app',
-  dashboard: '/app/dashboard',
   team: '/app/team',
   analytics: '/app/analytics',
   costs: '/app/costs',
