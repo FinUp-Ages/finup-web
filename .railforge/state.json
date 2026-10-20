@@ -4,8 +4,7 @@
   "objective": "Tela de usuarios com GET /api/v1/admin/users, mock via VITE_USE_MOCKS, paginacao de 20 itens, busca por nome ou e-mail, filtro ACTIVE/INACTIVE, datas em pt-BR e estados de carregamento, vazio e erro, dentro da area protegida do painel.",
   "decisions": [
     "Branch feat/tabela-usuarios-admin rebaseada sobre a develop em 6c2c68e (#9) em 2026-10-19. Os conflitos de state.json foram resolvidos com a versao da develop; o commit original 0719d05 tinha marcadores de conflito versionados neste arquivo",
-    "Rota movida de /users (fora do ProtectedRoute e sem sidebar) para /app/users, filha do AuthenticatedAdminLayout",
-    "Item 'Usuarios' no grupo 'Pessoas' da sidebar, reaproveitando o icone de 'Seu time' ate a revisao de design",
+    "A tela de usuarios e a do item 'Seu time' da sidebar (Figma): sai a rota /users (fora do ProtectedRoute e sem sidebar) e /app/team passa a renderizar a UsersPage, no lugar da page provisoria. Nao existe item 'Usuarios' na sidebar. Correcao de design apontada pelo solicitante em 2026-10-19",
     "A page nao renderiza <main> proprio: o AdminLayout e o unico <main> sob /app",
     "pageSize volta para 20 (09674ed tinha mudado para 7, contra o objetivo da tarefa)",
     "A pagina volta para 0 nos handlers de busca e status (antes um useEffect buscava a pagina antiga com o filtro novo) e e limitada a ultima pagina quando o total encolhe",
@@ -14,8 +13,6 @@
   "files_in_scope": [
     "src/features/users/",
     "src/app/routes/index.tsx",
-    "src/app/routes/paths.ts",
-    "src/app/routes/navigation.ts",
     ".railforge/state.json"
   ],
   "validation": {
@@ -23,14 +20,14 @@
     "npm run typecheck": "passed em 2026-10-19",
     "npm run build": "passed em 2026-10-19",
     "prettier": "--check --end-of-line auto sem pendencias em src/features/users/ (formatacao aplicada aos arquivos do PR)",
-    "navegador (desktop)": "/app/users sem sessao redireciona para /login com um unico <main>; /users deixou de existir (404 do router)",
+    "navegador (desktop)": "/app/team sem sessao redireciona para /login com um unico <main>; /users deixou de existir (404 do router)",
     "nao validado": "tabela dentro do layout com sessao real (exige login no Cognito pelo solicitante): sidebar com item ativo, busca, filtro, paginacao de 20 e estados de carregamento, vazio e erro. Sem testes automatizados"
   },
   "review": "Code review do PR #8 em 2026-10-19 com ajustes aplicados localmente, sem commit nem push. Pendente: validacao com sessao, aprovacao do solicitante, force-push da branch rebaseada e nova revisao do PR.",
   "updated_at": "2026-10-19",
   "open_questions": [
     "Contrato de GET /api/v1/admin/users (nomes dos parametros search/status/page/size e formato da resposta) nao esta documentado; so foi exercitado com mock",
-    "Icone proprio do item 'Usuarios' na sidebar e posicao do item: precisa de revisao de design",
+    "Titulo da tela continua 'Usuarios' sob o item 'Seu time': confirmar com o design",
     "Coluna PLANO fixa em '—', botoes Ver/Editar desabilitados e botao 'Mais acoes' sem acao: definir escopo",
     "Pendencias do login (#9) seguem abertas: tela inicial de /app, link do 'Baixe o app', NEW_PASSWORD_REQUIRED, avatar e rotulo da sidebar, botao Sair fora do Figma e CORS de producao"
   ]

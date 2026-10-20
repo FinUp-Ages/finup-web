@@ -28,11 +28,10 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to={paths.costs} replace /> },
       { path: paths.dashboard, element: <DashboardPage /> },
-      { path: paths.team, element: <AdminSectionPage title="Seu time" /> },
+      { path: paths.team, element: <UsersPage /> },
       { path: paths.analytics, element: <AdminSectionPage title="Analytics" /> },
       { path: paths.costs, element: <AdminSectionPage title="Custos" /> },
       { path: paths.studies, element: <AdminSectionPage title="Trilha de estudos" /> },
-      { path: paths.users, element: <UsersPage /> },
     ],
   },
 ]);

@@ -10,14 +10,7 @@ import studiesIcon from '@/shared/assets/sidebar/studies.png';
 import type { SidebarGroup } from '@/shared/components/common/Sidebar';
 
 export const navigation: SidebarGroup[] = [
-  {
-    label: 'Pessoas',
-    links: [
-      { label: 'Seu time', to: paths.team, icon: teamIcon },
-      // Sem icone proprio no Figma: reaproveita o de "Seu time" ate a revisao de design.
-      { label: 'Usuários', to: paths.users, icon: teamIcon },
-    ],
-  },
+  { label: 'Pessoas', links: [{ label: 'Seu time', to: paths.team, icon: teamIcon }] },
   {
     label: 'Aplicativo',
     links: [

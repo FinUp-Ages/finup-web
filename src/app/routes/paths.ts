@@ -11,5 +11,4 @@ export const paths = {
   analytics: '/app/analytics',
   costs: '/app/costs',
   studies: '/app/studies',
-  users: '/app/users',
 } as const;
