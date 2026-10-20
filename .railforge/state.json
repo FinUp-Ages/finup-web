@@ -1,34 +1,47 @@
 {
   "stage": "REVIEWING",
-  "task": "Tabela administrativa de usuarios (PR #8), ajustada apos o merge do login Cognito (#9)",
-  "objective": "Tela de usuarios com GET /api/v1/admin/users, mock via VITE_USE_MOCKS, paginacao de 20 itens, busca por nome ou e-mail, filtro ACTIVE/INACTIVE, datas em pt-BR e estados de carregamento, vazio e erro, dentro da area protegida do painel.",
+  "task": "Trilha: pergunta 'Preencher lacuna' (FILL_BLANK), tamanho M, contrato C6",
+  "objective": "Formulario de criacao e edicao do rascunho de uma pergunta FILL_BLANK (titulo, enunciado com ___, respostas aceitas e explicacao), com POST em .../categories/{categoryId}/questions, PUT em /questions/{id}, mock via VITE_USE_MOCKS e estados de carregamento, erro e sucesso.",
   "decisions": [
-    "Branch feat/tabela-usuarios-admin rebaseada sobre a develop em 6c2c68e (#9) em 2026-10-19. Os conflitos de state.json foram resolvidos com a versao da develop; o commit original 0719d05 tinha marcadores de conflito versionados neste arquivo",
-    "A tela de usuarios e a do item 'Seu time' da sidebar (Figma): sai a rota /users (fora do ProtectedRoute e sem sidebar) e /app/team passa a renderizar a UsersPage, no lugar da page provisoria. Nao existe item 'Usuarios' na sidebar. Correcao de design apontada pelo solicitante em 2026-10-19",
-    "A page nao renderiza <main> proprio: o AdminLayout e o unico <main> sob /app",
-    "pageSize volta para 20 (09674ed tinha mudado para 7, contra o objetivo da tarefa)",
-    "A pagina volta para 0 nos handlers de busca e status (antes um useEffect buscava a pagina antiga com o filtro novo) e e limitada a ultima pagina quando o total encolhe",
-    "Busca vazia nao e enviada para a API; placeholderData usa keepPreviousData, como o dashboard"
+    "Branch feat/trilha-pergunta-preencher-lacuna criada da develop em 83f2ea6 (#8) em 2026-10-20",
+    "Nenhuma branch nem PR do finup-web tem trilha, perguntas ou FILL_BLANK: implementacao do zero, em src/features/study-tracks/",
+    "O C6 so existe no finup-backend, branch feat/modelagem-trilha-estudos (contracts/study-track-c6.md, nao mergeada); nenhuma branch do backend tem POST/PUT de perguntas nem GET de pergunta do admin",
+    "2026-10-20: o solicitante pediu para seguir sem o backend, deixando a integracao preparada. Premissas P1-P5 adotadas",
+    "P1: corpo do card ({type,title,statement,answers,explanation}); divergencia com o schema FILL_BLANK do C6 do backend registrada. Rotas e mapeamento ficam so em api/fillBlankContract.ts",
+    "P2: so pergunta com status DRAFT e editavel no painel; as demais abrem somente leitura e o mock responde 409 problem+json no PUT",
+    "P3: rotas premissa /api/v1/admin/study-tracks/categories/{categoryId}/questions (POST) e /api/v1/admin/study-tracks/questions/{id} (GET e PUT); resposta plana {id,categoryId,status,type,title,statement,answers,explanation}",
+    "P4: Vitest + Testing Library como devDependencies (ja previstos no README); a API e simulada com vi.mock, sem MSW; CI nao alterada",
+    "P5: rotas /app/studies/categories/:categoryId/questions/new/fill-blank e /app/studies/questions/:questionId/edit; apos criar, vai para a edicao do rascunho com aviso de sucesso. Listagem e seletor de tipo fora do escopo",
+    "Regras: ao menos uma marcacao ___; respostas com trim, sem vazias e sem duplicatas (comparacao sem diferenciar maiusculas, pt-BR); nao remove a ultima resposta; titulo obrigatorio; explicacao opcional",
+    "Bug achado pelos testes e corrigido: a page e reaproveitada entre as rotas de criacao e edicao, entao o aviso de criacao vem de um efeito sobre location.state, nao do estado inicial"
   ],
   "files_in_scope": [
-    "src/features/users/",
-    "src/app/routes/index.tsx",
+    "src/features/study-tracks/",
+    "src/app/routes/",
+    "src/test/",
+    "vitest.config.ts",
+    "tsconfig.node.json",
+    "package.json",
+    "package-lock.json",
+    "README.md",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run lint": "passed em 2026-10-19",
-    "npm run typecheck": "passed em 2026-10-19",
-    "npm run build": "passed em 2026-10-19",
-    "prettier": "--check --end-of-line auto sem pendencias em src/features/users/ (formatacao aplicada aos arquivos do PR)",
-    "navegador (desktop)": "/app/team sem sessao redireciona para /login com um unico <main>; /users deixou de existir (404 do router)",
-    "nao validado": "tabela dentro do layout com sessao real (exige login no Cognito pelo solicitante): sidebar com item ativo, busca, filtro, paginacao de 20 e estados de carregamento, vazio e erro. Sem testes automatizados"
+    "npm run lint": "passed em 2026-10-20",
+    "npm run typecheck": "passed em 2026-10-20",
+    "npm run build": "passed em 2026-10-20",
+    "npm test": "32 testes passando em 2026-10-20 (validacao, contrato C6, mock e tela)",
+    "prettier": "--check sem pendencias nos arquivos da tarefa",
+    "navegador (desktop)": "/app/studies/questions/pergunta-rascunho/edit sem sessao redireciona para /login, sem erros no console",
+    "nao validado": "formulario no navegador com sessao real (exige login no Cognito pelo solicitante) e integracao com o backend, que ainda nao tem as rotas"
   },
-  "review": "Code review do PR #8 em 2026-10-19 com ajustes aplicados localmente, sem commit nem push. Pendente: validacao com sessao, aprovacao do solicitante, force-push da branch rebaseada e nova revisao do PR.",
-  "updated_at": "2026-10-19",
+  "review": "Implementacao concluida com commits locais, sem push. Aguardando revisao do solicitante para publicar a branch e abrir o PR.",
+  "updated_at": "2026-10-20",
   "open_questions": [
-    "Contrato de GET /api/v1/admin/users (nomes dos parametros search/status/page/size e formato da resposta) nao esta documentado; so foi exercitado com mock",
-    "Titulo da tela continua 'Usuarios' sob o item 'Seu time': confirmar com o design",
-    "Coluna PLANO fixa em '—', botoes Ver/Editar desabilitados e botao 'Mais acoes' sem acao: definir escopo",
-    "Pendencias do login (#9) seguem abertas: tela inicial de /app, link do 'Baixe o app', NEW_PASSWORD_REQUIRED, avatar e rotulo da sidebar, botao Sair fora do Figma e CORS de producao"
+    "Integracao com o backend: confirmar rotas, corpo e resposta quando o finup-backend publicar POST/PUT/GET de perguntas; ajustes ficam em src/features/study-tracks/api/fillBlankContract.ts",
+    "Corpo FILL_BLANK do card ({title,statement com ___,answers}) diverge do schema do C6 no backend ({textWithBlanks com {termo}, blanks, explanation})",
+    "Regra do PUT: hoje so DRAFT e editavel; se o backend permitir editar o rascunho de pergunta publicada (PUBLISHED_WITH_CHANGES), mudar isReadOnly na page e o mock",
+    "Sem tela da Trilha (categorias, lista e seletor de tipo): o formulario so e acessivel pela URL; o destino apos salvar e a propria edicao do rascunho",
+    "npm test ainda nao roda no CI; design sem Figma precisa de validacao; sem protecao contra sair com alteracoes nao salvas (nao e padrao do projeto)"
   ]
 }
