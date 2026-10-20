@@ -18,6 +18,9 @@ export default {
         'chart-line': '#7086fd',
         'chart-surface': '#f3f5f9',
         'chart-value': '#022a4d',
+        // Fundo da variacao dos widgets de indicador (Figma: nó 191-2603).
+        'indicator-favorable': 'rgba(0, 217, 40, 0.1)',
+        'indicator-unfavorable': 'rgba(217, 0, 0, 0.1)',
       },
       fontFamily: {
         // Tela de login (Figma, frame 191-2349).
