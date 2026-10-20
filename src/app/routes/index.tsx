@@ -32,9 +32,9 @@ const router = createBrowserRouter([
       { path: paths.analytics, element: <AdminSectionPage title="Analytics" /> },
       { path: paths.costs, element: <AdminSectionPage title="Custos" /> },
       { path: paths.studies, element: <AdminSectionPage title="Trilha de estudos" /> },
+      { path: paths.users, element: <UsersPage /> },
     ],
   },
-  { path: paths.users, element: <UsersPage /> },
 ]);
 
 export function AppRouter() {

@@ -36,12 +36,24 @@ export function UsersTable({ users }: UsersTableProps) {
         </colgroup>
         <thead>
           <tr className="h-[57px] border-b border-black/5">
-            <th scope="col" className="px-4 font-normal">USUÁRIO</th>
-            <th scope="col" className="px-4 font-normal">EMAIL</th>
-            <th scope="col" className="px-4 font-normal">PLANO</th>
-            <th scope="col" className="px-4 font-normal">JOINED</th>
-            <th scope="col" className="px-4 font-normal">STATUS</th>
-            <th scope="col" className="px-4 font-normal">AÇÕES</th>
+            <th scope="col" className="px-4 font-normal">
+              USUÁRIO
+            </th>
+            <th scope="col" className="px-4 font-normal">
+              EMAIL
+            </th>
+            <th scope="col" className="px-4 font-normal">
+              PLANO
+            </th>
+            <th scope="col" className="px-4 font-normal">
+              JOINED
+            </th>
+            <th scope="col" className="px-4 font-normal">
+              STATUS
+            </th>
+            <th scope="col" className="px-4 font-normal">
+              AÇÕES
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -60,7 +72,9 @@ export function UsersTable({ users }: UsersTableProps) {
                   </span>
                 </div>
               </td>
-              <td className="truncate px-4" title={user.email}>{user.email}</td>
+              <td className="truncate px-4" title={user.email}>
+                {user.email}
+              </td>
               <td className="px-4">—</td>
               <td className="px-4 whitespace-nowrap">{formatJoinedDate(user.createdAt)}</td>
               <td className="px-4">
@@ -68,7 +82,7 @@ export function UsersTable({ users }: UsersTableProps) {
                   className={`inline-flex h-[42px] items-center rounded-[4px] px-3 font-semibold ${
                     user.status === 'ACTIVE'
                       ? 'bg-[#EBF6ED] text-[#3EA54E]'
-                      : 'bg-[#F5F5F5] text-[#707070]'
+                      : 'bg-surface-light text-[#707070]'
                   }`}
                 >
                   {user.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}

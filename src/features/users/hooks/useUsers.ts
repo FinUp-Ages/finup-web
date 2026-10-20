@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { getUsers } from '../api/getUsers';
 import type { GetUsersParams } from '../types';
 
@@ -6,7 +6,8 @@ export function useUsers(params: GetUsersParams) {
   const query = useQuery({
     queryKey: ['users', params],
     queryFn: () => getUsers(params),
-    placeholderData: (previousData) => previousData,
+    // Ao trocar pagina ou filtro, mantem a tabela anterior ate a nova chegar.
+    placeholderData: keepPreviousData,
   });
 
   return {
