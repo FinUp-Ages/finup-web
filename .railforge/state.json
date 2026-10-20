@@ -1,34 +1,39 @@
 {
   "stage": "REVIEWING",
-  "task": "Tabela administrativa de usuarios (PR #8), ajustada apos o merge do login Cognito (#9)",
-  "objective": "Tela de usuarios com GET /api/v1/admin/users, mock via VITE_USE_MOCKS, paginacao de 20 itens, busca por nome ou e-mail, filtro ACTIVE/INACTIVE, datas em pt-BR e estados de carregamento, vazio e erro, dentro da area protegida do painel.",
+  "task": "ClickUp 86e3m989t — [ Frontend ] - Widgets Receita, Custo operacional e Usuários ativos (contrato C3, summary).",
+  "objective": "Três widgets de indicador no /app/dashboard (Figma nó 191-2603): Usuários ativos com activeUsers de GET /api/v1/admin/metrics/summary (mock via VITE_USE_MOCKS), Receita bruta e Custo operacional mockados e sinalizados como MOCK; valor, variação (changePct) com cor de alta/baixa, estados carregando e erro.",
   "decisions": [
-    "Branch feat/tabela-usuarios-admin rebaseada sobre a develop em 6c2c68e (#9) em 2026-10-19. Os conflitos de state.json foram resolvidos com a versao da develop; o commit original 0719d05 tinha marcadores de conflito versionados neste arquivo",
-    "A tela de usuarios e a do item 'Seu time' da sidebar (Figma): sai a rota /users (fora do ProtectedRoute e sem sidebar) e /app/team passa a renderizar a UsersPage, no lugar da page provisoria. Nao existe item 'Usuarios' na sidebar. Correcao de design apontada pelo solicitante em 2026-10-19",
-    "A page nao renderiza <main> proprio: o AdminLayout e o unico <main> sob /app",
-    "pageSize volta para 20 (09674ed tinha mudado para 7, contra o objetivo da tarefa)",
-    "A pagina volta para 0 nos handlers de busca e status (antes um useEffect buscava a pagina antiga com o filtro novo) e e limitada a ultima pagina quando o total encolhe",
-    "Busca vazia nao e enviada para a API; placeholderData usa keepPreviousData, como o dashboard"
+    "A estrutura de widgets configuráveis (86e3m9861, Lucas) ainda não está na develop: os widgets ficam num registro por id do C5 (REVENUE, ACTIVE_USERS, OPERATIONAL_COST em components/registroWidgetsIndicadores.ts), renderizados na ordem do Figma, para a estrutura ligar, desligar e ordenar sem mexer nos widgets",
+    "summary consultado com period=30d, que corresponde ao texto do Figma 'em relação ao mês anterior'; o Figma não tem seletor de período nos widgets",
+    "Cor da variação pelo sentido favorável: verde quando melhora, vermelho quando piora; para custo operacional alta é desfavorável (o Figma mostra +6% em vermelho). Variação zero usa o fundo neutro do gráfico",
+    "Receita e custo sempre mock (sem endpoint no back), com ou sem VITE_USE_MOCKS, no mesmo formato value/previousValue/changePct do C3",
+    "Fonte Inter, como o restante do dashboard (#7) e o AdminLayout; o Figma usa DM Sans",
+    "O card 'Clientes novos' (newUsers, nó 191-2618) do mesmo frame não faz parte desta tarefa",
+    "Widgets e gráfico são a tela de Custos (/app/costs), não uma aba Dashboard: a rota /app/dashboard (e paths.dashboard) foi removida e /app/costs renderiza a DashboardPage. Nome da feature 'dashboard' mantido. Decisão do solicitante em 2026-10-19",
+    "Branch rebaseada sobre a develop em 2026-10-20, depois do merge do #8 (83f2ea6, tabela de usuários): em routes/index.tsx fica /app/team com UsersPage (#8) e sem /app/dashboard"
   ],
   "files_in_scope": [
-    "src/features/users/",
+    "src/features/dashboard/",
     "src/app/routes/index.tsx",
+    "src/app/routes/paths.ts",
+    "src/features/admin/pages/AdminSectionPage.tsx",
+    "README.md",
+    "tailwind.config.js",
     ".railforge/state.json"
   ],
   "validation": {
     "npm run lint": "passed em 2026-10-19",
     "npm run typecheck": "passed em 2026-10-19",
     "npm run build": "passed em 2026-10-19",
-    "prettier": "--check --end-of-line auto sem pendencias em src/features/users/ (formatacao aplicada aos arquivos do PR)",
-    "navegador (desktop)": "/app/team sem sessao redireciona para /login com um unico <main>; /users deixou de existir (404 do router)",
-    "nao validado": "tabela dentro do layout com sessao real (exige login no Cognito pelo solicitante): sidebar com item ativo, busca, filtro, paginacao de 20 e estados de carregamento, vazio e erro. Sem testes automatizados"
+    "prettier": "--check --end-of-line auto sem pendencias em src/",
+    "navegador (desktop, 1400x900, mocks)": "rota temporária sem ProtectedRoute (revertida): 3 cards de 271x164 como no Figma; Receita R$ 9.876,45 e Usuários ativos 320 com +6% em verde; Custo R$ 23.456,45 com +6% em vermelho; 'Carregando...' no lugar do valor; erro forçado no mock do summary mostra mensagem e 'Tentar novamente' só no card de Usuários ativos",
+    "nao validado": "/app/dashboard autenticado e summary contra o backend real (exige login no Cognito). Sem testes automatizados (Vitest fica para PR próprio)",
+    "navegador (Custos)": "preview temporário com AdminLayout e sidebar: widgets e gráfico renderizam no layout administrativo; typecheck e lint passam após mover a rota"
   },
-  "review": "Code review do PR #8 em 2026-10-19 com ajustes aplicados localmente, sem commit nem push. Pendente: validacao com sessao, aprovacao do solicitante, force-push da branch rebaseada e nova revisao do PR.",
-  "updated_at": "2026-10-19",
   "open_questions": [
-    "Contrato de GET /api/v1/admin/users (nomes dos parametros search/status/page/size e formato da resposta) nao esta documentado; so foi exercitado com mock",
-    "Titulo da tela continua 'Usuarios' sob o item 'Seu time': confirmar com o design",
-    "Coluna PLANO fixa em '—', botoes Ver/Editar desabilitados e botao 'Mais acoes' sem acao: definir escopo",
-    "Pendencias do login (#9) seguem abertas: tela inicial de /app, link do 'Baixe o app', NEW_PASSWORD_REQUIRED, avatar e rotulo da sidebar, botao Sair fora do Figma e CORS de producao"
-  ]
+    "IDs REVENUE, ACTIVE_USERS e OPERATIONAL_COST precisam ser combinados com a estrutura de widgets (86e3m9861); o back (C5) aceita qualquer string",
+    "Integração com a estrutura de widgets configuráveis (item do DoD) depende do merge da 86e3m9861"
+  ],
+  "review": "pendente: commit, PR para develop e code review",
+  "updated_at": "2026-10-20"
 }
