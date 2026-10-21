@@ -35,3 +35,40 @@ export interface CrescimentoUsuario {
   /** Rotulos do eixo Y, do topo para a base. */
   rotulosEixoY: string[];
 }
+
+/** Valor de um indicador e o do periodo anterior de mesmo tamanho (contrato C3). */
+export interface MetricValueDTO {
+  value: number;
+  previousValue: number;
+  /** Variacao em %, com 1 casa decimal (ex.: 6.0, -4.0). */
+  changePct: number;
+}
+
+/** Periodos aceitos por GET /api/v1/admin/metrics/summary. */
+export type MetricsPeriod = '7d' | '30d' | '90d';
+
+/** Formato bruto devolvido por GET /api/v1/admin/metrics/summary (contrato C3). */
+export interface MetricsSummaryDTO {
+  activeUsers: MetricValueDTO;
+  newUsers: MetricValueDTO;
+}
+
+/**
+ * MOCK: Receita e Custo operacional estao fora do contrato C3 e nao tem endpoint.
+ * Mesmo formato dos indicadores do C3 para trocar pelo back sem mudar a tela.
+ */
+export interface FinancialMetricsDTO {
+  revenue: MetricValueDTO;
+  operationalCost: MetricValueDTO;
+}
+
+/** alta/baixa do valor; estavel quando a variacao e zero. */
+export type Tendencia = 'alta' | 'baixa' | 'estavel';
+
+/** Dados prontos para um widget de indicador — a tela nao conhece o DTO. */
+export interface Indicador {
+  valor: string;
+  /** Ex.: "+6%", "-4%", "0%". */
+  variacao: string;
+  tendencia: Tendencia;
+}

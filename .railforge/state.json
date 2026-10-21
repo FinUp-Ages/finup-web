@@ -3,13 +3,14 @@
   "task": "ClickUp 86e3m9860 - [ Frontend ] - Trilha: CRUD de categorias (contrato C6)",
   "objective": "Tela /app/studies com a lista de categorias da Trilha de estudos (nome, descricao, draftCount e publishedCount), criacao e edicao com nome obrigatorio, remocao com confirmacao e mensagem clara no 409 (categoria com perguntas). Endpoints em /api/v1/admin/study-tracks/categories (POST, GET, PUT /{id}, DELETE /{id}) com mock via VITE_USE_MOCKS identico ao contrato. Estados de carregamento, vazio, erro e sucesso.",
   "decisions": [
-    "Branch feat/trilha-crud-categorias criada de origin/develop em 83f2ea6 (#8) em 2026-10-20, sem upstream (nada foi enviado ao remoto)",
+    "Branch feat/trilha-crud-categorias criada de origin/develop em 83f2ea6 (#8) em 2026-10-20 e enviada ao remoto a pedido do solicitante (PR aberto por ele)",
     "Feature nova em src/features/study-tracks/ (api, hooks, components, model, pages), sem importar da branch feat/trilha-pergunta-preencher-lacuna (nao mergeada). Conflitos esperados no merge: types.ts, index.ts e src/app/routes/index.tsx (unir os dois lados); os demais arquivos tem nomes distintos",
     "QuestionStatus e questionStatusLabels nao foram criados aqui: a tela so usa as contagens draftCount/publishedCount do DTO",
     "Sem Figma: Input de 50px, Button primario, tabela no estilo de UsersTable, tokens do tailwind.config.js e espacamentos 16/24. SecondaryButton (contorno) e o botao vermelho de remover sao locais da feature",
     "Criacao e edicao em modal (<dialog> nativo: foco preso, Esc fecha, foco volta ao botao que abriu); remocao em modal de confirmacao que mostra o 409 sem fechar. Depois de remover, o foco vai para o titulo da tela",
     "Mensagens de erro por status em model/categoryErrorMessages.ts; o detail do problem+json so aparece em 400/409/422",
-    "Lista sem paginacao: o C6 nao define paginacao no GET"
+    "Lista sem paginacao: o C6 nao define paginacao no GET",
+    "Merge da develop em c2e9e49 (#10, widgets) em 2026-10-20: routes/index.tsx fica com /app/costs -> DashboardPage (#10) e /app/studies -> StudyCategoriesPage; state.json mantem esta tarefa (o #10 ja foi mergeado)"
   ],
   "files_in_scope": [
     "src/features/study-tracks/",
@@ -23,9 +24,10 @@
     "prettier": "--check --end-of-line auto sem pendencias em src/features/study-tracks/ e src/app/routes/index.tsx",
     "navegador (desktop, mocks)": "Com rota temporaria fora do ProtectedRoute (removida antes do commit): lista, nome obrigatorio, criar, editar, 409 ao remover categoria com perguntas, remover categoria vazia, estados de carregamento, vazio, erro com 'Tentar novamente' e mensagem de sucesso; Esc fecha e devolve o foco; fluxo por teclado no modal de remocao",
     "testes automatizados": "A develop nao tem Vitest; sem testes nesta tarefa (a branch feat/trilha-pergunta-preencher-lacuna introduz o Vitest)",
-    "nao validado": "/app/studies dentro do AdminLayout com sessao real do Cognito e contra o backend (rotas ainda nao existem)"
+    "nao validado": "/app/studies dentro do AdminLayout com sessao real do Cognito e contra o backend (rotas ainda nao existem)",
+    "apos o merge da develop (2026-10-20)": "lint, typecheck, build e prettier passam"
   },
-  "review": "Implementacao concluida em commits locais, sem push nem PR. Pendente: revisao de design (sem Figma), validacao com sessao real e aprovacao do solicitante.",
+  "review": "PR aberto pelo solicitante para a develop. Code review em 2026-10-20 sem bloqueios; sugestoes: nao trocar a tabela pelo erro quando um recarregamento falha com dados em cache, tirar do cache a categoria removida no onSuccess e desativar 'Remover' depois do 409. Pendente: revisao de design e validacao com sessao real.",
   "updated_at": "2026-10-20",
   "open_questions": [
     "C6 nao define limite de tamanho de nome e descricao, nem se o nome deve ser unico",

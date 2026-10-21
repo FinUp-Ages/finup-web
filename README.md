@@ -78,10 +78,10 @@ src/
 │   ├── welcome/               tela inicial (rota "/")
 │   │   ├── pages/             WelcomePage.tsx
 │   │   └── index.ts           API pública da feature
-│   ├── dashboard/             painel inicial (rota "/app/dashboard")
-│   │   ├── api/               getUserGrowth.ts + mock (VITE_USE_MOCKS)
-│   │   ├── hooks/             useUserGrowth.ts
-│   │   ├── components/        GraficoCrescimentoUsuario.tsx
+│   ├── dashboard/             tela de Custos (rota "/app/costs"): widgets e gráfico
+│   │   ├── api/               getUserGrowth.ts e getMetricsSummary.ts + mocks (VITE_USE_MOCKS); getFinancialMetrics.ts (sempre mock)
+│   │   ├── hooks/             useUserGrowth.ts e useIndicadores.ts
+│   │   ├── components/        GraficoCrescimentoUsuario.tsx e widgets de indicador
 │   │   ├── pages/             DashboardPage.tsx
 │   │   ├── types.ts           tipos da feature
 │   │   └── index.ts           API pública da feature
