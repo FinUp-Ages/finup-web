@@ -13,7 +13,6 @@ export function useCategories() {
   return {
     categories: query.data ?? [],
     isLoading: query.isPending,
-    isFetching: query.isFetching,
     errorMessage: query.isError ? toLoadCategoriesErrorMessage(query.error) : null,
     reload: () => {
       void query.refetch();

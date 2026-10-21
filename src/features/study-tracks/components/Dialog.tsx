@@ -16,8 +16,13 @@ export function Dialog({ titleId, onClose, children }: DialogProps) {
 
   useEffect(() => {
     const dialog = dialogRef.current;
+    // Na desmontagem o <dialog> ja saiu do DOM e o navegador nao devolve o foco sozinho.
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     dialog?.showModal();
-    return () => dialog?.close();
+    return () => {
+      dialog?.close();
+      opener?.focus();
+    };
   }, []);
 
   return (

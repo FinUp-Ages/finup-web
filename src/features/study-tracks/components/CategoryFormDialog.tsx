@@ -70,7 +70,6 @@ export function CategoryFormDialog({
                 setValues((current) => ({ ...current, name: event.target.value }));
                 setErrors({});
               }}
-              placeholder="Ex.: Reserva de emergência"
               aria-invalid={Boolean(errors.name)}
               aria-describedby={errors.name ? `${id}-name-error` : undefined}
               disabled={isSaving}

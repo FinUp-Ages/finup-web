@@ -1,7 +1,7 @@
 /**
  * Tela de categorias da Trilha de estudos (/app/studies): lista, cria, edita e remove (C6).
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/shared/components/ui/Button';
 import { CategoriesTable } from '../components/CategoriesTable';
@@ -18,11 +18,22 @@ type OpenDialog =
   | { kind: 'delete'; category: CategoryDTO };
 
 export function StudyCategoriesPage() {
-  const { categories, isLoading, isFetching, errorMessage, reload } = useCategories();
+  const { categories, isLoading, errorMessage, reload } = useCategories();
   const saveCategory = useSaveCategory();
   const deleteCategory = useDeleteCategory();
   const [dialog, setDialog] = useState<OpenDialog | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const focusHeadingOnClose = useRef(false);
+
+  // O botao que abriu o modal de remocao sai da tabela: o foco vai para o titulo da tela.
+  // Roda depois da limpeza do Dialog, que devolve o foco ao botao.
+  useEffect(() => {
+    if (!dialog && focusHeadingOnClose.current) {
+      focusHeadingOnClose.current = false;
+      headingRef.current?.focus();
+    }
+  }, [dialog]);
 
   function openDialog(next: OpenDialog) {
     saveCategory.reset();
@@ -43,6 +54,7 @@ export function StudyCategoriesPage() {
 
   function handleRemove(category: CategoryDTO) {
     deleteCategory.remove(category.id, () => {
+      focusHeadingOnClose.current = true;
       setDialog(null);
       setSuccessMessage(`Categoria “${category.name}” removida.`);
     });
@@ -53,7 +65,13 @@ export function StudyCategoriesPage() {
       <section className="mx-auto flex w-full min-w-[720px] max-w-[1171px] flex-col gap-6">
         <header className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-semibold tracking-[0.32px]">Trilha de estudos</h1>
+            <h1
+              ref={headingRef}
+              tabIndex={-1}
+              className="text-2xl font-semibold tracking-[0.32px] outline-none"
+            >
+              Trilha de estudos
+            </h1>
             <p className="text-sm text-navy/60">
               Categorias que agrupam as perguntas da trilha no app.
             </p>
@@ -96,10 +114,9 @@ export function StudyCategoriesPage() {
             <button
               type="button"
               onClick={reload}
-              disabled={isFetching}
-              className="rounded-[4px] font-semibold underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:opacity-60"
+              className="rounded-[4px] font-semibold underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
             >
-              {isFetching ? 'Tentando…' : 'Tentar novamente'}
+              Tentar novamente
             </button>
           </div>
         ) : categories.length === 0 ? (
