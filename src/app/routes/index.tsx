@@ -12,6 +12,7 @@ import { ProtectedRoute } from '@/app/routes/ProtectedRoute';
 import { AdminSectionPage } from '@/features/admin';
 import { LoginPage } from '@/features/auth';
 import { DashboardPage } from '@/features/dashboard';
+import { StudyCategoriesPage } from '@/features/study-tracks';
 import { UsersPage } from '@/features/users';
 import { WelcomePage } from '@/features/welcome';
 
@@ -30,7 +31,7 @@ const router = createBrowserRouter([
       { path: paths.team, element: <UsersPage /> },
       { path: paths.analytics, element: <AdminSectionPage title="Analytics" /> },
       { path: paths.costs, element: <DashboardPage /> },
-      { path: paths.studies, element: <AdminSectionPage title="Trilha de estudos" /> },
+      { path: paths.studies, element: <StudyCategoriesPage /> },
     ],
   },
 ]);
