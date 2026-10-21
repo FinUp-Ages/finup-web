@@ -33,9 +33,10 @@
     "npm test": "35 testes passando em 2026-10-20 (validacao, contrato C6, mock e tela)",
     "prettier": "--check sem pendencias nos arquivos da tarefa",
     "navegador (desktop)": "rota protegida redireciona para /login sem sessao, sem erros no console",
-    "nao validado": "formulario no navegador com sessao real (o solicitante testa com o login dele) e integracao com o backend, que ainda nao tem as rotas"
+    "nao validado": "formulario no navegador com sessao real (o solicitante testa com o login dele) e integracao com o backend, que ainda nao tem as rotas",
+    "merge com develop": "lint, typecheck, build e 35 testes passando apos atualizar com c2e9e49"
   },
-  "review": "Alinhada ao card de backend 86e3m95y3 com commits locais, sem push. Aguardando revisao do solicitante para publicar a branch e abrir o PR.",
+  "review": "Branch publicada em origin em 2026-10-20, atualizada com a develop (c2e9e49, #10). PR para a develop preparado pelo template; criacao pelo solicitante (sem gh nem conector do GitHub). Aguardando CI e code review; merge so pelo time.",
   "updated_at": "2026-10-20",
   "open_questions": [
     "Integracao com o backend: confirmar o prefixo do PUT /questions/{id} e o formato do GET da categoria quando o 86e3m95y3 for entregue; ajustes ficam em src/features/study-tracks/api/fillBlankContract.ts",
