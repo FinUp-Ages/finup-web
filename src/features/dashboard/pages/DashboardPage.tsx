@@ -1,14 +1,17 @@
 /**
- * Tela inicial do painel (rota "/app/dashboard"), renderizada dentro do AdminLayout.
+ * Tela de Custos do painel (rota "/app/costs"), renderizada dentro do AdminLayout.
  *
- * Exibe o card de crescimento do usuario (GET /api/v1/admin/metrics/user-growth, contrato C3).
+ * Exibe os widgets de indicador (Receita bruta, Usuarios ativos e Custo operacional) e o card
+ * de crescimento do usuario (GET /api/v1/admin/metrics/summary e user-growth, contrato C3).
  * Com VITE_USE_MOCKS=true os dados vem do mock da feature, sem chamar o backend.
+ * Receita e custo sao sempre mock (fora do contrato).
  */
 import { useState } from 'react';
 import {
   GraficoCrescimentoUsuario,
   type OpcaoPeriodo,
 } from '../components/GraficoCrescimentoUsuario';
+import { widgetsIndicadores } from '../components/registroWidgetsIndicadores';
 import { useUserGrowth } from '../hooks/useUserGrowth';
 
 const opcoesPeriodo: OpcaoPeriodo[] = [
@@ -26,7 +29,12 @@ export function DashboardPage() {
 
   return (
     <div className="flex items-start justify-center">
-      <div className="w-full max-w-[948px]">
+      <div className="flex w-full max-w-[948px] flex-col gap-6">
+        <div className="flex flex-wrap gap-6">
+          {widgetsIndicadores.map(({ id, Componente }) => (
+            <Componente key={id} />
+          ))}
+        </div>
         <GraficoCrescimentoUsuario
           dados={dados}
           isLoading={isLoading}
