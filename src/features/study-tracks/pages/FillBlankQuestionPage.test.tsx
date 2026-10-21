@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/shared/config/apiError';
 import { createQuestion } from '../api/createQuestion';
@@ -34,12 +34,21 @@ function questionDTO(status: QuestionStatus = 'DRAFT', draft = draftContent): Qu
   };
 }
 
-/** Mostra o caminho atual, para conferir a navegacao depois de criar. */
+/** Mostra o caminho atual e simula o Voltar do navegador. */
 function LocationProbe() {
-  return <p data-testid="location">{useLocation().pathname}</p>;
+  const navigate = useNavigate();
+  return (
+    <>
+      <p data-testid="location">{useLocation().pathname}</p>
+      <button type="button" onClick={() => navigate(-1)}>
+        Voltar do navegador
+      </button>
+    </>
+  );
 }
 
-function renderAt(url: string) {
+/** `history` sao as entradas anteriores do navegador, antes de `url`. */
+function renderAt(url: string, history: string[] = []) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
@@ -53,7 +62,7 @@ function renderAt(url: string) {
   );
   render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[url]}>
+      <MemoryRouter initialEntries={[...history, url]}>
         <Routes>
           <Route path="/studies" element={<p>Tela da trilha</p>} />
           <Route path="/studies/categories/:categoryId/questions/new/fill-blank" element={page} />
@@ -63,7 +72,7 @@ function renderAt(url: string) {
       </MemoryRouter>
     </QueryClientProvider>,
   );
-  return { user: userEvent.setup() };
+  return { user: userEvent.setup(), queryClient };
 }
 
 const createUrl = '/studies/categories/cat-1/questions/new/fill-blank';
@@ -177,7 +186,25 @@ describe('FillBlankQuestionPage - criacao', () => {
     expect(
       screen.getByRole('heading', { name: 'Editar pergunta: Preencher lacuna' }),
     ).toBeVisible();
-    expect(screen.getByLabelText('Título')).toHaveValue('Rendimento do CDB');
+    expect(await screen.findByDisplayValue('Rendimento do CDB')).toBeVisible();
+    // Sem lista em cache, a edicao busca a lista completa da categoria.
+    expect(getCategoryQuestions).toHaveBeenCalledWith('cat-1');
+  });
+
+  it('depois de criar, o Voltar do navegador nao reabre a criacao', async () => {
+    vi.mocked(createQuestion).mockResolvedValue(questionDTO());
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO()]);
+    const { user } = renderAt(createUrl, ['/studies']);
+
+    await fillValidForm(user);
+    await user.click(screen.getByRole('button', { name: 'Criar rascunho' }));
+    await screen.findByText('Pergunta criada como rascunho.');
+
+    await user.click(screen.getByRole('button', { name: 'Voltar do navegador' }));
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/studies');
+    expect(screen.getByText('Tela da trilha')).toBeVisible();
+    expect(screen.queryByText('Pergunta criada como rascunho.')).not.toBeInTheDocument();
   });
 
   it('mostra o detail do problem+json e preserva os dados quando o POST falha', async () => {
@@ -297,6 +324,38 @@ describe('FillBlankQuestionPage - edicao', () => {
     await user.click(screen.getByRole('button', { name: 'Tentar novamente' }));
 
     expect(await screen.findByDisplayValue('Rendimento do CDB')).toBeVisible();
+  });
+
+  it('mantem o formulario sem alerta quando um recarregamento falha', async () => {
+    vi.mocked(getCategoryQuestions)
+      .mockResolvedValueOnce([questionDTO()])
+      .mockRejectedValueOnce(new ApiError(null, null));
+    const { queryClient } = renderAt(editUrl);
+    await screen.findByDisplayValue('Rendimento do CDB');
+
+    await act(() => queryClient.refetchQueries());
+
+    expect(getCategoryQuestions).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue('Rendimento do CDB')).toBeVisible();
+  });
+
+  it('marca na lista as respostas repetidas vindas do servidor e foca a primeira', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([
+      questionDTO('DRAFT', { ...draftContent, answers: ['CDI', 'cdi'] }),
+    ]);
+    const { user } = renderAt(editUrl);
+    await screen.findByDisplayValue('Rendimento do CDB');
+
+    await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+
+    const removeRepeated = screen.getByRole('button', { name: 'Remover resposta repetida "cdi"' });
+    expect(removeRepeated).toHaveFocus();
+    expect(
+      screen.getByRole('list', { name: 'Respostas aceitas adicionadas' }),
+    ).toHaveAccessibleDescription('Remova as respostas aceitas repetidas.');
+    expect(screen.getByLabelText('Respostas aceitas')).not.toHaveAttribute('aria-invalid');
+    expect(updateQuestion).not.toHaveBeenCalled();
   });
 
   it('nao abre o formulario para pergunta de outro tipo', async () => {

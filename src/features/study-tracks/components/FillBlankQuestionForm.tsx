@@ -1,8 +1,11 @@
 import { useId, useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/shared/components/ui/Button';
+import { Input } from '@/shared/components/ui/Input';
 import {
   BLANK_MARKER,
   fillBlankFieldOrder,
+  fillBlankMessages,
+  findRepeatedAnswerIndexes,
   hasBlank,
   splitStatement,
   validateFillBlankQuestion,
@@ -11,7 +14,7 @@ import {
 } from '../model/fillBlankValidation';
 import type { FillBlankFormValues } from '../types';
 import { AcceptedAnswersField } from './AcceptedAnswersField';
-import { fieldClassName } from './fieldClassName';
+import { textAreaClassName } from './textAreaClassName';
 
 type FillBlankQuestionFormProps = {
   initialValues: FillBlankFormValues;
@@ -40,6 +43,7 @@ export function FillBlankQuestionForm({
     statement: useRef<HTMLTextAreaElement>(null),
     answers: useRef<HTMLInputElement>(null),
   };
+  const answersListRef = useRef<HTMLUListElement>(null);
 
   function setField<K extends keyof FillBlankFormValues>(field: K, value: FillBlankFormValues[K]) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -77,7 +81,17 @@ export function FillBlankQuestionForm({
 
     const firstInvalid = fillBlankFieldOrder.find((field) => nextErrors[field]);
     if (firstInvalid) {
-      fieldRefs[firstInvalid].current?.focus();
+      // Respostas repetidas estao na lista: o foco vai para remover a primeira repetida. A posicao
+      // vem dos valores, porque a marcacao na lista so aparece no proximo render.
+      const [firstRepeated] =
+        nextErrors[firstInvalid] === fillBlankMessages.answersDuplicated
+          ? findRepeatedAnswerIndexes(values.answers)
+          : [];
+      const repeatedButton =
+        firstRepeated === undefined
+          ? null
+          : answersListRef.current?.querySelectorAll('button')[firstRepeated];
+      (repeatedButton ?? fieldRefs[firstInvalid].current)?.focus();
       return;
     }
     onSubmit(values);
@@ -91,7 +105,7 @@ export function FillBlankQuestionForm({
         <label htmlFor={titleId} className="text-sm font-medium">
           Título
         </label>
-        <input
+        <Input
           ref={fieldRefs.title}
           id={titleId}
           type="text"
@@ -99,7 +113,6 @@ export function FillBlankQuestionForm({
           aria-invalid={errors.title ? true : undefined}
           aria-describedby={errors.title ? `${titleId}-error` : undefined}
           onChange={(event) => setField('title', event.target.value)}
-          className={`h-11 ${fieldClassName}`}
         />
         {errors.title && (
           <p id={`${titleId}-error`} className="text-sm text-login-error">
@@ -126,7 +139,7 @@ export function FillBlankQuestionForm({
             errors.statement ? `${statementHintId} ${statementId}-error` : statementHintId
           }
           onChange={(event) => setField('statement', event.target.value)}
-          className={`resize-y py-3 ${fieldClassName}`}
+          className={textAreaClassName}
         />
         {errors.statement && (
           <p id={`${statementId}-error`} className="text-sm text-login-error">
@@ -154,7 +167,9 @@ export function FillBlankQuestionForm({
         answers={values.answers}
         pendingAnswer={pendingAnswer}
         error={errors.answers}
+        errorOnList={errors.answers === fillBlankMessages.answersDuplicated}
         inputRef={fieldRefs.answers}
+        listRef={answersListRef}
         onPendingAnswerChange={(value) => {
           setPendingAnswer(value);
           setErrors((current) => ({ ...current, answers: undefined }));
@@ -172,7 +187,7 @@ export function FillBlankQuestionForm({
           rows={3}
           value={values.explanation}
           onChange={(event) => setField('explanation', event.target.value)}
-          className={`resize-y py-3 ${fieldClassName}`}
+          className={textAreaClassName}
         />
       </div>
 

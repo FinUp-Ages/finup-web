@@ -5,6 +5,10 @@
  * Com :questionId, carrega a pergunta pela lista da categoria e salva com PUT. O PUT so altera o
  * rascunho, em qualquer status: numa pergunta publicada, a versao no ar so muda ao publicar.
  * Os caminhos vem por props: features nao importam app/.
+ *
+ * As rotas de criacao e de edicao renderizam esta mesma page. Por isso o conteudo recebe uma key
+ * por pergunta: trocar de rota (criar -> editar, Voltar do navegador, outra pergunta) monta a tela
+ * de novo, sem aviso de sucesso, erro ou estado de salvamento da rota anterior.
  */
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -25,8 +29,29 @@ type LocationState = { created?: boolean } | null;
 
 const emptyValues: FillBlankFormValues = { title: '', statement: '', answers: [], explanation: '' };
 
-export function FillBlankQuestionPage({ backTo, editPathFor }: FillBlankQuestionPageProps) {
+export function FillBlankQuestionPage(props: FillBlankQuestionPageProps) {
   const { categoryId = '', questionId } = useParams();
+  return (
+    <FillBlankQuestionScreen
+      key={`${categoryId}/${questionId ?? 'new'}`}
+      categoryId={categoryId}
+      questionId={questionId}
+      {...props}
+    />
+  );
+}
+
+type FillBlankQuestionScreenProps = FillBlankQuestionPageProps & {
+  categoryId: string;
+  questionId: string | undefined;
+};
+
+function FillBlankQuestionScreen({
+  backTo,
+  editPathFor,
+  categoryId,
+  questionId,
+}: FillBlankQuestionScreenProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const isEditing = Boolean(questionId);
@@ -44,9 +69,8 @@ export function FillBlankQuestionPage({ backTo, editPathFor }: FillBlankQuestion
   } = useSaveFillBlankQuestion({ categoryId, questionId });
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // O aviso de criacao vem no state da navegacao. Fica num efeito (e nao no estado inicial)
-  // porque a page pode ser reaproveitada entre a rota de criacao e a de edicao. Depois de
-  // exibido, o state e limpo para o aviso nao repetir ao recarregar.
+  // O aviso de criacao vem no state da navegacao. Depois de exibido, o state e limpo para o
+  // aviso nao repetir ao recarregar.
   useEffect(() => {
     if ((location.state as LocationState)?.created) {
       setSuccessMessage('Pergunta criada como rascunho.');
@@ -58,7 +82,8 @@ export function FillBlankQuestionPage({ backTo, editPathFor }: FillBlankQuestion
     setSuccessMessage(null);
     save(values, (saved) => {
       if (!isEditing) {
-        navigate(editPathFor(categoryId, saved.id), { state: { created: true } });
+        // replace: o Voltar do navegador nao reabre a criacao (evita criar a pergunta de novo).
+        navigate(editPathFor(categoryId, saved.id), { replace: true, state: { created: true } });
       } else if (saved.status === 'DRAFT') {
         setSuccessMessage('Rascunho salvo.');
       } else {

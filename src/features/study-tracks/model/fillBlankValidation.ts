@@ -50,6 +50,26 @@ export function validateNewAnswer(answers: string[], candidate: string): string 
 }
 
 /**
+ * Posicoes das respostas que repetem uma anterior (a primeira ocorrencia nao entra).
+ * So acontece com dados vindos do servidor: o formulario nao deixa adicionar repetida.
+ */
+export function findRepeatedAnswerIndexes(answers: string[]): Set<number> {
+  const seen = new Set<string>();
+  const repeated = new Set<number>();
+  answers.forEach((answer, index) => {
+    const key = toAnswerKey(answer);
+    if (!key) {
+      return;
+    }
+    if (seen.has(key)) {
+      repeated.add(index);
+    }
+    seen.add(key);
+  });
+  return repeated;
+}
+
+/**
  * Valida o formulario inteiro. `pendingAnswer` e o texto ainda nao adicionado a lista:
  * salvar com ele preenchido perderia a resposta sem aviso.
  */
@@ -75,7 +95,7 @@ export function validateFillBlankQuestion(
     errors.answers = fillBlankMessages.answerPending;
   } else if (answerKeys.length === 0) {
     errors.answers = fillBlankMessages.answersRequired;
-  } else if (new Set(answerKeys).size !== answerKeys.length) {
+  } else if (findRepeatedAnswerIndexes(values.answers).size > 0) {
     errors.answers = fillBlankMessages.answersDuplicated;
   }
 

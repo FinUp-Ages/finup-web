@@ -24,13 +24,18 @@ export function useSaveFillBlankQuestion({ categoryId, questionId }: SaveFillBla
       return questionId ? updateQuestion(questionId, payload) : createQuestion(categoryId, payload);
     },
     onSuccess: (dto) => {
-      // Atualiza a lista da categoria em cache: a edicao abre com o rascunho salvo.
+      // Atualiza a lista da categoria so se ela ja estiver em cache (veio de um GET completo).
+      // Sem cache, nao cria uma lista so com esta pergunta: quem precisar da lista busca do GET.
       queryClient.setQueryData<QuestionDTO[]>(
         questionQueryKeys.categoryQuestions(categoryId),
-        (questions) =>
-          questions?.some((question) => question.id === dto.id)
+        (questions) => {
+          if (!questions) {
+            return undefined;
+          }
+          return questions.some((question) => question.id === dto.id)
             ? questions.map((question) => (question.id === dto.id ? dto : question))
-            : [...(questions ?? []), dto],
+            : [...questions, dto];
+        },
       );
     },
   });

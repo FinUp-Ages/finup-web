@@ -50,6 +50,8 @@ describe('questionsMock', () => {
       publishedAt: null,
     });
     expect(created).not.toHaveProperty('categoryId');
+    // Id sequencial: crypto.randomUUID nao existe fora de HTTPS/localhost.
+    expect(created.id).toMatch(/^pergunta-nova-\d+$/);
     const questions = await settle(getCategoryQuestionsMock('categoria-reserva'));
     expect(questions).toContainEqual(created);
   });

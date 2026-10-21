@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { FillBlankFormValues } from '../types';
 import {
   fillBlankMessages,
+  findRepeatedAnswerIndexes,
   splitStatement,
   validateFillBlankQuestion,
   validateNewAnswer,
@@ -76,5 +77,13 @@ describe('validateNewAnswer', () => {
 describe('splitStatement', () => {
   it('separa os trechos entre as lacunas', () => {
     expect(splitStatement('A ___ e o ___')).toEqual(['A ', ' e o ', '']);
+  });
+});
+
+describe('findRepeatedAnswerIndexes', () => {
+  it('aponta so as repeticoes, sem a primeira ocorrencia e sem respostas vazias', () => {
+    expect(findRepeatedAnswerIndexes(['CDI', ' cdi ', '', '', 'Selic', 'CDI'])).toEqual(
+      new Set([1, 5]),
+    );
   });
 });

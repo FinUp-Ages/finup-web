@@ -85,10 +85,13 @@ const initialQuestions: StoredQuestion[] = [
 ];
 
 let questions: StoredQuestion[] = [];
+/** Ids sequenciais: crypto.randomUUID so existe em HTTPS ou localhost (quebraria pelo IP da rede). */
+let nextQuestionNumber = 1;
 
 /** Volta o store as fixtures (usado tambem pelos testes). */
 export function resetQuestionsMock(): void {
   questions = initialQuestions.map((question) => ({ ...question }));
+  nextQuestionNumber = 1;
 }
 
 resetQuestionsMock();
@@ -156,7 +159,7 @@ export async function createQuestionMock(
   assertValidPayload(payload);
 
   const created: StoredQuestion = {
-    id: crypto.randomUUID(),
+    id: `pergunta-nova-${nextQuestionNumber++}`,
     categoryId,
     draft: payload,
     published: null,
