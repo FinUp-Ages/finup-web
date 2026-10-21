@@ -7,9 +7,9 @@
     "Nenhuma branch nem PR do finup-web tem trilha, perguntas ou FILL_BLANK: implementacao do zero, em src/features/study-tracks/",
     "O C6 so existe no finup-backend, branch feat/modelagem-trilha-estudos (contracts/study-track-c6.md, nao mergeada); nenhuma branch do backend tem POST/PUT de perguntas nem GET de pergunta do admin",
     "2026-10-20: o solicitante pediu para seguir sem o backend, deixando a integracao preparada. Premissas P1-P5 adotadas",
-    "P1: corpo do card ({type,title,statement,answers,explanation}); divergencia com o schema FILL_BLANK do C6 do backend registrada. Rotas e mapeamento ficam so em api/fillBlankContract.ts",
-    "P2: so pergunta com status DRAFT e editavel no painel; as demais abrem somente leitura e o mock responde 409 problem+json no PUT",
-    "P3: rotas premissa /api/v1/admin/study-tracks/categories/{categoryId}/questions (POST) e /api/v1/admin/study-tracks/questions/{id} (GET e PUT); resposta plana {id,categoryId,status,type,title,statement,answers,explanation}",
+    "P1: corpo do card ({type,title,statement,answers,explanation}), confirmado pelo card de backend 86e3m95y3; o schema FILL_BLANK em contracts/study-track-c6.md do backend descreve outro formato (textWithBlanks/blanks). Rotas e mapeamento ficam so em api/fillBlankContract.ts",
+    "P2 (revista em 2026-10-20 pelo card de backend 86e3m95y3): o PUT edita so o draft em qualquer status, nunca o published; pergunta publicada e editavel e vira PUBLISHED_WITH_CHANGES. O modo somente leitura e o 409 do mock sairam",
+    "P3 (revista pelo card 86e3m95y3): POST e GET em /api/v1/admin/study-tracks/categories/{categoryId}/questions; resposta { id, status, draft, published, updatedAt, publishedAt }; sem GET de uma pergunta, a edicao procura a pergunta no GET da categoria e a rota de edicao passou a /app/studies/categories/:categoryId/questions/:questionId/edit. Premissas restantes: PUT com prefixo /api/v1/admin/study-tracks e GET da categoria devolvendo QuestionDTO[]",
     "P4: Vitest + Testing Library como devDependencies (ja previstos no README); a API e simulada com vi.mock, sem MSW; CI nao alterada",
     "P5: rotas /app/studies/categories/:categoryId/questions/new/fill-blank e /app/studies/questions/:questionId/edit; apos criar, vai para a edicao do rascunho com aviso de sucesso. Listagem e seletor de tipo fora do escopo",
     "Regras: ao menos uma marcacao ___; respostas com trim, sem vazias e sem duplicatas (comparacao sem diferenciar maiusculas, pt-BR); nao remove a ultima resposta; titulo obrigatorio; explicacao opcional",
@@ -27,21 +27,21 @@
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run lint": "passed em 2026-10-20",
+    "npm run lint": "passed em 2026-10-20 (apos alinhar ao 86e3m95y3)",
     "npm run typecheck": "passed em 2026-10-20",
     "npm run build": "passed em 2026-10-20",
-    "npm test": "32 testes passando em 2026-10-20 (validacao, contrato C6, mock e tela)",
+    "npm test": "35 testes passando em 2026-10-20 (validacao, contrato C6, mock e tela)",
     "prettier": "--check sem pendencias nos arquivos da tarefa",
-    "navegador (desktop)": "/app/studies/questions/pergunta-rascunho/edit sem sessao redireciona para /login, sem erros no console",
-    "nao validado": "formulario no navegador com sessao real (exige login no Cognito pelo solicitante) e integracao com o backend, que ainda nao tem as rotas"
+    "navegador (desktop)": "rota protegida redireciona para /login sem sessao, sem erros no console",
+    "nao validado": "formulario no navegador com sessao real (o solicitante testa com o login dele) e integracao com o backend, que ainda nao tem as rotas"
   },
-  "review": "Implementacao concluida com commits locais, sem push. Aguardando revisao do solicitante para publicar a branch e abrir o PR.",
+  "review": "Alinhada ao card de backend 86e3m95y3 com commits locais, sem push. Aguardando revisao do solicitante para publicar a branch e abrir o PR.",
   "updated_at": "2026-10-20",
   "open_questions": [
-    "Integracao com o backend: confirmar rotas, corpo e resposta quando o finup-backend publicar POST/PUT/GET de perguntas; ajustes ficam em src/features/study-tracks/api/fillBlankContract.ts",
-    "Corpo FILL_BLANK do card ({title,statement com ___,answers}) diverge do schema do C6 no backend ({textWithBlanks com {termo}, blanks, explanation})",
-    "Regra do PUT: hoje so DRAFT e editavel; se o backend permitir editar o rascunho de pergunta publicada (PUBLISHED_WITH_CHANGES), mudar isReadOnly na page e o mock",
-    "Sem tela da Trilha (categorias, lista e seletor de tipo): o formulario so e acessivel pela URL; o destino apos salvar e a propria edicao do rascunho",
-    "npm test ainda nao roda no CI; design sem Figma precisa de validacao; sem protecao contra sair com alteracoes nao salvas (nao e padrao do projeto)"
+    "Integracao com o backend: confirmar o prefixo do PUT /questions/{id} e o formato do GET da categoria quando o 86e3m95y3 for entregue; ajustes ficam em src/features/study-tracks/api/fillBlankContract.ts",
+    "O card de lista de perguntas (86e3m989y, Gabriel Moura) tambem vai consumir GET .../categories/{categoryId}/questions: alinhar para usar getCategoryQuestions e questionQueryKeys.categoryQuestions desta branch, sem duplicar",
+    "Sem tela da Trilha (categorias e lista): o formulario so e acessivel pela URL ate os cards 86e3m9860 e 86e3m989y entrarem",
+    "Os cards de lista e de categorias pedem os componentes do frame 191-2349 (Input de 50px); este formulario usa o estilo da tela de usuarios: confirmar com o design",
+    "npm test ainda nao roda no CI; sem protecao contra sair com alteracoes nao salvas (nao e padrao do projeto)"
   ]
 }
