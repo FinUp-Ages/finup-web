@@ -1,7 +1,7 @@
 {
   "stage": "REVIEWING",
   "task": "ClickUp 86e3m989t — [ Frontend ] - Widgets Receita, Custo operacional e Usuários ativos (contrato C3, summary).",
-  "objective": "Três widgets de indicador no /app/dashboard (Figma nó 191-2603): Usuários ativos com activeUsers de GET /api/v1/admin/metrics/summary (mock via VITE_USE_MOCKS), Receita bruta e Custo operacional mockados e sinalizados como MOCK; valor, variação (changePct) com cor de alta/baixa, estados carregando e erro.",
+  "objective": "Três widgets de indicador na tela de Custos, /app/costs (Figma nó 191-2603): Usuários ativos com activeUsers de GET /api/v1/admin/metrics/summary (mock via VITE_USE_MOCKS), Receita bruta e Custo operacional mockados e sinalizados como MOCK; valor, variação (changePct) com cor de alta/baixa, estados carregando e erro.",
   "decisions": [
     "A estrutura de widgets configuráveis (86e3m9861, Lucas) ainda não está na develop: os widgets ficam num registro por id do C5 (REVENUE, ACTIVE_USERS, OPERATIONAL_COST em components/registroWidgetsIndicadores.ts), renderizados na ordem do Figma, para a estrutura ligar, desligar e ordenar sem mexer nos widgets",
     "summary consultado com period=30d, que corresponde ao texto do Figma 'em relação ao mês anterior'; o Figma não tem seletor de período nos widgets",
@@ -27,13 +27,14 @@
     "npm run build": "passed em 2026-10-19",
     "prettier": "--check --end-of-line auto sem pendencias em src/",
     "navegador (desktop, 1400x900, mocks)": "rota temporária sem ProtectedRoute (revertida): 3 cards de 271x164 como no Figma; Receita R$ 9.876,45 e Usuários ativos 320 com +6% em verde; Custo R$ 23.456,45 com +6% em vermelho; 'Carregando...' no lugar do valor; erro forçado no mock do summary mostra mensagem e 'Tentar novamente' só no card de Usuários ativos",
-    "nao validado": "/app/dashboard autenticado e summary contra o backend real (exige login no Cognito). Sem testes automatizados (Vitest fica para PR próprio)",
-    "navegador (Custos)": "preview temporário com AdminLayout e sidebar: widgets e gráfico renderizam no layout administrativo; typecheck e lint passam após mover a rota"
+    "nao validado": "/app/costs autenticado e summary contra o backend real (exige login no Cognito). Sem testes automatizados (Vitest fica para PR próprio)",
+    "navegador (Custos)": "preview temporário com AdminLayout e sidebar: widgets e gráfico renderizam no layout administrativo; typecheck e lint passam após mover a rota",
+    "apos o rebase (2026-10-20)": "lint, typecheck, prettier e build passam; preview com mocks e prints dos estados normal, carregando e erro para o PR"
   },
   "open_questions": [
     "IDs REVENUE, ACTIVE_USERS e OPERATIONAL_COST precisam ser combinados com a estrutura de widgets (86e3m9861); o back (C5) aceita qualquer string",
     "Integração com a estrutura de widgets configuráveis (item do DoD) depende do merge da 86e3m9861"
   ],
-  "review": "pendente: commit, PR para develop e code review",
+  "review": "PR aberto para develop em 2026-10-20, aguardando code review",
   "updated_at": "2026-10-20"
 }
