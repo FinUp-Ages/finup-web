@@ -28,10 +28,9 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to={paths.costs} replace /> },
-      { path: paths.dashboard, element: <DashboardPage /> },
       { path: paths.team, element: <UsersPage /> },
       { path: paths.analytics, element: <AdminSectionPage title="Analytics" /> },
-      { path: paths.costs, element: <AdminSectionPage title="Custos" /> },
+      { path: paths.costs, element: <DashboardPage /> },
       { path: paths.studies, element: <AdminSectionPage title="Trilha de estudos" /> },
       {
         path: paths.studiesNewFillBlankQuestion,
