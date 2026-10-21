@@ -93,12 +93,12 @@ src/
 │   │   ├── session/           tokens, renovação, logout e mensagens de erro
 │   │   ├── pages/             LoginPage.tsx
 │   │   └── index.ts           API pública da feature
-│   ├── study-tracks/          Trilha de estudos: pergunta "Preencher lacuna" (contrato C6)
-│   │   ├── api/               POST/PUT/GET + mock; fillBlankContract.ts concentra rotas e formato do C6
+│   ├── study-tracks/          Trilha de estudos: categorias, lista de perguntas e "Preencher lacuna" (C6)
+│   │   ├── api/               POST/PUT/GET + mocks; getCategoryQuestions compartilhado pela lista e edição
 │   │   ├── model/             validação e mensagens, sem React
-│   │   ├── hooks/             useQuestion.ts, useSaveFillBlankQuestion.ts
-│   │   ├── components/        FillBlankQuestionForm.tsx, AcceptedAnswersField.tsx
-│   │   ├── pages/             FillBlankQuestionPage.tsx (criação e edição do rascunho)
+│   │   ├── hooks/             useCategoryQuestions.ts, useQuestion.ts e hooks de salvamento
+│   │   ├── components/        tabelas, ações de criação e formulários da feature
+│   │   ├── pages/             categorias, perguntas da categoria e criação/edição de lacuna
 │   │   └── index.ts           API pública da feature
 │   └── example/               feature de referência, com dados da API
 │       ├── api/               chamadas HTTP da feature (getExample.ts)
@@ -176,6 +176,36 @@ A feature `example/` é a referência completa do padrão.
 | **Formulários** (React Hook Form + Zod) | fora do escopo desta primeira versão — o painel é majoritariamente formulário, então provavelmente entra cedo |
 | **Biblioteca de componentes** | `shared/components/ui/` será construída à mão, sobre Tailwind |
 ---
+
+## Trilha de estudos
+
+Em `/app/studies`, clique no nome de uma categoria para abrir suas perguntas em
+`/app/studies/categories/:categoryId/questions`. A tabela mostra o título do rascunho, tipo e
+status retornado pela API. Perguntas objetivas usam o enunciado como título, conforme o C6.
+
+A lista e a edição reutilizam `getCategoryQuestions` e
+`questionQueryKeys.categoryQuestions(categoryId)`. Salvar ou criar uma pergunta atualiza esse
+cache, sem montar uma lista parcial. Uma falha de atualização preserva a tabela e oferece nova
+tentativa; uma falha inicial não aparece como lista vazia.
+
+O seletor de tipo abre `/questions/new/fill-blank`, `/questions/new/multiple-choice` ou
+`/questions/new/learning` sob a mesma categoria. A criação e edição de **Preencher lacuna** estão
+disponíveis e o link de retorno leva à lista da categoria. Os formulários de **Múltipla escolha**
+([86e3m98f5](https://app.clickup.com/t/86e3m98f5)) e **Conteúdo educativo**
+([86e3m98f4](https://app.clickup.com/t/86e3m98f4)) pertencem a outras tasks: as rotas de criação
+exibem um aviso temporário até sua integração. A edição já existente também avisa quando o
+tipo ainda não tem formulário. Ao integrar esses formulários, substitua os destinos temporários
+em `app/routes/index.tsx`, preservando o contexto da categoria e a chave de cache compartilhada.
+
+Com `VITE_USE_MOCKS=true`, a categoria `categoria-reserva` tem exemplos dos três tipos e dos três
+status, `categoria-orcamento` começa vazia e `categoria-inexistente` simula um 404. Os dados ficam
+em memória e voltam às fixtures ao recarregar. Com mocks desativados, a lista usa
+`GET /api/v1/admin/study-tracks/categories/{categoryId}/questions`.
+
+Para conferir o fluxo desktop: abra a categoria, escolha **Preencher lacuna**, crie uma pergunta,
+volte à lista e edite uma pergunta publicada. Ao salvar o rascunho, o selo passa a **Publicada
+com alterações**. Verifique também a categoria vazia, navegação por teclado e títulos longos.
+A validação completa dos outros dois formulários e do GET real fica para suas integrações.
 
 ## Autenticação
 

@@ -17,7 +17,11 @@ type OpenDialog =
   | { kind: 'edit'; category: CategoryDTO }
   | { kind: 'delete'; category: CategoryDTO };
 
-export function StudyCategoriesPage() {
+type StudyCategoriesPageProps = {
+  questionsPathFor: (categoryId: string) => string;
+};
+
+export function StudyCategoriesPage({ questionsPathFor }: StudyCategoriesPageProps) {
   const { categories, isLoading, errorMessage, reload } = useCategories();
   const saveCategory = useSaveCategory();
   const deleteCategory = useDeleteCategory();
@@ -127,6 +131,7 @@ export function StudyCategoriesPage() {
         ) : (
           <CategoriesTable
             categories={categories}
+            questionsPathFor={questionsPathFor}
             onEdit={(category) => openDialog({ kind: 'edit', category })}
             onRemove={(category) => openDialog({ kind: 'delete', category })}
           />

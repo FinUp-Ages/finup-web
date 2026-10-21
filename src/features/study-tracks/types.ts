@@ -43,9 +43,23 @@ export interface FillBlankQuestionPayload {
   explanation: string;
 }
 
-/** Conteudo de `draft` e `published`. Os outros tipos ainda nao tem formulario no painel. */
+/** Metadados de leitura dos tipos cujos formularios pertencem a outras tasks. */
+export interface MultipleChoiceContentDTO {
+  type: 'MULTIPLE_CHOICE';
+  statement?: string;
+  options?: { text: string; correct: boolean }[];
+  explanation?: string;
+}
+
+export interface LearningContentDTO {
+  type: 'LEARNING';
+  title?: string;
+  body?: string;
+}
+
+/** Conteudo de `draft` e `published`, incluindo os metadados usados pela listagem. */
 export type QuestionContentDTO =
-  FillBlankQuestionPayload | { type: Exclude<QuestionType, 'FILL_BLANK'> };
+  FillBlankQuestionPayload | MultipleChoiceContentDTO | LearningContentDTO;
 
 /** Resposta do POST e do PUT e item do GET da categoria. */
 export interface QuestionDTO {

@@ -1,9 +1,11 @@
+import { Link } from 'react-router-dom';
 import type { CategoryDTO } from '../types';
 
 interface CategoriesTableProps {
   categories: CategoryDTO[];
   onEdit: (category: CategoryDTO) => void;
   onRemove: (category: CategoryDTO) => void;
+  questionsPathFor: (categoryId: string) => string;
 }
 
 const actionClassName =
@@ -11,7 +13,12 @@ const actionClassName =
 
 const countFormat = new Intl.NumberFormat('pt-BR');
 
-export function CategoriesTable({ categories, onEdit, onRemove }: CategoriesTableProps) {
+export function CategoriesTable({
+  categories,
+  onEdit,
+  onRemove,
+  questionsPathFor,
+}: CategoriesTableProps) {
   return (
     <div className="overflow-hidden rounded-[4px] border border-black/5 bg-white">
       <table className="w-full table-fixed border-collapse text-left text-base tracking-[0.32px] text-navy">
@@ -46,7 +53,13 @@ export function CategoriesTable({ categories, onEdit, onRemove }: CategoriesTabl
           {categories.map((category) => (
             <tr key={category.id} className="h-[75px] border-b border-black/5 last:border-b-0">
               <th scope="row" className="truncate px-4 font-semibold" title={category.name}>
-                {category.name}
+                <Link
+                  to={questionsPathFor(category.id)}
+                  aria-label={`Ver perguntas de ${category.name}`}
+                  className="rounded-[4px] underline underline-offset-4 hover:text-navy/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+                >
+                  {category.name}
+                </Link>
               </th>
               <td className="truncate px-4" title={category.description || undefined}>
                 {category.description || (

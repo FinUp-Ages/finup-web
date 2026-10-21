@@ -1,47 +1,38 @@
 {
   "stage": "REVIEWING",
-  "task": "Trilha: pergunta 'Preencher lacuna' (FILL_BLANK), tamanho M, contrato C6",
-  "objective": "Formulario de criacao e edicao do rascunho de uma pergunta FILL_BLANK (titulo, enunciado com ___, respostas aceitas e explicacao), com POST em .../categories/{categoryId}/questions, PUT em /questions/{id}, mock via VITE_USE_MOCKS e estados de carregamento, erro e sucesso.",
+  "task": "86e3m989y — Trilha: lista de perguntas da categoria",
+  "objective": "Listar perguntas por categoria com título, tipo, status, estados de carregamento, vazio e erro, ações de criação dos três tipos e acesso à edição, seguindo o contrato C6 e VITE_USE_MOCKS.",
   "decisions": [
-    "Branch feat/trilha-pergunta-preencher-lacuna criada da develop em 83f2ea6 (#8) em 2026-10-20",
-    "Nenhuma branch nem PR do finup-web tem trilha, perguntas ou FILL_BLANK: implementacao do zero, em src/features/study-tracks/",
-    "O C6 so existe no finup-backend, branch feat/modelagem-trilha-estudos (contracts/study-track-c6.md, nao mergeada); nenhuma branch do backend tem POST/PUT de perguntas nem GET de pergunta do admin",
-    "2026-10-20: o solicitante pediu para seguir sem o backend, deixando a integracao preparada. Premissas P1-P5 adotadas",
-    "P1: corpo do card ({type,title,statement,answers,explanation}), confirmado pelo card de backend 86e3m95y3; o schema FILL_BLANK em contracts/study-track-c6.md do backend descreve outro formato (textWithBlanks/blanks). Rotas e mapeamento ficam so em api/fillBlankContract.ts",
-    "P2 (revista em 2026-10-20 pelo card de backend 86e3m95y3): o PUT edita so o draft em qualquer status, nunca o published; pergunta publicada e editavel e vira PUBLISHED_WITH_CHANGES. O modo somente leitura e o 409 do mock sairam",
-    "P3 (revista pelo card 86e3m95y3): POST e GET em /api/v1/admin/study-tracks/categories/{categoryId}/questions; resposta { id, status, draft, published, updatedAt, publishedAt }; sem GET de uma pergunta, a edicao procura a pergunta no GET da categoria e a rota de edicao passou a /app/studies/categories/:categoryId/questions/:questionId/edit. Premissas restantes: PUT com prefixo /api/v1/admin/study-tracks e GET da categoria devolvendo QuestionDTO[]",
-    "P4: Vitest + Testing Library como devDependencies (ja previstos no README); a API e simulada com vi.mock, sem MSW; CI nao alterada",
-    "P5: rotas /app/studies/categories/:categoryId/questions/new/fill-blank e /app/studies/questions/:questionId/edit; apos criar, vai para a edicao do rascunho com aviso de sucesso. Listagem e seletor de tipo fora do escopo",
-    "Regras: ao menos uma marcacao ___; respostas com trim, sem vazias e sem duplicatas (comparacao sem diferenciar maiusculas, pt-BR); nao remove a ultima resposta; titulo obrigatorio; explicacao opcional",
-    "Bug achado pelos testes e corrigido: a page e reaproveitada entre as rotas de criacao e edicao, entao o aviso de criacao vem de um efeito sobre location.state, nao do estado inicial",
-    "Code review do PR em 2026-10-20, ajustes aplicados: Voltar apos criar nao reabre a criacao (navigate com replace e uma instancia da tela por pergunta); salvar nao cria lista parcial no cache da categoria; falha de recarregamento com a pergunta na tela nao vira alerta; select estavel; ids sequenciais no mock (sem crypto.randomUUID); Input compartilhado e textarea no visual do frame 191-2349; respostas repetidas marcadas na lista com foco na primeira; npm test na CI",
-    "Merge da develop em 95b76ce (#11, CRUD de categorias) em 2026-10-20: types.ts e index.ts unem categorias e perguntas; /app/studies passa a StudyCategoriesPage (#11) e as rotas do formulario continuam abaixo dela; state.json mantem esta tarefa (#11 ja foi mergeado)"
+    "Plano aprovado em 2026-10-21; branch feat/86e3m989y-lista-perguntas-categoria criada de origin/develop em 10f92ca, com árvore limpa.",
+    "Reutilizar getCategoryQuestions, questionQueryKeys.categoryQuestions, rótulos, componentes e autenticação existentes; nenhuma dependência nova.",
+    "Fluxo administrativo desktop: categorias → perguntas da categoria → criação/edição → retorno à lista da mesma categoria.",
+    "Exibir o título do draft para FILL_BLANK e LEARNING e o statement para MULTIPLE_CHOICE, cujo contrato não possui title. O status vem da API.",
+    "Os formulários MULTIPLE_CHOICE (86e3m98f5) e LEARNING (86e3m98f4) pertencem a outras tasks e ainda não estão na develop. Preparar suas ações e rotas de integração, com aviso de indisponibilidade enquanto os formulários não chegam; não implementar os formulários nesta task nem marcar a integração como validada.",
+    "Manter a lista visível em falhas de atualização, com mensagem e nova tentativa; não compartilhar dados entre categorias.",
+    "Não modificar backend/mobile nem realizar pushes, merges, rebases ou atualizações no ClickUp. Commit local autorizado pelo solicitante para salvar a implementação antes de voltar à develop."
   ],
   "files_in_scope": [
     "src/features/study-tracks/",
-    "src/app/routes/",
-    "src/test/",
-    "vitest.config.ts",
-    "tsconfig.node.json",
-    "package.json",
-    "package-lock.json",
+    "src/app/routes/paths.ts",
+    "src/app/routes/index.tsx",
     "README.md",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run lint": "passed em 2026-10-20 (apos o code review)",
-    "npm run typecheck": "passed em 2026-10-20",
-    "npm run build": "passed em 2026-10-20",
-    "npm test": "41 testes passando em 2026-10-20 (inclui regressoes do code review)",
-    "prettier": "--check sem pendencias nos arquivos da tarefa",
-    "CI": "npm test adicionado ao .github/workflows/ci.yml",
-    "nao validado": "formulario no navegador com sessao real (o solicitante testa com o login dele) e integracao com o backend, que ainda nao tem as rotas"
+    "npm test": "passed: 62 testes em 7 arquivos, incluindo 21 novos testes de API e fluxo da lista; nenhuma falha.",
+    "npm run lint": "passed.",
+    "npm run typecheck": "passed.",
+    "npm run build": "passed.",
+    "prettier": "passed: arquivos TypeScript e JSON alterados/criados.",
+    "diff": "git diff --check passou; revisão dos arquivos alterados e novos restrita ao escopo aprovado; backend/mobile continuam limpos; nenhuma dependência nova.",
+    "servidor local": "Nova rota e módulo da página responderam HTTP 200 no Vite ativo em localhost:5173.",
+    "desktop": "Fluxo, teclado, erros e cache verificados em testes com Testing Library. Revisão visual, larguras de desktop e foco visível no navegador aguardam a sessão autenticada do solicitante.",
+    "integracao": "Fluxo de criação/edição FILL_BLANK e retorno à lista verificados com mocks. GET real e formulários MULTIPLE_CHOICE/LEARNING pendentes de suas entregas."
   },
-  "review": "PR para a develop criado pelo solicitante. Code review em 2026-10-20 com 9 pontos: 8 corrigidos nesta branch; o conflito com feat/trilha-crud-categorias (types.ts, index.ts e rota /app/studies) fica para quem mergear por ultimo. Aguardando CI e aprovacao; merge so pelo time.",
-  "updated_at": "2026-10-20",
+  "review": "Implementação da lista disponível para revisão visual do solicitante. Ações dos três tipos preparadas; integração completa dos dois formulários ausentes permanece pendente. Commit local autorizado para preservar o trabalho na branch da task; sem envio ao remoto ou alteração no ClickUp.",
   "open_questions": [
-    "Integracao com o backend: confirmar o prefixo do PUT /questions/{id} e o formato do GET da categoria quando o 86e3m95y3 for entregue; ajustes ficam em src/features/study-tracks/api/fillBlankContract.ts",
-    "O card de lista de perguntas (86e3m989y, Gabriel Moura) tambem vai consumir GET .../categories/{categoryId}/questions: alinhar para usar getCategoryQuestions e questionQueryKeys.categoryQuestions desta branch, sem duplicar",
-    "Sem lista de perguntas da categoria (86e3m989y): o formulario so abre pela URL; a tela de categorias (#11) ainda nao tem link para criar ou editar perguntas"
-  ]
+    "Validar os fluxos completos de MULTIPLE_CHOICE e LEARNING quando os respectivos formulários forem integrados.",
+    "Validar o GET real quando a API de perguntas 86e3m95y3 estiver disponível; preservar o formato de leitura já adotado pelo frontend."
+  ],
+  "updated_at": "2026-10-21"
 }

@@ -7,7 +7,7 @@
  * - pergunta-rascunho: FILL_BLANK em DRAFT;
  * - pergunta-publicada: FILL_BLANK publicada, sem alteracoes (editar vira PUBLISHED_WITH_CHANGES);
  * - pergunta-com-alteracoes: FILL_BLANK publicada com rascunho diferente;
- * - pergunta-multipla-escolha: tipo sem formulario no painel.
+ * - pergunta-multipla-escolha e conteudo-educativo: tipos com formularios em outras tasks.
  * A categoria "categoria-inexistente" responde 404.
  */
 import { ApiError } from '@/shared/config/apiError';
@@ -77,7 +77,27 @@ const initialQuestions: StoredQuestion[] = [
   {
     id: 'pergunta-multipla-escolha',
     categoryId: 'categoria-reserva',
-    draft: { type: 'MULTIPLE_CHOICE' },
+    draft: {
+      type: 'MULTIPLE_CHOICE',
+      statement: 'Onde guardar a reserva de emergência?',
+      options: [
+        { text: 'Em um investimento de alta liquidez e baixo risco', correct: true },
+        { text: 'Em um investimento sem possibilidade de resgate imediato', correct: false },
+      ],
+      explanation: 'A reserva precisa estar disponível para imprevistos.',
+    },
+    published: null,
+    updatedAt: '2026-10-20T12:00:00Z',
+    publishedAt: null,
+  },
+  {
+    id: 'conteudo-educativo',
+    categoryId: 'categoria-reserva',
+    draft: {
+      type: 'LEARNING',
+      title: 'Por que ter uma reserva de emergência?',
+      body: 'Uma **reserva de emergência** ajuda a enfrentar despesas inesperadas.',
+    },
     published: null,
     updatedAt: '2026-10-20T12:00:00Z',
     publishedAt: null,
