@@ -3,4 +3,5 @@
  * Rotas e outras features importam somente daqui (@/features/study-tracks).
  */
 export { FillBlankQuestionPage } from './pages/FillBlankQuestionPage';
-export type { QuestionStatus, QuestionType } from './types';
+export { StudyCategoriesPage } from './pages/StudyCategoriesPage';
+export type { CategoryDTO, QuestionStatus, QuestionType } from './types';

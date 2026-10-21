@@ -1,9 +1,29 @@
 /**
- * Tipos da Trilha de estudos (contrato C6, card de backend 86e3m95y3).
+ * Tipos da Trilha de estudos (contrato C6).
  *
- * Os DTOs espelham o corpo e a resposta da API; FillBlankQuestion e FillBlankFormValues sao o
- * formato que a tela usa. A conversao entre os dois fica so em api/fillBlankContract.ts.
+ * Os DTOs espelham o corpo e a resposta da API em /api/v1/admin/study-tracks (categorias e
+ * perguntas). FillBlankQuestion e FillBlankFormValues sao o formato que a tela da pergunta
+ * "Preencher lacuna" usa; a conversao fica so em api/fillBlankContract.ts.
  */
+
+/** Corpo do POST e do PUT de uma categoria. */
+export interface CategoryPayload {
+  name: string;
+  description: string;
+}
+
+/** Resposta do POST (201), do PUT e de cada item do GET de categorias. */
+export interface CategoryDTO {
+  id: string;
+  name: string;
+  description: string;
+  /** Perguntas em rascunho na categoria. */
+  draftCount: number;
+  /** Perguntas publicadas na categoria. */
+  publishedCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 /** Tipos de pergunta do C6. */
 export type QuestionType = 'FILL_BLANK' | 'MULTIPLE_CHOICE' | 'LEARNING';

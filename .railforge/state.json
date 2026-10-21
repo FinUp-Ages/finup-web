@@ -14,7 +14,8 @@
     "P5: rotas /app/studies/categories/:categoryId/questions/new/fill-blank e /app/studies/questions/:questionId/edit; apos criar, vai para a edicao do rascunho com aviso de sucesso. Listagem e seletor de tipo fora do escopo",
     "Regras: ao menos uma marcacao ___; respostas com trim, sem vazias e sem duplicatas (comparacao sem diferenciar maiusculas, pt-BR); nao remove a ultima resposta; titulo obrigatorio; explicacao opcional",
     "Bug achado pelos testes e corrigido: a page e reaproveitada entre as rotas de criacao e edicao, entao o aviso de criacao vem de um efeito sobre location.state, nao do estado inicial",
-    "Code review do PR em 2026-10-20, ajustes aplicados: Voltar apos criar nao reabre a criacao (navigate com replace e uma instancia da tela por pergunta); salvar nao cria lista parcial no cache da categoria; falha de recarregamento com a pergunta na tela nao vira alerta; select estavel; ids sequenciais no mock (sem crypto.randomUUID); Input compartilhado e textarea no visual do frame 191-2349; respostas repetidas marcadas na lista com foco na primeira; npm test na CI"
+    "Code review do PR em 2026-10-20, ajustes aplicados: Voltar apos criar nao reabre a criacao (navigate com replace e uma instancia da tela por pergunta); salvar nao cria lista parcial no cache da categoria; falha de recarregamento com a pergunta na tela nao vira alerta; select estavel; ids sequenciais no mock (sem crypto.randomUUID); Input compartilhado e textarea no visual do frame 191-2349; respostas repetidas marcadas na lista com foco na primeira; npm test na CI",
+    "Merge da develop em 95b76ce (#11, CRUD de categorias) em 2026-10-20: types.ts e index.ts unem categorias e perguntas; /app/studies passa a StudyCategoriesPage (#11) e as rotas do formulario continuam abaixo dela; state.json mantem esta tarefa (#11 ja foi mergeado)"
   ],
   "files_in_scope": [
     "src/features/study-tracks/",
@@ -41,7 +42,6 @@
   "open_questions": [
     "Integracao com o backend: confirmar o prefixo do PUT /questions/{id} e o formato do GET da categoria quando o 86e3m95y3 for entregue; ajustes ficam em src/features/study-tracks/api/fillBlankContract.ts",
     "O card de lista de perguntas (86e3m989y, Gabriel Moura) tambem vai consumir GET .../categories/{categoryId}/questions: alinhar para usar getCategoryQuestions e questionQueryKeys.categoryQuestions desta branch, sem duplicar",
-    "Sem tela da Trilha (categorias e lista): o formulario so e acessivel pela URL ate os cards 86e3m9860 e 86e3m989y entrarem",
-    "Merge com feat/trilha-crud-categorias: as duas branches criam src/features/study-tracks/types.ts e index.ts e mexem em /app/studies; quem mergear por ultimo une os dois lados e roda lint, typecheck, test e build"
+    "Sem lista de perguntas da categoria (86e3m989y): o formulario so abre pela URL; a tela de categorias (#11) ainda nao tem link para criar ou editar perguntas"
   ]
 }
