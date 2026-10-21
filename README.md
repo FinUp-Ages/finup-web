@@ -58,8 +58,9 @@ A variável definida com `$env:` permanece disponível apenas na sessão atual d
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript sem emitir arquivos |
 | `npm run format` | Prettier |
+| `npm test` | testes com Vitest + Testing Library (`*.test.ts(x)` em `src/`) |
 
-Antes de abrir um PR, rode `npm run lint && npm run typecheck && npm run build` — é exatamente o que o CI executa.
+Antes de abrir um PR, rode `npm run lint && npm run typecheck && npm run build` — é exatamente o que o CI executa. Rode também `npm test` (ainda fora do CI).
 
 ---
 
@@ -91,6 +92,13 @@ src/
 │   │   ├── hooks/             useAuth.ts
 │   │   ├── session/           tokens, renovação, logout e mensagens de erro
 │   │   ├── pages/             LoginPage.tsx
+│   │   └── index.ts           API pública da feature
+│   ├── study-tracks/          Trilha de estudos: pergunta "Preencher lacuna" (contrato C6)
+│   │   ├── api/               POST/PUT/GET + mock; fillBlankContract.ts concentra rotas e formato do C6
+│   │   ├── model/             validação e mensagens, sem React
+│   │   ├── hooks/             useQuestion.ts, useSaveFillBlankQuestion.ts
+│   │   ├── components/        FillBlankQuestionForm.tsx, AcceptedAnswersField.tsx
+│   │   ├── pages/             FillBlankQuestionPage.tsx (criação e edição do rascunho)
 │   │   └── index.ts           API pública da feature
 │   └── example/               feature de referência, com dados da API
 │       ├── api/               chamadas HTTP da feature (getExample.ts)
@@ -164,7 +172,7 @@ A feature `example/` é a referência completa do padrão.
 | Item | Situação |
 |---|---|
 | **Design tokens** (cores, tipografia, espaçamento) | `tailwind.config.js` está com `theme.extend` vazio, aguardando o Figma do AGES IV |
-| **Testes** (Vitest + Testing Library) | entram num PR próprio, que depois recebe os testes do login |
+| **Testes no CI** | Vitest + Testing Library já rodam com `npm test` (testes da Trilha); o passo no CI e os testes do login entram depois |
 | **Formulários** (React Hook Form + Zod) | fora do escopo desta primeira versão — o painel é majoritariamente formulário, então provavelmente entra cedo |
 | **Biblioteca de componentes** | `shared/components/ui/` será construída à mão, sobre Tailwind |
 ---

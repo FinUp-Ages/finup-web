@@ -1,39 +1,47 @@
 {
   "stage": "REVIEWING",
-  "task": "ClickUp 86e3m9860 - [ Frontend ] - Trilha: CRUD de categorias (contrato C6)",
-  "objective": "Tela /app/studies com a lista de categorias da Trilha de estudos (nome, descricao, draftCount e publishedCount), criacao e edicao com nome obrigatorio, remocao com confirmacao e mensagem clara no 409 (categoria com perguntas). Endpoints em /api/v1/admin/study-tracks/categories (POST, GET, PUT /{id}, DELETE /{id}) com mock via VITE_USE_MOCKS identico ao contrato. Estados de carregamento, vazio, erro e sucesso.",
+  "task": "Trilha: pergunta 'Preencher lacuna' (FILL_BLANK), tamanho M, contrato C6",
+  "objective": "Formulario de criacao e edicao do rascunho de uma pergunta FILL_BLANK (titulo, enunciado com ___, respostas aceitas e explicacao), com POST em .../categories/{categoryId}/questions, PUT em /questions/{id}, mock via VITE_USE_MOCKS e estados de carregamento, erro e sucesso.",
   "decisions": [
-    "Branch feat/trilha-crud-categorias criada de origin/develop em 83f2ea6 (#8) em 2026-10-20 e enviada ao remoto a pedido do solicitante (PR aberto por ele)",
-    "Feature nova em src/features/study-tracks/ (api, hooks, components, model, pages), sem importar da branch feat/trilha-pergunta-preencher-lacuna (nao mergeada). Conflitos esperados no merge: types.ts, index.ts e src/app/routes/index.tsx (unir os dois lados); os demais arquivos tem nomes distintos",
-    "QuestionStatus e questionStatusLabels nao foram criados aqui: a tela so usa as contagens draftCount/publishedCount do DTO",
-    "Sem Figma: Input de 50px, Button primario, tabela no estilo de UsersTable, tokens do tailwind.config.js e espacamentos 16/24. SecondaryButton (contorno) e o botao vermelho de remover sao locais da feature",
-    "Criacao e edicao em modal (<dialog> nativo: foco preso, Esc fecha, foco volta ao botao que abriu); remocao em modal de confirmacao que mostra o 409 sem fechar. Depois de remover, o foco vai para o titulo da tela",
-    "Mensagens de erro por status em model/categoryErrorMessages.ts; o detail do problem+json so aparece em 400/409/422",
-    "Lista sem paginacao: o C6 nao define paginacao no GET",
-    "Merge da develop em c2e9e49 (#10, widgets) em 2026-10-20: routes/index.tsx fica com /app/costs -> DashboardPage (#10) e /app/studies -> StudyCategoriesPage; state.json mantem esta tarefa (o #10 ja foi mergeado)"
+    "Branch feat/trilha-pergunta-preencher-lacuna criada da develop em 83f2ea6 (#8) em 2026-10-20",
+    "Nenhuma branch nem PR do finup-web tem trilha, perguntas ou FILL_BLANK: implementacao do zero, em src/features/study-tracks/",
+    "O C6 so existe no finup-backend, branch feat/modelagem-trilha-estudos (contracts/study-track-c6.md, nao mergeada); nenhuma branch do backend tem POST/PUT de perguntas nem GET de pergunta do admin",
+    "2026-10-20: o solicitante pediu para seguir sem o backend, deixando a integracao preparada. Premissas P1-P5 adotadas",
+    "P1: corpo do card ({type,title,statement,answers,explanation}), confirmado pelo card de backend 86e3m95y3; o schema FILL_BLANK em contracts/study-track-c6.md do backend descreve outro formato (textWithBlanks/blanks). Rotas e mapeamento ficam so em api/fillBlankContract.ts",
+    "P2 (revista em 2026-10-20 pelo card de backend 86e3m95y3): o PUT edita so o draft em qualquer status, nunca o published; pergunta publicada e editavel e vira PUBLISHED_WITH_CHANGES. O modo somente leitura e o 409 do mock sairam",
+    "P3 (revista pelo card 86e3m95y3): POST e GET em /api/v1/admin/study-tracks/categories/{categoryId}/questions; resposta { id, status, draft, published, updatedAt, publishedAt }; sem GET de uma pergunta, a edicao procura a pergunta no GET da categoria e a rota de edicao passou a /app/studies/categories/:categoryId/questions/:questionId/edit. Premissas restantes: PUT com prefixo /api/v1/admin/study-tracks e GET da categoria devolvendo QuestionDTO[]",
+    "P4: Vitest + Testing Library como devDependencies (ja previstos no README); a API e simulada com vi.mock, sem MSW; CI nao alterada",
+    "P5: rotas /app/studies/categories/:categoryId/questions/new/fill-blank e /app/studies/questions/:questionId/edit; apos criar, vai para a edicao do rascunho com aviso de sucesso. Listagem e seletor de tipo fora do escopo",
+    "Regras: ao menos uma marcacao ___; respostas com trim, sem vazias e sem duplicatas (comparacao sem diferenciar maiusculas, pt-BR); nao remove a ultima resposta; titulo obrigatorio; explicacao opcional",
+    "Bug achado pelos testes e corrigido: a page e reaproveitada entre as rotas de criacao e edicao, entao o aviso de criacao vem de um efeito sobre location.state, nao do estado inicial",
+    "Code review do PR em 2026-10-20, ajustes aplicados: Voltar apos criar nao reabre a criacao (navigate com replace e uma instancia da tela por pergunta); salvar nao cria lista parcial no cache da categoria; falha de recarregamento com a pergunta na tela nao vira alerta; select estavel; ids sequenciais no mock (sem crypto.randomUUID); Input compartilhado e textarea no visual do frame 191-2349; respostas repetidas marcadas na lista com foco na primeira; npm test na CI",
+    "Merge da develop em 95b76ce (#11, CRUD de categorias) em 2026-10-20: types.ts e index.ts unem categorias e perguntas; /app/studies passa a StudyCategoriesPage (#11) e as rotas do formulario continuam abaixo dela; state.json mantem esta tarefa (#11 ja foi mergeado)"
   ],
   "files_in_scope": [
     "src/features/study-tracks/",
-    "src/app/routes/index.tsx",
+    "src/app/routes/",
+    "src/test/",
+    "vitest.config.ts",
+    "tsconfig.node.json",
+    "package.json",
+    "package-lock.json",
+    "README.md",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run lint": "passed em 2026-10-20",
+    "npm run lint": "passed em 2026-10-20 (apos o code review)",
     "npm run typecheck": "passed em 2026-10-20",
     "npm run build": "passed em 2026-10-20",
-    "prettier": "--check --end-of-line auto sem pendencias em src/features/study-tracks/ e src/app/routes/index.tsx",
-    "navegador (desktop, mocks)": "Com rota temporaria fora do ProtectedRoute (removida antes do commit): lista, nome obrigatorio, criar, editar, 409 ao remover categoria com perguntas, remover categoria vazia, estados de carregamento, vazio, erro com 'Tentar novamente' e mensagem de sucesso; Esc fecha e devolve o foco; fluxo por teclado no modal de remocao",
-    "testes automatizados": "A develop nao tem Vitest; sem testes nesta tarefa (a branch feat/trilha-pergunta-preencher-lacuna introduz o Vitest)",
-    "nao validado": "/app/studies dentro do AdminLayout com sessao real do Cognito e contra o backend (rotas ainda nao existem)",
-    "apos o merge da develop (2026-10-20)": "lint, typecheck, build e prettier passam"
+    "npm test": "41 testes passando em 2026-10-20 (inclui regressoes do code review)",
+    "prettier": "--check sem pendencias nos arquivos da tarefa",
+    "CI": "npm test adicionado ao .github/workflows/ci.yml",
+    "nao validado": "formulario no navegador com sessao real (o solicitante testa com o login dele) e integracao com o backend, que ainda nao tem as rotas"
   },
-  "review": "PR aberto pelo solicitante para a develop. Code review em 2026-10-20 sem bloqueios; sugestoes: nao trocar a tabela pelo erro quando um recarregamento falha com dados em cache, tirar do cache a categoria removida no onSuccess e desativar 'Remover' depois do 409. Pendente: revisao de design e validacao com sessao real.",
+  "review": "PR para a develop criado pelo solicitante. Code review em 2026-10-20 com 9 pontos: 8 corrigidos nesta branch; o conflito com feat/trilha-crud-categorias (types.ts, index.ts e rota /app/studies) fica para quem mergear por ultimo. Aguardando CI e aprovacao; merge so pelo time.",
   "updated_at": "2026-10-20",
   "open_questions": [
-    "C6 nao define limite de tamanho de nome e descricao, nem se o nome deve ser unico",
-    "C6 nao define o corpo do PUT nem a resposta do DELETE: assumido PUT { name, description } -> 200 com a categoria, DELETE -> 204",
-    "Descricao opcional? Assumido que sim (o card so exige o nome)",
-    "Ordem da lista: exibida na ordem do GET (o mock devolve por criacao)",
-    "Cores da mensagem de sucesso sao hex soltos (mesmo verde do status 'Ativo' da tabela de usuarios), nao tokens: confirmar na revisao de design"
+    "Integracao com o backend: confirmar o prefixo do PUT /questions/{id} e o formato do GET da categoria quando o 86e3m95y3 for entregue; ajustes ficam em src/features/study-tracks/api/fillBlankContract.ts",
+    "O card de lista de perguntas (86e3m989y, Gabriel Moura) tambem vai consumir GET .../categories/{categoryId}/questions: alinhar para usar getCategoryQuestions e questionQueryKeys.categoryQuestions desta branch, sem duplicar",
+    "Sem lista de perguntas da categoria (86e3m989y): o formulario so abre pela URL; a tela de categorias (#11) ainda nao tem link para criar ou editar perguntas"
   ]
 }
