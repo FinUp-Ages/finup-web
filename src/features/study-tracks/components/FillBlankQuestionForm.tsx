@@ -17,8 +17,6 @@ type FillBlankQuestionFormProps = {
   initialValues: FillBlankFormValues;
   submitLabel: string;
   isSaving?: boolean;
-  /** Pergunta fora de rascunho: so exibe os dados, sem salvar. */
-  readOnly?: boolean;
   onSubmit: (values: FillBlankFormValues) => void;
 };
 
@@ -27,7 +25,6 @@ export function FillBlankQuestionForm({
   initialValues,
   submitLabel,
   isSaving = false,
-  readOnly = false,
   onSubmit,
 }: FillBlankQuestionFormProps) {
   const [values, setValues] = useState(initialValues);
@@ -99,7 +96,6 @@ export function FillBlankQuestionForm({
           id={titleId}
           type="text"
           value={values.title}
-          disabled={readOnly}
           aria-invalid={errors.title ? true : undefined}
           aria-describedby={errors.title ? `${titleId}-error` : undefined}
           onChange={(event) => setField('title', event.target.value)}
@@ -125,7 +121,6 @@ export function FillBlankQuestionForm({
           id={statementId}
           rows={3}
           value={values.statement}
-          disabled={readOnly}
           aria-invalid={errors.statement ? true : undefined}
           aria-describedby={
             errors.statement ? `${statementHintId} ${statementId}-error` : statementHintId
@@ -159,7 +154,6 @@ export function FillBlankQuestionForm({
         answers={values.answers}
         pendingAnswer={pendingAnswer}
         error={errors.answers}
-        disabled={readOnly}
         inputRef={fieldRefs.answers}
         onPendingAnswerChange={(value) => {
           setPendingAnswer(value);
@@ -177,19 +171,16 @@ export function FillBlankQuestionForm({
           id={explanationId}
           rows={3}
           value={values.explanation}
-          disabled={readOnly}
           onChange={(event) => setField('explanation', event.target.value)}
           className={`resize-y py-3 ${fieldClassName}`}
         />
       </div>
 
-      {!readOnly && (
-        <div className="w-[240px]">
-          <Button type="submit" disabled={isSaving} aria-busy={isSaving}>
-            {isSaving ? 'Salvando...' : submitLabel}
-          </Button>
-        </div>
-      )}
+      <div className="w-[240px]">
+        <Button type="submit" disabled={isSaving} aria-busy={isSaving}>
+          {isSaving ? 'Salvando...' : submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

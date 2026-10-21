@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError } from '@/shared/config/apiError';
 import type { FillBlankQuestionPayload } from '../types';
 import {
   createQuestionMock,
-  getQuestionMock,
+  getCategoryQuestionsMock,
   MISSING_CATEGORY_ID,
   resetQuestionsMock,
   updateQuestionMock,
@@ -41,36 +40,69 @@ afterEach(() => {
 });
 
 describe('questionsMock', () => {
-  it('cria a pergunta como rascunho e permite carrega-la', async () => {
+  it('cria a pergunta como rascunho, no formato de resposta do C6, e lista na categoria', async () => {
     const created = await settle(createQuestionMock('categoria-reserva', payload));
 
-    expect(created).toMatchObject({ ...payload, categoryId: 'categoria-reserva', status: 'DRAFT' });
-    await expect(settle(getQuestionMock(created.id))).resolves.toEqual(created);
+    expect(created).toMatchObject({
+      status: 'DRAFT',
+      draft: payload,
+      published: null,
+      publishedAt: null,
+    });
+    expect(created).not.toHaveProperty('categoryId');
+    const questions = await settle(getCategoryQuestionsMock('categoria-reserva'));
+    expect(questions).toContainEqual(created);
   });
 
-  it('atualiza o rascunho de pergunta em DRAFT', async () => {
-    const updated = await settle(updateQuestionMock('pergunta-rascunho', payload));
-
-    expect(updated).toMatchObject({ ...payload, id: 'pergunta-rascunho', status: 'DRAFT' });
-  });
-
-  it('recusa com 409 em problem+json a edicao de pergunta fora de DRAFT', async () => {
-    const error = await settle(updateQuestionMock('pergunta-publicada', payload)).catch(
-      (reason: unknown) => reason,
+  it('lista com o status derivado de draft e published', async () => {
+    const questions = await settle(getCategoryQuestionsMock('categoria-reserva'));
+    const statusById = Object.fromEntries(
+      questions.map((question) => [question.id, question.status]),
     );
 
-    expect(error).toBeInstanceOf(ApiError);
-    expect(error).toMatchObject({
-      status: 409,
-      problem: { status: 409, detail: 'Somente perguntas em rascunho podem ser editadas.' },
+    expect(statusById).toMatchObject({
+      'pergunta-rascunho': 'DRAFT',
+      'pergunta-publicada': 'PUBLISHED',
+      'pergunta-com-alteracoes': 'PUBLISHED_WITH_CHANGES',
     });
   });
 
-  it('responde 404 para categoria ou pergunta inexistente', async () => {
+  it('PUT em pergunta publicada altera so o draft e deixa PUBLISHED_WITH_CHANGES', async () => {
+    const [before] = (await settle(getCategoryQuestionsMock('categoria-reserva'))).filter(
+      (question) => question.id === 'pergunta-publicada',
+    );
+
+    const updated = await settle(updateQuestionMock('pergunta-publicada', payload));
+
+    expect(updated.status).toBe('PUBLISHED_WITH_CHANGES');
+    expect(updated.draft).toEqual(payload);
+    expect(updated.published).toEqual(before.published);
+    expect(updated.publishedAt).toBe(before.publishedAt);
+  });
+
+  it('PUT que volta o draft ao conteudo publicado deixa PUBLISHED', async () => {
+    const [question] = (await settle(getCategoryQuestionsMock('categoria-reserva'))).filter(
+      (item) => item.id === 'pergunta-com-alteracoes',
+    );
+
+    const updated = await settle(
+      updateQuestionMock('pergunta-com-alteracoes', question.published as FillBlankQuestionPayload),
+    );
+
+    expect(updated.status).toBe('PUBLISHED');
+  });
+
+  it('responde 404 em problem+json para categoria ou pergunta inexistente', async () => {
     await expect(settle(createQuestionMock(MISSING_CATEGORY_ID, payload))).rejects.toMatchObject({
       status: 404,
+      problem: { status: 404, detail: 'Categoria não encontrada.' },
     });
-    await expect(settle(getQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
+    await expect(settle(getCategoryQuestionsMock(MISSING_CATEGORY_ID))).rejects.toMatchObject({
+      status: 404,
+    });
+    await expect(settle(updateQuestionMock('nao-existe', payload))).rejects.toMatchObject({
+      status: 404,
+    });
   });
 
   it('responde 400 para corpo invalido', async () => {

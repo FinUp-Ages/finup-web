@@ -1,8 +1,9 @@
 /**
  * Criacao e edicao do rascunho de uma pergunta "Preencher lacuna".
  *
- * Com :categoryId na rota, cria (POST) e segue para a edicao do rascunho criado. Com :questionId,
- * carrega a pergunta e salva com PUT; fora de DRAFT a pergunta abre somente leitura.
+ * Sem :questionId na rota, cria (POST) na categoria e segue para a edicao do rascunho criado.
+ * Com :questionId, carrega a pergunta pela lista da categoria e salva com PUT. O PUT so altera o
+ * rascunho, em qualquer status: numa pergunta publicada, a versao no ar so muda ao publicar.
  * Os caminhos vem por props: features nao importam app/.
  */
 import { useEffect, useState } from 'react';
@@ -17,7 +18,7 @@ type FillBlankQuestionPageProps = {
   /** Tela da Trilha de estudos, destino do link de voltar. */
   backTo: string;
   /** Caminho de edicao de uma pergunta, usado depois de criar. */
-  editPathFor: (questionId: string) => string;
+  editPathFor: (categoryId: string, questionId: string) => string;
 };
 
 type LocationState = { created?: boolean } | null;
@@ -30,12 +31,17 @@ export function FillBlankQuestionPage({ backTo, editPathFor }: FillBlankQuestion
   const navigate = useNavigate();
   const isEditing = Boolean(questionId);
 
-  const { question, isLoading, errorMessage: loadErrorMessage, reload } = useQuestion(questionId);
+  const {
+    question,
+    isLoading,
+    errorMessage: loadErrorMessage,
+    reload,
+  } = useQuestion(categoryId, questionId);
   const {
     save,
     isSaving,
     errorMessage: saveErrorMessage,
-  } = useSaveFillBlankQuestion(questionId ? { questionId } : { categoryId });
+  } = useSaveFillBlankQuestion({ categoryId, questionId });
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // O aviso de criacao vem no state da navegacao. Fica num efeito (e nao no estado inicial)
@@ -51,17 +57,21 @@ export function FillBlankQuestionPage({ backTo, editPathFor }: FillBlankQuestion
   function handleSubmit(values: FillBlankFormValues) {
     setSuccessMessage(null);
     save(values, (saved) => {
-      if (isEditing) {
+      if (!isEditing) {
+        navigate(editPathFor(categoryId, saved.id), { state: { created: true } });
+      } else if (saved.status === 'DRAFT') {
         setSuccessMessage('Rascunho salvo.');
       } else {
-        navigate(editPathFor(saved.id), { state: { created: true } });
+        setSuccessMessage(
+          'Rascunho salvo. A versão publicada só muda quando for publicada de novo.',
+        );
       }
     });
   }
 
   const typeLabel = questionTypeLabels.FILL_BLANK;
   const isOtherType = question !== null && question.type !== 'FILL_BLANK';
-  const isReadOnly = question !== null && question.status !== 'DRAFT';
+  const isPublished = question !== null && question.status !== 'DRAFT';
   const canShowForm = !isEditing || (question !== null && !isOtherType);
 
   return (
@@ -119,12 +129,10 @@ export function FillBlankQuestionPage({ backTo, editPathFor }: FillBlankQuestion
           </p>
         )}
 
-        {isReadOnly && !isOtherType && (
-          <p
-            role="status"
-            className="rounded-[4px] border border-navy/20 bg-white px-4 py-3 text-sm"
-          >
-            Esta pergunta já foi publicada. Somente perguntas em rascunho podem ser editadas.
+        {isPublished && !isOtherType && (
+          <p className="rounded-[4px] border border-navy/20 bg-white px-4 py-3 text-sm">
+            Esta pergunta está publicada. As alterações ficam no rascunho e só chegam ao app quando
+            forem publicadas.
           </p>
         )}
 
@@ -151,7 +159,6 @@ export function FillBlankQuestionPage({ backTo, editPathFor }: FillBlankQuestion
             initialValues={question?.values ?? emptyValues}
             submitLabel={isEditing ? 'Salvar rascunho' : 'Criar rascunho'}
             isSaving={isSaving}
-            readOnly={isReadOnly}
             onSubmit={handleSubmit}
           />
         )}

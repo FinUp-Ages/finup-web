@@ -5,25 +5,34 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/shared/config/apiError';
 import { createQuestion } from '../api/createQuestion';
-import { getQuestion } from '../api/getQuestion';
+import { getCategoryQuestions } from '../api/getCategoryQuestions';
 import { updateQuestion } from '../api/updateQuestion';
-import type { QuestionDTO } from '../types';
+import type { FillBlankQuestionPayload, QuestionDTO, QuestionStatus } from '../types';
 import { FillBlankQuestionPage } from './FillBlankQuestionPage';
 
 vi.mock('../api/createQuestion', () => ({ createQuestion: vi.fn() }));
 vi.mock('../api/updateQuestion', () => ({ updateQuestion: vi.fn() }));
-vi.mock('../api/getQuestion', () => ({ getQuestion: vi.fn() }));
+vi.mock('../api/getCategoryQuestions', () => ({ getCategoryQuestions: vi.fn() }));
 
-const draftQuestion: QuestionDTO = {
-  id: 'q-1',
-  categoryId: 'cat-1',
+const draftContent: FillBlankQuestionPayload = {
   type: 'FILL_BLANK',
-  status: 'DRAFT',
   title: 'Rendimento do CDB',
   statement: 'O CDB rende ___ do CDI',
   answers: ['100%'],
   explanation: 'Explicação',
 };
+
+function questionDTO(status: QuestionStatus = 'DRAFT', draft = draftContent): QuestionDTO {
+  const isPublished = status !== 'DRAFT';
+  return {
+    id: 'q-1',
+    status,
+    draft,
+    published: isPublished ? draftContent : null,
+    updatedAt: '2026-10-20T12:00:00Z',
+    publishedAt: isPublished ? '2026-10-18T12:00:00Z' : null,
+  };
+}
 
 /** Mostra o caminho atual, para conferir a navegacao depois de criar. */
 function LocationProbe() {
@@ -37,7 +46,9 @@ function renderAt(url: string) {
   const page = (
     <FillBlankQuestionPage
       backTo="/studies"
-      editPathFor={(questionId) => `/studies/questions/${questionId}/edit`}
+      editPathFor={(categoryId, questionId) =>
+        `/studies/categories/${categoryId}/questions/${questionId}/edit`
+      }
     />
   );
   render(
@@ -46,7 +57,7 @@ function renderAt(url: string) {
         <Routes>
           <Route path="/studies" element={<p>Tela da trilha</p>} />
           <Route path="/studies/categories/:categoryId/questions/new/fill-blank" element={page} />
-          <Route path="/studies/questions/:questionId/edit" element={page} />
+          <Route path="/studies/categories/:categoryId/questions/:questionId/edit" element={page} />
         </Routes>
         <LocationProbe />
       </MemoryRouter>
@@ -56,6 +67,7 @@ function renderAt(url: string) {
 }
 
 const createUrl = '/studies/categories/cat-1/questions/new/fill-blank';
+const editUrl = '/studies/categories/cat-1/questions/q-1/edit';
 
 async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText('Título'), 'Rendimento do CDB');
@@ -67,11 +79,11 @@ async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
 beforeEach(() => {
   vi.mocked(createQuestion).mockReset();
   vi.mocked(updateQuestion).mockReset();
-  vi.mocked(getQuestion).mockReset();
+  vi.mocked(getCategoryQuestions).mockReset();
 });
 
 describe('FillBlankQuestionPage - criacao', () => {
-  it('exibe os campos com rotulos e nao carrega pergunta', () => {
+  it('exibe os campos com rotulos e nao carrega perguntas', () => {
     renderAt(createUrl);
 
     expect(screen.getByRole('heading', { name: 'Nova pergunta: Preencher lacuna' })).toBeVisible();
@@ -79,7 +91,7 @@ describe('FillBlankQuestionPage - criacao', () => {
     expect(screen.getByLabelText('Enunciado')).toBeVisible();
     expect(screen.getByLabelText('Respostas aceitas')).toBeVisible();
     expect(screen.getByLabelText(/Explicação/)).toBeVisible();
-    expect(getQuestion).not.toHaveBeenCalled();
+    expect(getCategoryQuestions).not.toHaveBeenCalled();
   });
 
   it('valida no envio, liga os erros aos campos e foca o primeiro invalido', async () => {
@@ -148,27 +160,20 @@ describe('FillBlankQuestionPage - criacao', () => {
         resolveCreate = resolve;
       }),
     );
-    vi.mocked(getQuestion).mockResolvedValue(draftQuestion);
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO()]);
     const { user } = renderAt(createUrl);
 
     await fillValidForm(user);
     await user.click(screen.getByRole('button', { name: 'Criar rascunho' }));
 
     expect(createQuestion).toHaveBeenCalledTimes(1);
-    expect(createQuestion).toHaveBeenCalledWith('cat-1', {
-      type: 'FILL_BLANK',
-      title: 'Rendimento do CDB',
-      statement: 'O CDB rende ___ do CDI',
-      answers: ['100%'],
-      explanation: 'Explicação',
-    });
-    const savingButton = screen.getByRole('button', { name: 'Salvando...' });
-    expect(savingButton).toBeDisabled();
+    expect(createQuestion).toHaveBeenCalledWith('cat-1', draftContent);
+    expect(screen.getByRole('button', { name: 'Salvando...' })).toBeDisabled();
 
-    resolveCreate(draftQuestion);
+    resolveCreate(questionDTO());
 
     expect(await screen.findByText('Pergunta criada como rascunho.')).toBeVisible();
-    expect(screen.getByTestId('location')).toHaveTextContent('/studies/questions/q-1/edit');
+    expect(screen.getByTestId('location')).toHaveTextContent(editUrl);
     expect(
       screen.getByRole('heading', { name: 'Editar pergunta: Preencher lacuna' }),
     ).toBeVisible();
@@ -205,70 +210,88 @@ describe('FillBlankQuestionPage - criacao', () => {
 });
 
 describe('FillBlankQuestionPage - edicao', () => {
-  it('carrega o rascunho e envia o PUT com o corpo FILL_BLANK', async () => {
-    vi.mocked(getQuestion).mockResolvedValue(draftQuestion);
-    vi.mocked(updateQuestion).mockResolvedValue({ ...draftQuestion, title: 'Novo título' });
-    const { user } = renderAt('/studies/questions/q-1/edit');
+  it('carrega o rascunho pela lista da categoria e envia o PUT com o corpo FILL_BLANK', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO()]);
+    vi.mocked(updateQuestion).mockResolvedValue(
+      questionDTO('DRAFT', { ...draftContent, title: 'Novo título' }),
+    );
+    const { user } = renderAt(editUrl);
 
     expect(screen.getByRole('status')).toHaveTextContent('Carregando pergunta...');
     const title = await screen.findByLabelText('Título');
     expect(title).toHaveValue('Rendimento do CDB');
     expect(screen.getByText('Rascunho')).toBeVisible();
-    expect(getQuestion).toHaveBeenCalledWith('q-1');
+    expect(getCategoryQuestions).toHaveBeenCalledWith('cat-1');
 
     await user.clear(title);
     await user.type(title, 'Novo título');
     await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
 
-    expect(updateQuestion).toHaveBeenCalledWith('q-1', {
-      type: 'FILL_BLANK',
-      title: 'Novo título',
-      statement: 'O CDB rende ___ do CDI',
-      answers: ['100%'],
-      explanation: 'Explicação',
-    });
+    expect(updateQuestion).toHaveBeenCalledWith('q-1', { ...draftContent, title: 'Novo título' });
     expect(await screen.findByText('Rascunho salvo.')).toBeVisible();
     expect(createQuestion).not.toHaveBeenCalled();
   });
 
-  it('abre pergunta publicada somente leitura, sem botao de salvar', async () => {
-    vi.mocked(getQuestion).mockResolvedValue({ ...draftQuestion, status: 'PUBLISHED' });
-    renderAt('/studies/questions/q-1/edit');
+  it('edita o rascunho de pergunta publicada, avisando que a versao no ar nao muda', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO('PUBLISHED')]);
+    vi.mocked(updateQuestion).mockResolvedValue(
+      questionDTO('PUBLISHED_WITH_CHANGES', { ...draftContent, explanation: 'Nova explicação' }),
+    );
+    const { user } = renderAt(editUrl);
 
+    expect(await screen.findByText(/Esta pergunta está publicada\./)).toBeVisible();
+    expect(screen.getByText('Publicada')).toBeVisible();
+    const explanation = screen.getByLabelText(/Explicação/);
+    expect(explanation).toBeEnabled();
+
+    await user.clear(explanation);
+    await user.type(explanation, 'Nova explicação');
+    await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+
+    expect(updateQuestion).toHaveBeenCalledWith('q-1', {
+      ...draftContent,
+      explanation: 'Nova explicação',
+    });
     expect(
-      await screen.findByText(/Somente perguntas em rascunho podem ser editadas\./),
+      await screen.findByText(
+        'Rascunho salvo. A versão publicada só muda quando for publicada de novo.',
+      ),
     ).toBeVisible();
-    expect(screen.getByLabelText('Título')).toBeDisabled();
-    expect(screen.getByLabelText('Enunciado')).toBeDisabled();
-    expect(screen.queryByRole('button', { name: 'Salvar rascunho' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Remover resposta/ })).not.toBeInTheDocument();
+    expect(screen.getByText('Publicada com alterações')).toBeVisible();
   });
 
-  it('trata a recusa 409 do PUT quando a pergunta deixou de ser rascunho', async () => {
-    vi.mocked(getQuestion).mockResolvedValue(draftQuestion);
+  it('mostra o detail do problem+json quando o PUT falha', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO()]);
     vi.mocked(updateQuestion).mockRejectedValue(
-      new ApiError(409, {
-        status: 409,
-        detail: 'Somente perguntas em rascunho podem ser editadas.',
-      }),
+      new ApiError(400, { status: 400, detail: 'Adicione pelo menos uma resposta aceita.' }),
     );
-    const { user } = renderAt('/studies/questions/q-1/edit');
+    const { user } = renderAt(editUrl);
 
     await screen.findByDisplayValue('Rendimento do CDB');
     await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Somente perguntas em rascunho podem ser editadas.',
+      'Adicione pelo menos uma resposta aceita.',
     );
   });
 
-  it('mostra erro de carregamento com opcao de tentar novamente', async () => {
-    vi.mocked(getQuestion)
-      .mockRejectedValueOnce(new ApiError(404, { status: 404 }))
-      .mockResolvedValueOnce(draftQuestion);
-    const { user } = renderAt('/studies/questions/q-1/edit');
+  it('avisa quando a pergunta nao esta na lista da categoria', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([]);
+    renderAt(editUrl);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Pergunta não encontrada.');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Pergunta não encontrada nesta categoria.',
+    );
+    expect(screen.queryByLabelText('Título')).not.toBeInTheDocument();
+  });
+
+  it('mostra erro de carregamento com opcao de tentar novamente', async () => {
+    vi.mocked(getCategoryQuestions)
+      .mockRejectedValueOnce(new ApiError(404, { status: 404 }))
+      .mockResolvedValueOnce([questionDTO()]);
+    const { user } = renderAt(editUrl);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Categoria não encontrada.');
     expect(screen.queryByLabelText('Título')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Tentar novamente' }));
@@ -277,13 +300,10 @@ describe('FillBlankQuestionPage - edicao', () => {
   });
 
   it('nao abre o formulario para pergunta de outro tipo', async () => {
-    vi.mocked(getQuestion).mockResolvedValue({
-      id: 'q-2',
-      categoryId: 'cat-1',
-      type: 'MULTIPLE_CHOICE',
-      status: 'DRAFT',
-    });
-    renderAt('/studies/questions/q-2/edit');
+    vi.mocked(getCategoryQuestions).mockResolvedValue([
+      { ...questionDTO(), draft: { type: 'MULTIPLE_CHOICE' } },
+    ]);
+    renderAt(editUrl);
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Múltipla escolha');
     expect(screen.queryByLabelText('Título')).not.toBeInTheDocument();

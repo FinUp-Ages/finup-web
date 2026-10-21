@@ -7,24 +7,31 @@ import { createQuestion } from '../api/createQuestion';
 import { toFillBlankPayload, toFillBlankQuestion } from '../api/fillBlankContract';
 import { updateQuestion } from '../api/updateQuestion';
 import { toSaveQuestionErrorMessage } from '../model/questionErrorMessages';
-import type { FillBlankFormValues, FillBlankQuestion } from '../types';
+import type { FillBlankFormValues, FillBlankQuestion, QuestionDTO } from '../types';
 import { questionQueryKeys } from './questionQueryKeys';
 
-/** Criacao dentro de uma categoria ou edicao de uma pergunta existente. */
-export type SaveTarget = { categoryId: string } | { questionId: string };
+type SaveFillBlankQuestionOptions = {
+  categoryId: string;
+  /** Sem id, cria a pergunta na categoria. */
+  questionId?: string;
+};
 
-export function useSaveFillBlankQuestion(target: SaveTarget) {
+export function useSaveFillBlankQuestion({ categoryId, questionId }: SaveFillBlankQuestionOptions) {
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: (values: FillBlankFormValues) => {
       const payload = toFillBlankPayload(values);
-      return 'questionId' in target
-        ? updateQuestion(target.questionId, payload)
-        : createQuestion(target.categoryId, payload);
+      return questionId ? updateQuestion(questionId, payload) : createQuestion(categoryId, payload);
     },
     onSuccess: (dto) => {
-      // A tela de edicao abre com o rascunho salvo, sem nova requisicao.
-      queryClient.setQueryData(questionQueryKeys.detail(dto.id), dto);
+      // Atualiza a lista da categoria em cache: a edicao abre com o rascunho salvo.
+      queryClient.setQueryData<QuestionDTO[]>(
+        questionQueryKeys.categoryQuestions(categoryId),
+        (questions) =>
+          questions?.some((question) => question.id === dto.id)
+            ? questions.map((question) => (question.id === dto.id ? dto : question))
+            : [...(questions ?? []), dto],
+      );
     },
   });
 

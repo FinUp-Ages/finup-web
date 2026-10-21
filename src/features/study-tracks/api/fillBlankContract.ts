@@ -1,14 +1,18 @@
 /**
- * Ponto unico da feature que conhece o formato do contrato C6 para "Preencher lacuna".
+ * Ponto unico da feature que conhece o formato do contrato C6 para "Preencher lacuna", conforme o
+ * card de backend 86e3m95y3 ("API de perguntas da Trilha: escrita").
  *
- * Quando o finup-backend publicar as rotas de escrita, os ajustes de caminho, corpo e resposta
- * ficam neste arquivo; createQuestion, updateQuestion, getQuestion e a tela nao mudam.
+ * Quando o finup-backend publicar as rotas, ajustes de caminho, corpo e resposta ficam neste
+ * arquivo; createQuestion, updateQuestion, getCategoryQuestions e a tela nao mudam.
  *
- * PREMISSAS (C6 sem rotas de escrita nem GET do admin em nenhuma branch do backend em 2026-10-20):
- * - prefixo /api/v1/admin/study-tracks, como as demais rotas do painel em /api/v1/admin;
- * - corpo do card ({ type, title, statement, answers, explanation }), que diverge do schema
- *   FILL_BLANK de contracts/study-track-c6.md ({ textWithBlanks, blanks, explanation });
- * - resposta plana (QuestionDTO), com o rascunho no mesmo nivel de id, categoryId e status.
+ * - POST e GET em /api/v1/admin/study-tracks/categories/{categoryId}/questions.
+ * - PUT /questions/{id} edita so o `draft`, em qualquer status, nunca o `published`.
+ * - Resposta: { id, status, draft, published, updatedAt, publishedAt }.
+ * - Nao ha GET de uma pergunta: a edicao procura a pergunta no GET da categoria.
+ *
+ * PREMISSAS: o card escreve o PUT como "/questions/{id}" sem prefixo; assume o mesmo prefixo
+ * /api/v1/admin/study-tracks. Assume tambem que o GET da categoria devolve uma lista de
+ * QuestionDTO, no formato da resposta do POST.
  */
 import type {
   FillBlankFormValues,
@@ -20,10 +24,10 @@ import type {
 const STUDY_TRACKS_ADMIN_PATH = '/api/v1/admin/study-tracks';
 
 export const questionRoutes = {
-  /** POST: cria a pergunta, que nasce como rascunho. */
+  /** POST cria a pergunta (nasce como rascunho) e GET lista as perguntas da categoria. */
   categoryQuestions: (categoryId: string) =>
     `${STUDY_TRACKS_ADMIN_PATH}/categories/${encodeURIComponent(categoryId)}/questions`,
-  /** GET carrega e PUT atualiza o rascunho. */
+  /** PUT atualiza o rascunho. */
   question: (questionId: string) =>
     `${STUDY_TRACKS_ADMIN_PATH}/questions/${encodeURIComponent(questionId)}`,
 };
@@ -39,18 +43,18 @@ export function toFillBlankPayload(values: FillBlankFormValues): FillBlankQuesti
   };
 }
 
-/** Resposta da API -> pergunta no formato da tela. */
+/** Resposta da API -> pergunta no formato da tela, com os valores do rascunho. */
 export function toFillBlankQuestion(dto: QuestionDTO): FillBlankQuestion {
+  const draft = dto.draft.type === 'FILL_BLANK' ? dto.draft : null;
   return {
     id: dto.id,
-    categoryId: dto.categoryId,
-    type: dto.type,
+    type: dto.draft.type,
     status: dto.status,
     values: {
-      title: dto.title ?? '',
-      statement: dto.statement ?? '',
-      answers: dto.answers ?? [],
-      explanation: dto.explanation ?? '',
+      title: draft?.title ?? '',
+      statement: draft?.statement ?? '',
+      answers: draft?.answers ?? [],
+      explanation: draft?.explanation ?? '',
     },
   };
 }

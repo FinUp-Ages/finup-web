@@ -1,6 +1,7 @@
 /**
  * PUT do rascunho de uma pergunta da trilha (contrato C6).
- * O backend recusa pergunta fora de DRAFT (no mock, 409 em problem+json).
+ * Altera so o `draft`, em qualquer status; numa pergunta publicada o status vira
+ * PUBLISHED_WITH_CHANGES.
  * Sem hooks do React, sem estado e sem JSX.
  */
 import { env } from '@/shared/config/env';
