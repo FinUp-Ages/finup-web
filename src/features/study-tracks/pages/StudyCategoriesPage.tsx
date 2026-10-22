@@ -17,7 +17,11 @@ type OpenDialog =
   | { kind: 'edit'; category: CategoryDTO }
   | { kind: 'delete'; category: CategoryDTO };
 
-export function StudyCategoriesPage() {
+type StudyCategoriesPageProps = {
+  questionsPathFor: (categoryId: string) => string;
+};
+
+export function StudyCategoriesPage({ questionsPathFor }: StudyCategoriesPageProps) {
   const { categories, isLoading, errorMessage, reload } = useCategories();
   const saveCategory = useSaveCategory();
   const deleteCategory = useDeleteCategory();
@@ -125,11 +129,17 @@ export function StudyCategoriesPage() {
             <p>Crie a primeira categoria para começar a montar a trilha.</p>
           </div>
         ) : (
-          <CategoriesTable
-            categories={categories}
-            onEdit={(category) => openDialog({ kind: 'edit', category })}
-            onRemove={(category) => openDialog({ kind: 'delete', category })}
-          />
+          <>
+            <CategoriesTable
+              categories={categories}
+              questionsPathFor={questionsPathFor}
+              onEdit={(category) => openDialog({ kind: 'edit', category })}
+              onRemove={(category) => openDialog({ kind: 'delete', category })}
+            />
+            <p className="text-sm text-navy/60">
+              Perguntas publicadas com alterações entram nas contagens de rascunhos e publicadas.
+            </p>
+          </>
         )}
       </section>
 

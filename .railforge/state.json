@@ -1,47 +1,56 @@
 {
   "stage": "REVIEWING",
-  "task": "Trilha: pergunta 'Preencher lacuna' (FILL_BLANK), tamanho M, contrato C6",
-  "objective": "Formulario de criacao e edicao do rascunho de uma pergunta FILL_BLANK (titulo, enunciado com ___, respostas aceitas e explicacao), com POST em .../categories/{categoryId}/questions, PUT em /questions/{id}, mock via VITE_USE_MOCKS e estados de carregamento, erro e sucesso.",
+  "task": "86e3m989y — Trilha: lista de perguntas da categoria",
+  "objective": "Listar perguntas por categoria com título, tipo, status, estados de carregamento, vazio e erro, ações de criação dos três tipos e acesso à edição, seguindo o contrato C6 e VITE_USE_MOCKS.",
   "decisions": [
-    "Branch feat/trilha-pergunta-preencher-lacuna criada da develop em 83f2ea6 (#8) em 2026-10-20",
-    "Nenhuma branch nem PR do finup-web tem trilha, perguntas ou FILL_BLANK: implementacao do zero, em src/features/study-tracks/",
-    "O C6 so existe no finup-backend, branch feat/modelagem-trilha-estudos (contracts/study-track-c6.md, nao mergeada); nenhuma branch do backend tem POST/PUT de perguntas nem GET de pergunta do admin",
-    "2026-10-20: o solicitante pediu para seguir sem o backend, deixando a integracao preparada. Premissas P1-P5 adotadas",
-    "P1: corpo do card ({type,title,statement,answers,explanation}), confirmado pelo card de backend 86e3m95y3; o schema FILL_BLANK em contracts/study-track-c6.md do backend descreve outro formato (textWithBlanks/blanks). Rotas e mapeamento ficam so em api/fillBlankContract.ts",
-    "P2 (revista em 2026-10-20 pelo card de backend 86e3m95y3): o PUT edita so o draft em qualquer status, nunca o published; pergunta publicada e editavel e vira PUBLISHED_WITH_CHANGES. O modo somente leitura e o 409 do mock sairam",
-    "P3 (revista pelo card 86e3m95y3): POST e GET em /api/v1/admin/study-tracks/categories/{categoryId}/questions; resposta { id, status, draft, published, updatedAt, publishedAt }; sem GET de uma pergunta, a edicao procura a pergunta no GET da categoria e a rota de edicao passou a /app/studies/categories/:categoryId/questions/:questionId/edit. Premissas restantes: PUT com prefixo /api/v1/admin/study-tracks e GET da categoria devolvendo QuestionDTO[]",
-    "P4: Vitest + Testing Library como devDependencies (ja previstos no README); a API e simulada com vi.mock, sem MSW; CI nao alterada",
-    "P5: rotas /app/studies/categories/:categoryId/questions/new/fill-blank e /app/studies/questions/:questionId/edit; apos criar, vai para a edicao do rascunho com aviso de sucesso. Listagem e seletor de tipo fora do escopo",
-    "Regras: ao menos uma marcacao ___; respostas com trim, sem vazias e sem duplicatas (comparacao sem diferenciar maiusculas, pt-BR); nao remove a ultima resposta; titulo obrigatorio; explicacao opcional",
-    "Bug achado pelos testes e corrigido: a page e reaproveitada entre as rotas de criacao e edicao, entao o aviso de criacao vem de um efeito sobre location.state, nao do estado inicial",
-    "Code review do PR em 2026-10-20, ajustes aplicados: Voltar apos criar nao reabre a criacao (navigate com replace e uma instancia da tela por pergunta); salvar nao cria lista parcial no cache da categoria; falha de recarregamento com a pergunta na tela nao vira alerta; select estavel; ids sequenciais no mock (sem crypto.randomUUID); Input compartilhado e textarea no visual do frame 191-2349; respostas repetidas marcadas na lista com foco na primeira; npm test na CI",
-    "Merge da develop em 95b76ce (#11, CRUD de categorias) em 2026-10-20: types.ts e index.ts unem categorias e perguntas; /app/studies passa a StudyCategoriesPage (#11) e as rotas do formulario continuam abaixo dela; state.json mantem esta tarefa (#11 ja foi mergeado)"
+    "Plano aprovado em 2026-10-21; branch feat/86e3m989y-lista-perguntas-categoria criada de origin/develop em 10f92ca, com árvore limpa.",
+    "Reutilizar getCategoryQuestions, questionQueryKeys.categoryQuestions, rótulos, componentes e autenticação existentes; nenhuma dependência nova.",
+    "Fluxo administrativo desktop: categorias → perguntas da categoria → criação/edição → retorno à lista da mesma categoria.",
+    "Exibir o título do draft para FILL_BLANK e LEARNING e o statement para MULTIPLE_CHOICE, cujo contrato não possui title. O status vem da API.",
+    "Os formulários MULTIPLE_CHOICE (86e3m98f5) e LEARNING (86e3m98f4) pertencem a outras tasks e ainda não estão na develop. Preparar suas ações e rotas de integração, com aviso de indisponibilidade enquanto os formulários não chegam; não implementar os formulários nesta task nem marcar a integração como validada.",
+    "Manter a lista visível em falhas de atualização, com mensagem e nova tentativa; não compartilhar dados entre categorias.",
+    "Não modificar backend/mobile nem realizar pushes, merges, rebases ou atualizações no ClickUp. Solicitante autorizou o commit local da implementação e dos ajustes finais.",
+    "Ajuste solicitado na revisão: adicionar Gerenciar perguntas nas ações da categoria, preservando o link no nome; calcular as contagens dos mocks a partir das perguntas existentes e invalidar o cache de categorias após salvar uma pergunta. Publicada com alterações entra em ambas as contagens, conforme o C6.",
+    "Solicitante autorizou concluir a preparação para integração: concentrar as rotas da Trilha em app/routes/studyTracksRoutes.tsx, testar a configuração real e documentar a conexão dos formulários das outras tasks, sem assumir sua implementação."
   ],
   "files_in_scope": [
     "src/features/study-tracks/",
     "src/app/routes/",
-    "src/test/",
-    "vitest.config.ts",
-    "tsconfig.node.json",
-    "package.json",
-    "package-lock.json",
     "README.md",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run lint": "passed em 2026-10-20 (apos o code review)",
-    "npm run typecheck": "passed em 2026-10-20",
-    "npm run build": "passed em 2026-10-20",
-    "npm test": "41 testes passando em 2026-10-20 (inclui regressoes do code review)",
-    "prettier": "--check sem pendencias nos arquivos da tarefa",
-    "CI": "npm test adicionado ao .github/workflows/ci.yml",
-    "nao validado": "formulario no navegador com sessao real (o solicitante testa com o login dele) e integracao com o backend, que ainda nao tem as rotas"
+    "npm test": "passed: 80 testes em 9 arquivos. Regressões cobrem criação com lista em cache, categoria vazia e erro anterior da consulta; edição inexistente continua exibindo o erro correto.",
+    "npm run lint": "passed após a correção do alerta indevido na criação.",
+    "npm run typecheck": "passed após a correção.",
+    "npm run build": "passed após a correção.",
+    "prettier": "passed nos arquivos da correção.",
+    "diff": "Diff revisado: 27 arquivos em relação à develop, restritos à feature, rotas, README e estado do workflow; nenhuma alteração no backend/mobile.",
+    "desktop": "Fluxos e teclado validados em testes; layout e contagens revisados nas capturas de categorias e perguntas enviadas pelo solicitante. Conferência visual final de foco e diferentes larguras fica no roteiro de revisão.",
+    "integracao": "Ações, URLs, parâmetros, retorno e cache da listagem prontos para integração. Avisos temporários dos formulários externos explicitamente documentados e testados; sem implementar as outras tasks.",
+    "route_contract": "8 novos testes da configuração real das rotas passaram.",
+    "creation_regression": "Teste da rota real reproduziu o alerta antes da correção e passou após restringir estados de consulta ao modo de edição. Dois novos testes verificam lista e erro previamente armazenados em cache; formulário de criação fica vazio e não dispara GET."
   },
-  "review": "PR para a develop criado pelo solicitante. Code review em 2026-10-20 com 9 pontos: 8 corrigidos nesta branch; o conflito com feat/trilha-crud-categorias (types.ts, index.ts e rota /app/studies) fica para quem mergear por ultimo. Aguardando CI e aprovacao; merge so pelo time.",
-  "updated_at": "2026-10-20",
+  "review": "Escopo da listagem pronto para revisão e integração. Alerta indevido na criação corrigido; 80 testes, lint, typecheck e build passaram. Commit local dos ajustes finais autorizado pelo solicitante. Code review e merge permanecem pendentes; nenhum envio ao remoto ou atualização no ClickUp autorizado.",
   "open_questions": [
-    "Integracao com o backend: confirmar o prefixo do PUT /questions/{id} e o formato do GET da categoria quando o 86e3m95y3 for entregue; ajustes ficam em src/features/study-tracks/api/fillBlankContract.ts",
-    "O card de lista de perguntas (86e3m989y, Gabriel Moura) tambem vai consumir GET .../categories/{categoryId}/questions: alinhar para usar getCategoryQuestions e questionQueryKeys.categoryQuestions desta branch, sem duplicar",
-    "Sem lista de perguntas da categoria (86e3m989y): o formulario so abre pela URL; a tela de categorias (#11) ainda nao tem link para criar ou editar perguntas"
-  ]
+    "Validar os fluxos completos de MULTIPLE_CHOICE e LEARNING quando os respectivos formulários forem integrados.",
+    "Validar o GET real quando a API de perguntas 86e3m95y3 estiver disponível; preservar o formato de leitura já adotado pelo frontend."
+  ],
+  "updated_at": "2026-10-21",
+  "integration_readiness": {
+    "status": "READY_FOR_INTEGRATION",
+    "scope": "Ações da listagem e rotas dos três tipos, parâmetros categoryId/questionId, retorno à categoria e cache compartilhado.",
+    "contract": "README.md — Contrato da listagem: pronto para integração; app/routes/studyTracksRoutes.tsx.",
+    "verified": "8 testes da configuração real de rotas passaram: categorias/lista/retorno, criação dos três tipos, edição dos três tipos e IDs codificados.",
+    "external_deliveries": "Os formulários MULTIPLE_CHOICE e LEARNING e a validação completa com esses formulários permanecem nas respectivas tasks. GET real depende da entrega da API; mocks são permitidos pelo aceite."
+  },
+  "acceptance_review": {
+    "lista_titulo_tipo_status": "READY",
+    "get_c6_e_mocks": "READY_WITH_MOCKS",
+    "acoes_e_contrato_de_integracao": "READY_FOR_INTEGRATION",
+    "estados_e_padroes_visuais": "IMPLEMENTED_AND_TESTED",
+    "portugues_e_teclado": "IMPLEMENTED_AND_TESTED",
+    "build_lint_typecheck_testes": "PASSED",
+    "code_review_e_merge": "PENDING_EXTERNAL_REVIEW"
+  }
 }
