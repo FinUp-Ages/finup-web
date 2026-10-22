@@ -9,6 +9,9 @@ const registeredIds = widgetsIndicadores.map(({ id }) => id);
 const reconcile = (configuration: DashboardWidgetsDTO) =>
   reconcileWidgets(configuration, registeredIds);
 
+/** Todos os widgets do registro ativos, na ordem do registro. */
+export const defaultWidgetsConfiguration = reconcile({ widgets: [] });
+
 export function useDashboardWidgets() {
   const queryClient = useQueryClient();
   const query = useQuery({

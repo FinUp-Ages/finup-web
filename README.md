@@ -253,7 +253,7 @@ eslint.config.js · .prettierrc · .editorconfig · .nvmrc
 
 Na tela de Custos, **Editar widgets** permite ativar/desativar e mover cada widget pelas setas (também acessíveis por teclado). **Salvar alterações** persiste e aplica; **Cancelar** ou Esc descarta a edição. Todos podem ser desativados e reativados pelo editor.
 
-Por padrão, a configuração fica em localStorage na chave `finup:admin:dashboard:widgets`, neste navegador/origem (não sincroniza entre dispositivos ou contas). Falhas de armazenamento aparecem na interface; uma falha ao salvar mantém o rascunho para nova tentativa. Dados inválidos não são sobrescritos silenciosamente.
+Por padrão, a configuração fica em localStorage na chave `finup:admin:dashboard:widgets`, neste navegador/origem (não sincroniza entre dispositivos ou contas). Falhas de armazenamento aparecem na interface; uma falha ao salvar mantém o rascunho para nova tentativa. Se a leitura falhar (dado inválido ou C5 indisponível), o painel exibe os widgets padrão com um alerta, **Tentar novamente** e **Restaurar padrão**; dados inválidos só são sobrescritos por essa ação explícita. Um erro ao recarregar não esconde a configuração já carregada.
 
 O serviço `src/features/dashboard/api/dashboardWidgetsService.ts` usa o C5:
 `{ "widgets": [{ "id": "NEW_CLIENTS", "enabled": true, "position": 0 }] }`.

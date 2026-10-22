@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { EditWidgetsDialog } from '../components/EditWidgetsDialog';
 import { widgetsIndicadores } from '../components/registroWidgetsIndicadores';
-import { useDashboardWidgets } from '../hooks/useDashboardWidgets';
+import { defaultWidgetsConfiguration, useDashboardWidgets } from '../hooks/useDashboardWidgets';
 
 export function DashboardPage() {
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const { query, mutation } = useDashboardWidgets();
-  const configuration = query.data;
+  // A configuracao em cache prevalece sobre erro de refetch; sem ela, a falha exibe o padrao.
+  const readFailed = query.isError && !query.data;
+  const configuration = query.data ?? (readFailed ? defaultWidgetsConfiguration : undefined);
   const visible =
     configuration?.widgets.filter(
       ({ id, enabled }) => enabled && widgetsIndicadores.some((widget) => widget.id === id),
@@ -19,7 +21,7 @@ export function DashboardPage() {
         <header className="flex items-center justify-end">
           <button
             type="button"
-            disabled={!configuration || query.isError}
+            disabled={!query.data}
             onClick={() => {
               mutation.reset();
               setSaved(false);
@@ -32,21 +34,47 @@ export function DashboardPage() {
         </header>
         {query.isPending ? (
           <p role="status">Carregando configuração dos widgets...</p>
-        ) : query.isError ? (
-          <div role="alert" className="rounded-lg bg-white p-6">
-            <p>Não foi possível carregar a configuração dos widgets.</p>
-            <button
-              type="button"
-              onClick={() => {
-                void query.refetch();
-              }}
-              className="mt-3 underline"
-            >
-              Tentar novamente
-            </button>
-          </div>
         ) : (
           <>
+            {readFailed && (
+              <div role="alert" className="rounded-lg bg-white p-6">
+                <p>
+                  Não foi possível carregar a configuração dos widgets. Exibindo os widgets padrão.
+                </p>
+                <p className="mt-1 text-sm">
+                  Restaurar padrão substitui a configuração salva por todos os widgets ativos.
+                </p>
+                {mutation.isError && (
+                  <p className="mt-1 text-sm text-error">
+                    Não foi possível restaurar o padrão. Tente novamente.
+                  </p>
+                )}
+                <div className="mt-3 flex gap-6">
+                  <button
+                    type="button"
+                    disabled={query.isFetching || mutation.isPending}
+                    onClick={() => {
+                      void query.refetch();
+                    }}
+                    className="underline disabled:opacity-50"
+                  >
+                    Tentar novamente
+                  </button>
+                  <button
+                    type="button"
+                    disabled={query.isFetching || mutation.isPending}
+                    onClick={() =>
+                      mutation.mutate(defaultWidgetsConfiguration, {
+                        onSuccess: () => setSaved(true),
+                      })
+                    }
+                    className="underline disabled:opacity-50"
+                  >
+                    {mutation.isPending ? 'Restaurando...' : 'Restaurar padrão'}
+                  </button>
+                </div>
+              </div>
+            )}
             {saved && (
               <p role="status" className="text-sm">
                 Configuração dos widgets salva.
@@ -72,9 +100,9 @@ export function DashboardPage() {
             )}
           </>
         )}
-        {editing && configuration && (
+        {editing && query.data && (
           <EditWidgetsDialog
-            configuration={configuration}
+            configuration={query.data}
             saving={mutation.isPending}
             error={mutation.isError}
             onClose={() => {
