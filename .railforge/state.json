@@ -1,43 +1,39 @@
 {
   "stage": "REVIEWING",
-  "task": "Frontend: estrutura de widgets configuraveis (C5)",
-  "objective": "Ativar, desativar e reordenar widgets no dashboard, persistindo em localStorage com servico GET/PUT C5 substituivel por HTTP.",
+  "task": "Frontend: widget Clientes novos com filtro (C3)",
+  "objective": "Exibir newUsers do summary por 7d, 30d e 90d, com variacao, loading, erro e alternancia mock/HTTP pela flag existente.",
   "decisions": [
-    "Branch feat/configurable-widgets a partir da develop 10f92ca.",
-    "Registro unico inclui indicadores e crescimento; componentes existentes reutilizados; Clientes novos usa newUsers do C3.",
-    "Fonte Inter. CSS e screenshots fornecidos pelo solicitante orientam cards e botao.",
-    "Figma MCP sem acesso; desenho do editor nao fornecido. Editor segue os modais existentes, com checkbox e botoes acessiveis de ordenacao.",
-    "Persistencia local por padrao, independente de VITE_USE_MOCKS; VITE_DASHBOARD_WIDGETS_API=true habilita o backend.",
-    "Salvar aplica e persiste; cancelar descarta rascunho. Falhas de leitura e gravacao permitem tentar novamente.",
-    "Code review de 2026-10-21, ajustes 1-3 autorizados pelo solicitante: leitura com falha (dado invalido ou C5 indisponivel) exibe os widgets padrao do registro com alerta, Tentar novamente e Restaurar padrao (PUT explicito do padrao); erro de refetch com configuracao em cache mantem os widgets. Demais pontos do review fora deste ajuste; Node local alinhado ao .nvmrc (20), sem mudar engines.",
-    "Segundo code review em 2026-10-21: branch apta a mergear; ajustes autorizados de foco (Editar widgets recebe o foco apos salvar ou restaurar) e de assercao do teste de Tentar novamente (espera a nova leitura)."
+    "Filtro local ao widget; padrao 30d preservado.",
+    "Reutilizar registro NEW_CLIENTS, TanStack Query e servico C3.",
+    "Nao alterar configuracao ou periodo dos demais widgets.",
+    "Task isolada na branch feat/new-clients-filter, criada a partir de feat/configurable-widgets; cada task deve ter sua propria branch.",
+    "Refinamento visual solicitado: filtro compacto no cabecalho, numero em destaque e variacao em selo com texto auxiliar. Aplicado apenas ao widget com filtro.",
+    "Igualar altura de Clientes novos aos demais indicadores (164px no estado de sucesso), reduzindo espacamentos internos e altura do filtro sem cortar texto."
   ],
   "plan": [
-    "Estender registro e adicionar adaptadores C5",
-    "Integrar editor e renderizacao ordenada",
-    "Testar persistencia, cancelamento, erros e registro; rodar lint/typecheck/build/test e revisar diff",
-    "Ajustes do code review 1-3: fallback do registro, Restaurar padrao e cache prevalecendo sobre erro de refetch, com testes"
+    "Adicionar filtro acessivel e consulta por periodo",
+    "Adaptar mock e texto comparativo",
+    "Testar filtro, estados, variacoes e mock/HTTP; executar checks e revisar diff"
   ],
   "files_in_scope": [
-    "src/features/dashboard/",
-    "src/shared/components/ui/Dialog.tsx",
-    "src/features/study-tracks/components/Dialog.tsx",
-    "src/shared/config/env.ts",
-    "src/vite-env.d.ts",
-    ".env.example",
-    "README.md",
+    "src/features/dashboard/components/WidgetsIndicadores.tsx",
+    "src/features/dashboard/components/WidgetIndicador.tsx",
+    "src/features/dashboard/hooks/useIndicadores.ts",
+    "src/features/dashboard/api/getMetricsSummary.ts",
+    "src/features/dashboard/api/metricsSummaryMock.ts",
+    "src/features/dashboard/components/WidgetClientesNovos.test.tsx",
+    "src/features/dashboard/api/getMetricsSummary.test.ts",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run lint": "passed (2026-10-21, apos ajustes do segundo code review)",
-    "npm run typecheck": "passed (2026-10-21, apos ajustes do segundo code review)",
-    "npm run build": "passed (2026-10-21, apos ajustes do segundo code review)",
-    "npm test": "58 testes passando em Node 20.17.0, incluindo os 41 da develop; os testes dos ajustes falham na pagina anterior",
-    "navegador": "Preview isolado validado e teste manual pelo solicitante no painel autenticado: ativar/desativar, reordenar e persistir apos recarregar confirmados em 2026-10-21. Ajustes 1-3 do code review cobertos por testes; ainda nao verificados no navegador.",
+    "npm run lint": "passed",
+    "npm run typecheck": "passed",
+    "npm test": "66 testes passando, incluindo 10 novos",
+    "npm run build": "passed",
     "git diff --check": "passed",
-    "limitacoes": "Comparacao integral com Figma pendente por falta de acesso; backend C5 ainda nao integrado."
+    "interface": "Preview isolado dos componentes reais no navegador: Custo operacional, Clientes novos e Receita bruta medidos em 271x164px. Filtro e texto sem corte. Build, lint, typecheck e 66 testes aprovados apos ajuste.",
+    "limitacoes": "Dashboard autenticado apos refinamento visual e integracao com backend real nao verificados nesta etapa."
   },
-  "review": "Segundo code review em 2026-10-21: apta a mergear, sem bloqueios; foco e assercao do teste corrigidos e commitados com autorizacao do solicitante em 2026-10-21. Pendentes de decisao: largura 1156px, chave local por usuario, Restaurar no modo HTTP, query duplicada, periodo do grafico, re-export do Dialog, largura duplicada e imagem em docs/. Aguardando verificacao no navegador, push, PR pelo template e merge.",
-  "updated_at": "2026-10-21",
-  "open_questions": ["Comparacao visual completa depende do acesso ao Figma e do design do editor."]
+  "review": "Diff revisado localmente, validacoes aprovadas e commit autorizado pelo solicitante em 2026-10-21. Pendente push, PR, aprovacao do time e merge.",
+  "updated_at": "2026-10-21"
 }
