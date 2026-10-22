@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createQuestion } from '../api/createQuestion';
 import type { FillBlankFormValues, QuestionDTO } from '../types';
+import { categoryQueryKeys } from './categoryQueryKeys';
 import { questionQueryKeys } from './questionQueryKeys';
 import { useSaveFillBlankQuestion } from './useSaveFillBlankQuestion';
 
@@ -52,6 +53,21 @@ beforeEach(() => {
 });
 
 describe('useSaveFillBlankQuestion - cache da lista da categoria', () => {
+  it('invalida as contagens das categorias sem invalidar a lista de perguntas atualizada', async () => {
+    vi.mocked(createQuestion).mockResolvedValue(questionDTO('nova'));
+    const queryClient = new QueryClient();
+    const categoriesKey = categoryQueryKeys.list();
+    queryClient.setQueryData(categoriesKey, []);
+    queryClient.setQueryData<QuestionDTO[]>(listKey, [questionDTO('existente')]);
+    const { result } = renderSave(queryClient);
+
+    await create(result.current.save);
+
+    expect(queryClient.getQueryState(categoriesKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(listKey)?.isInvalidated).toBe(false);
+    expect(queryClient.getQueryData<QuestionDTO[]>(listKey)).toHaveLength(2);
+  });
+
   it('sem lista em cache, nao cria uma lista so com a pergunta nova', async () => {
     vi.mocked(createQuestion).mockResolvedValue(questionDTO('nova'));
     const queryClient = new QueryClient();

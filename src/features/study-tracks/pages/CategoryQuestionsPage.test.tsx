@@ -1,13 +1,19 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/shared/config/apiError';
 import { createQuestion } from '../api/createQuestion';
+import { getCategoriesMock, resetCategoriesMock } from '../api/categoriesMock';
 import { getCategories } from '../api/getCategories';
 import { getCategoryQuestions } from '../api/getCategoryQuestions';
 import { updateQuestion } from '../api/updateQuestion';
+import {
+  createQuestionMock,
+  getCategoryQuestionsMock,
+  resetQuestionsMock,
+} from '../api/questionsMock';
 import { questionQueryKeys } from '../hooks/questionQueryKeys';
 import type { CategoryDTO, FillBlankQuestionPayload, QuestionDTO, QuestionType } from '../types';
 import { CategoryQuestionsPage } from './CategoryQuestionsPage';
@@ -132,6 +138,41 @@ beforeEach(() => {
 });
 
 describe('CategoryQuestionsPage', () => {
+  it('atualiza a contagem ao criar uma pergunta e voltar para as categorias com os mocks integrados', async () => {
+    resetCategoriesMock();
+    resetQuestionsMock();
+    vi.mocked(getCategories).mockImplementation(getCategoriesMock);
+    vi.mocked(getCategoryQuestions).mockImplementation(getCategoryQuestionsMock);
+    vi.mocked(createQuestion).mockImplementation(createQuestionMock);
+    const { user } = renderAt('/studies');
+    const manage = await screen.findByRole('link', {
+      name: 'Gerenciar perguntas de Investimentos',
+    });
+    const initialRow = within(manage.closest('tr')!);
+    expect(initialRow.getAllByRole('cell')[1]).toHaveTextContent('0');
+    expect(initialRow.getAllByRole('cell')[2]).toHaveTextContent('0');
+
+    await user.click(manage);
+    await screen.findByText('Nenhuma pergunta cadastrada nesta categoria.');
+    await user.click(screen.getByRole('button', { name: 'Nova pergunta' }));
+    await user.type(screen.getByLabelText('Título'), 'Rendimento do investimento');
+    await user.type(screen.getByLabelText('Enunciado'), content.statement);
+    await user.type(screen.getByLabelText('Respostas aceitas'), '100%{Enter}');
+    await user.click(screen.getByRole('button', { name: 'Criar rascunho' }));
+    await screen.findByText('Pergunta criada como rascunho.');
+    await user.click(screen.getByRole('link', { name: /Perguntas da categoria/ }));
+    expect(await screen.findByText('Rendimento do investimento')).toBeVisible();
+    await user.click(screen.getByRole('link', { name: /Categorias da trilha/ }));
+
+    await waitFor(() => {
+      const row = within(
+        screen.getByRole('link', { name: 'Gerenciar perguntas de Investimentos' }).closest('tr')!,
+      );
+      expect(row.getAllByRole('cell')[1]).toHaveTextContent('1');
+      expect(row.getAllByRole('cell')[2]).toHaveTextContent('0');
+    });
+  });
+
   it('permite abrir a criacao pelo teclado com controles rotulados', async () => {
     const { user } = renderAt();
     await screen.findByRole('table');
@@ -215,6 +256,7 @@ describe('CategoryQuestionsPage', () => {
     await user.click(screen.getByRole('button', { name: 'Nova pergunta' }));
     expect(screen.getByRole('heading', { name: 'Nova pergunta: Preencher lacuna' })).toBeVisible();
     expect(screen.getByLabelText('Título')).toBeVisible();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: /Perguntas da categoria/ }));
     expect(await screen.findByText('Nenhuma pergunta cadastrada nesta categoria.')).toBeVisible();
   });
@@ -331,6 +373,20 @@ describe('CategoryQuestionsPage', () => {
     expect(
       screen.getByRole('button', { name: 'Remover categoria Reserva de emergência' }),
     ).toBeVisible();
+  });
+
+  it('abre a mesma lista pela acao Gerenciar perguntas, preservando o link no nome', async () => {
+    const { user } = renderAt('/studies');
+    const manage = await screen.findByRole('link', {
+      name: 'Gerenciar perguntas de Reserva de emergência',
+    });
+    const title = screen.getByRole('link', { name: 'Ver perguntas de Reserva de emergência' });
+    expect(manage).toHaveAttribute('href', title.getAttribute('href'));
+
+    await user.click(manage);
+
+    expect(await screen.findByRole('table', { name: 'Perguntas da categoria' })).toBeVisible();
+    expect(getCategoryQuestions).toHaveBeenCalledWith('cat-1');
   });
 
   it('reflete a pergunta criada ao retornar do formulario, sem perder as demais', async () => {

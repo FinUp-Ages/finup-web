@@ -17,9 +17,9 @@ export interface CategoryDTO {
   id: string;
   name: string;
   description: string;
-  /** Perguntas em rascunho na categoria. */
+  /** Perguntas em DRAFT ou PUBLISHED_WITH_CHANGES. */
   draftCount: number;
-  /** Perguntas publicadas na categoria. */
+  /** Perguntas em PUBLISHED ou PUBLISHED_WITH_CHANGES. */
   publishedCount: number;
   createdAt: string;
   updatedAt: string;

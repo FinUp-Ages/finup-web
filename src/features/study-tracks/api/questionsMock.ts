@@ -14,6 +14,7 @@ import { ApiError } from '@/shared/config/apiError';
 import type { ProblemDetail } from '@/shared/types/problemDetail';
 import { validateFillBlankQuestion } from '../model/fillBlankValidation';
 import type {
+  CategoryDTO,
   FillBlankQuestionPayload,
   QuestionContentDTO,
   QuestionDTO,
@@ -135,6 +136,21 @@ function deriveStatus({ draft, published }: StoredQuestion): QuestionStatus {
     return 'DRAFT';
   }
   return sameContent(draft, published) ? 'PUBLISHED' : 'PUBLISHED_WITH_CHANGES';
+}
+
+/** As categorias usam o mesmo store de perguntas, sem contagens fixas independentes. */
+export function getCategoryQuestionCountsMock(
+  categoryId: string,
+): Pick<CategoryDTO, 'draftCount' | 'publishedCount'> {
+  let draftCount = 0;
+  let publishedCount = 0;
+  for (const question of questions) {
+    if (question.categoryId !== categoryId) continue;
+    const status = deriveStatus(question);
+    if (status !== 'PUBLISHED') draftCount += 1;
+    if (status !== 'DRAFT') publishedCount += 1;
+  }
+  return { draftCount, publishedCount };
 }
 
 /** A resposta do contrato nao traz a categoria. */

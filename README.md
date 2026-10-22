@@ -179,7 +179,8 @@ A feature `example/` é a referência completa do padrão.
 
 ## Trilha de estudos
 
-Em `/app/studies`, clique no nome de uma categoria para abrir suas perguntas em
+Em `/app/studies`, use **Gerenciar perguntas** nas ações ou clique no nome da categoria para abrir
+suas perguntas em
 `/app/studies/categories/:categoryId/questions`. A tabela mostra o título do rascunho, tipo e
 status retornado pela API. Perguntas objetivas usam o enunciado como título, conforme o C6.
 
@@ -194,12 +195,55 @@ disponíveis e o link de retorno leva à lista da categoria. Os formulários de 
 ([86e3m98f5](https://app.clickup.com/t/86e3m98f5)) e **Conteúdo educativo**
 ([86e3m98f4](https://app.clickup.com/t/86e3m98f4)) pertencem a outras tasks: as rotas de criação
 exibem um aviso temporário até sua integração. A edição já existente também avisa quando o
-tipo ainda não tem formulário. Ao integrar esses formulários, substitua os destinos temporários
-em `app/routes/index.tsx`, preservando o contexto da categoria e a chave de cache compartilhada.
+tipo ainda não tem formulário. As rotas da Trilha ficam em `app/routes/studyTracksRoutes.tsx`,
+montadas sob a proteção de administrador do router principal.
+
+### Contrato da listagem: pronto para integração
+
+Os acessos abaixo estão implementados e cobertos por testes da configuração real das rotas:
+
+| Destino | Caminho |
+|---|---|
+| Perguntas da categoria | `/app/studies/categories/:categoryId/questions` |
+| Criar Preencher lacuna | `/app/studies/categories/:categoryId/questions/new/fill-blank` |
+| Criar Múltipla escolha | `/app/studies/categories/:categoryId/questions/new/multiple-choice` |
+| Criar Conteúdo educativo | `/app/studies/categories/:categoryId/questions/new/learning` |
+| Editar qualquer tipo | `/app/studies/categories/:categoryId/questions/:questionId/edit` |
+
+Para conectar os formulários das outras tasks:
+
+1. Implemente suas páginas em `features/study-tracks/` e exporte-as pelo `index.ts` da feature.
+2. Substitua os dois elementos `QuestionFormPendingPage` em `app/routes/studyTracksRoutes.tsx`
+   pelas páginas correspondentes. Preserve os caminhos e receba `categoryId` via `useParams`.
+3. Na rota genérica de edição, selecione o formulário pelo `draft.type` da pergunta. A consulta
+   existente `api/getCategoryQuestions.ts` devolve `QuestionDTO[]`; procure pelo `questionId`
+   dentro da categoria. O adaptador `useQuestion` atual é específico do formulário de lacuna;
+   os novos formulários devem ler seus próprios campos do `draft`, preservando o `published`.
+4. Compartilhe `hooks/questionQueryKeys.ts`: a chave é
+   `['study-tracks', 'categories', categoryId, 'questions']`. Ao salvar, atualize apenas uma lista
+   completa já em cache, como faz `useSaveFillBlankQuestion`; sem lista em cache, deixe o GET
+   carregá-la. Invalide `categoryQueryKeys.list()` com `exact: true` para atualizar as contagens
+   sem invalidar inadvertidamente o cache das perguntas.
+5. Receba o caminho de retorno por prop, usando `studiesCategoryQuestionsPath` em `app/routes/`.
+   Features não importam `app/`. Após criar, navegue com `replace` para
+   `studiesEditQuestionPath(categoryId, id)`, preservando a categoria e evitando reabrir uma
+   criação já salva ao usar Voltar. Os helpers codificam os IDs da URL.
+6. Execute os testes da feature e `src/app/routes/studyTracksRoutes.test.tsx`. Substitua as
+   expectativas dos avisos temporários por verificações dos formulários quando forem entregues.
+
+A responsabilidade da task de listagem termina nos acessos, parâmetros, consulta e cache acima.
+Os formulários e suas regras de edição pertencem às tasks
+[Objetiva](https://app.clickup.com/t/86e3m98f5) e
+[Conteúdo explicativo](https://app.clickup.com/t/86e3m98f4). Seus avisos temporários mantêm o fluxo
+navegável; a validação completa desses formulários ocorre na integração das respectivas entregas.
 
 Com `VITE_USE_MOCKS=true`, a categoria `categoria-reserva` tem exemplos dos três tipos e dos três
 status, `categoria-orcamento` começa vazia e `categoria-inexistente` simula um 404. Os dados ficam
-em memória e voltam às fixtures ao recarregar. Com mocks desativados, a lista usa
+em memória e voltam às fixtures ao recarregar. As contagens das categorias são calculadas sobre
+essas mesmas perguntas e atualizadas após salvar. **Publicada com alterações** entra tanto em
+rascunhos quanto em publicadas; por isso a soma dessas colunas não representa o total de perguntas
+distintas. A categoria `categoria-investimentos` começa vazia, com ambas as contagens em zero.
+Com mocks desativados, a lista usa
 `GET /api/v1/admin/study-tracks/categories/{categoryId}/questions`.
 
 Para conferir o fluxo desktop: abra a categoria, escolha **Preencher lacuna**, crie uma pergunta,

@@ -9,30 +9,48 @@
     "Exibir o título do draft para FILL_BLANK e LEARNING e o statement para MULTIPLE_CHOICE, cujo contrato não possui title. O status vem da API.",
     "Os formulários MULTIPLE_CHOICE (86e3m98f5) e LEARNING (86e3m98f4) pertencem a outras tasks e ainda não estão na develop. Preparar suas ações e rotas de integração, com aviso de indisponibilidade enquanto os formulários não chegam; não implementar os formulários nesta task nem marcar a integração como validada.",
     "Manter a lista visível em falhas de atualização, com mensagem e nova tentativa; não compartilhar dados entre categorias.",
-    "Não modificar backend/mobile nem realizar pushes, merges, rebases ou atualizações no ClickUp. Commit local autorizado pelo solicitante para salvar a implementação antes de voltar à develop."
+    "Não modificar backend/mobile nem realizar pushes, merges, rebases ou atualizações no ClickUp. Solicitante autorizou o commit local da implementação e dos ajustes finais.",
+    "Ajuste solicitado na revisão: adicionar Gerenciar perguntas nas ações da categoria, preservando o link no nome; calcular as contagens dos mocks a partir das perguntas existentes e invalidar o cache de categorias após salvar uma pergunta. Publicada com alterações entra em ambas as contagens, conforme o C6.",
+    "Solicitante autorizou concluir a preparação para integração: concentrar as rotas da Trilha em app/routes/studyTracksRoutes.tsx, testar a configuração real e documentar a conexão dos formulários das outras tasks, sem assumir sua implementação."
   ],
   "files_in_scope": [
     "src/features/study-tracks/",
-    "src/app/routes/paths.ts",
-    "src/app/routes/index.tsx",
+    "src/app/routes/",
     "README.md",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm test": "passed: 62 testes em 7 arquivos, incluindo 21 novos testes de API e fluxo da lista; nenhuma falha.",
-    "npm run lint": "passed.",
-    "npm run typecheck": "passed.",
-    "npm run build": "passed.",
-    "prettier": "passed: arquivos TypeScript e JSON alterados/criados.",
-    "diff": "git diff --check passou; revisão dos arquivos alterados e novos restrita ao escopo aprovado; backend/mobile continuam limpos; nenhuma dependência nova.",
-    "servidor local": "Nova rota e módulo da página responderam HTTP 200 no Vite ativo em localhost:5173.",
-    "desktop": "Fluxo, teclado, erros e cache verificados em testes com Testing Library. Revisão visual, larguras de desktop e foco visível no navegador aguardam a sessão autenticada do solicitante.",
-    "integracao": "Fluxo de criação/edição FILL_BLANK e retorno à lista verificados com mocks. GET real e formulários MULTIPLE_CHOICE/LEARNING pendentes de suas entregas."
+    "npm test": "passed: 80 testes em 9 arquivos. Regressões cobrem criação com lista em cache, categoria vazia e erro anterior da consulta; edição inexistente continua exibindo o erro correto.",
+    "npm run lint": "passed após a correção do alerta indevido na criação.",
+    "npm run typecheck": "passed após a correção.",
+    "npm run build": "passed após a correção.",
+    "prettier": "passed nos arquivos da correção.",
+    "diff": "Diff revisado: 27 arquivos em relação à develop, restritos à feature, rotas, README e estado do workflow; nenhuma alteração no backend/mobile.",
+    "desktop": "Fluxos e teclado validados em testes; layout e contagens revisados nas capturas de categorias e perguntas enviadas pelo solicitante. Conferência visual final de foco e diferentes larguras fica no roteiro de revisão.",
+    "integracao": "Ações, URLs, parâmetros, retorno e cache da listagem prontos para integração. Avisos temporários dos formulários externos explicitamente documentados e testados; sem implementar as outras tasks.",
+    "route_contract": "8 novos testes da configuração real das rotas passaram.",
+    "creation_regression": "Teste da rota real reproduziu o alerta antes da correção e passou após restringir estados de consulta ao modo de edição. Dois novos testes verificam lista e erro previamente armazenados em cache; formulário de criação fica vazio e não dispara GET."
   },
-  "review": "Implementação da lista disponível para revisão visual do solicitante. Ações dos três tipos preparadas; integração completa dos dois formulários ausentes permanece pendente. Commit local autorizado para preservar o trabalho na branch da task; sem envio ao remoto ou alteração no ClickUp.",
+  "review": "Escopo da listagem pronto para revisão e integração. Alerta indevido na criação corrigido; 80 testes, lint, typecheck e build passaram. Commit local dos ajustes finais autorizado pelo solicitante. Code review e merge permanecem pendentes; nenhum envio ao remoto ou atualização no ClickUp autorizado.",
   "open_questions": [
     "Validar os fluxos completos de MULTIPLE_CHOICE e LEARNING quando os respectivos formulários forem integrados.",
     "Validar o GET real quando a API de perguntas 86e3m95y3 estiver disponível; preservar o formato de leitura já adotado pelo frontend."
   ],
-  "updated_at": "2026-10-21"
+  "updated_at": "2026-10-21",
+  "integration_readiness": {
+    "status": "READY_FOR_INTEGRATION",
+    "scope": "Ações da listagem e rotas dos três tipos, parâmetros categoryId/questionId, retorno à categoria e cache compartilhado.",
+    "contract": "README.md — Contrato da listagem: pronto para integração; app/routes/studyTracksRoutes.tsx.",
+    "verified": "8 testes da configuração real de rotas passaram: categorias/lista/retorno, criação dos três tipos, edição dos três tipos e IDs codificados.",
+    "external_deliveries": "Os formulários MULTIPLE_CHOICE e LEARNING e a validação completa com esses formulários permanecem nas respectivas tasks. GET real depende da entrega da API; mocks são permitidos pelo aceite."
+  },
+  "acceptance_review": {
+    "lista_titulo_tipo_status": "READY",
+    "get_c6_e_mocks": "READY_WITH_MOCKS",
+    "acoes_e_contrato_de_integracao": "READY_FOR_INTEGRATION",
+    "estados_e_padroes_visuais": "IMPLEMENTED_AND_TESTED",
+    "portugues_e_teclado": "IMPLEMENTED_AND_TESTED",
+    "build_lint_typecheck_testes": "PASSED",
+    "code_review_e_merge": "PENDING_EXTERNAL_REVIEW"
+  }
 }

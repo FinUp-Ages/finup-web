@@ -20,15 +20,15 @@ export function CategoriesTable({
   questionsPathFor,
 }: CategoriesTableProps) {
   return (
-    <div className="overflow-hidden rounded-[4px] border border-black/5 bg-white">
-      <table className="w-full table-fixed border-collapse text-left text-base tracking-[0.32px] text-navy">
+    <div className="overflow-x-auto rounded-[4px] border border-black/5 bg-white">
+      <table className="w-full min-w-[1060px] table-fixed border-collapse text-left text-base tracking-[0.32px] text-navy">
         <caption className="sr-only">Categorias da trilha de estudos</caption>
         <colgroup>
           <col className="w-[24%]" />
           <col />
           <col className="w-[130px]" />
           <col className="w-[130px]" />
-          <col className="w-[200px]" />
+          <col className="w-[400px]" />
         </colgroup>
         <thead>
           <tr className="h-[57px] border-b border-black/5">
@@ -77,6 +77,13 @@ export function CategoriesTable({
               </td>
               <td className="px-4">
                 <div className="flex items-center gap-2">
+                  <Link
+                    to={questionsPathFor(category.id)}
+                    aria-label={`Gerenciar perguntas de ${category.name}`}
+                    className={`inline-flex shrink-0 items-center whitespace-nowrap ${actionClassName}`}
+                  >
+                    Gerenciar perguntas
+                  </Link>
                   <button
                     type="button"
                     onClick={() => onEdit(category)}
