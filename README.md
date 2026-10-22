@@ -248,3 +248,17 @@ eslint.config.js · .prettierrc · .editorconfig · .nvmrc
 ```
 
 **Antes do primeiro PR:** ajuste o `@arquitetura` no `CODEOWNERS` para o time ou usuário real da organização no GitHub.
+
+## Widgets configuráveis do dashboard (C5)
+
+Na tela de Custos, **Editar widgets** permite ativar/desativar e mover cada widget pelas setas (também acessíveis por teclado). **Salvar alterações** persiste e aplica; **Cancelar** ou Esc descarta a edição. Todos podem ser desativados e reativados pelo editor.
+
+Por padrão, a configuração fica em localStorage na chave `finup:admin:dashboard:widgets`, neste navegador/origem (não sincroniza entre dispositivos ou contas). Falhas de armazenamento aparecem na interface; uma falha ao salvar mantém o rascunho para nova tentativa. Dados inválidos não são sobrescritos silenciosamente.
+
+O serviço `src/features/dashboard/api/dashboardWidgetsService.ts` usa o C5:
+`{ "widgets": [{ "id": "NEW_CLIENTS", "enabled": true, "position": 0 }] }`.
+Com `VITE_DASHBOARD_WIDGETS_API=true`, passa a usar GET/PUT `/api/v1/admin/dashboard/widgets` pelo cliente HTTP autenticado, sem alterar UI ou hooks. Essa opção é independente de `VITE_USE_MOCKS`; deixe desativada até o backend disponibilizar o C5.
+
+Para acrescentar um widget, adicione seu componente e uma entrada em `registroWidgetsIndicadores.ts` (ID do contrato, título e largura). O editor e a renderização são derivados do registro. Novos widgets entram ativos após os já salvos; IDs desconhecidos são preservados no payload e não renderizados. Os IDs REVENUE, ACTIVE_USERS e OPERATIONAL_COST já existiam; NEW_CLIENTS segue o card da task e USER_GROWTH identifica o gráfico para futura confirmação com o backend.
+
+Fonte Inter. O layout dos cards e o texto do botão seguem as referências fornecidas. O editor segue o padrão dos modais do projeto; comparação integral com o Figma depende de acesso ao arquivo.

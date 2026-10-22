@@ -2,7 +2,12 @@
  * Widgets de indicador do dashboard, cada um com os proprios dados.
  * Receita bruta e Custo operacional sao MOCK (fora do contrato C3).
  */
-import { useCustoOperacional, useReceita, useUsuariosAtivos } from '../hooks/useIndicadores';
+import {
+  useCustoOperacional,
+  useReceita,
+  useUsuariosAtivos,
+  useClientesNovos,
+} from '../hooks/useIndicadores';
 import { WidgetIndicador } from './WidgetIndicador';
 
 /** MOCK: sem endpoint de receita (ver api/getFinancialMetrics.ts). */
@@ -47,6 +52,19 @@ export function WidgetCustoOperacional() {
       errorMessage={errorMessage}
       onTentarNovamente={reload}
       altaEhFavoravel={false}
+    />
+  );
+}
+
+export function WidgetClientesNovos() {
+  const { dados, isLoading, errorMessage, reload } = useClientesNovos();
+  return (
+    <WidgetIndicador
+      titulo="Clientes novos"
+      dados={dados}
+      isLoading={isLoading}
+      errorMessage={errorMessage}
+      onTentarNovamente={reload}
     />
   );
 }
