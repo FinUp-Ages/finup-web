@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EditWidgetsDialog } from '../components/EditWidgetsDialog';
 import { widgetsIndicadores } from '../components/registroWidgetsIndicadores';
 import { defaultWidgetsConfiguration, useDashboardWidgets } from '../hooks/useDashboardWidgets';
@@ -6,7 +6,14 @@ import { defaultWidgetsConfiguration, useDashboardWidgets } from '../hooks/useDa
 export function DashboardPage() {
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
   const { query, mutation } = useDashboardWidgets();
+
+  // Apos salvar ou restaurar, o alerta ou o modal com o foco saem da tela; o foco vai para Editar.
+  useEffect(() => {
+    if (saved) editButtonRef.current?.focus();
+  }, [saved]);
+
   // A configuracao em cache prevalece sobre erro de refetch; sem ela, a falha exibe o padrao.
   const readFailed = query.isError && !query.data;
   const configuration = query.data ?? (readFailed ? defaultWidgetsConfiguration : undefined);
@@ -20,6 +27,7 @@ export function DashboardPage() {
       <div className="flex w-full max-w-[1156px] flex-col gap-6">
         <header className="flex items-center justify-end">
           <button
+            ref={editButtonRef}
             type="button"
             disabled={!query.data}
             onClick={() => {

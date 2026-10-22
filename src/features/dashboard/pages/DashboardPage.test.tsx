@@ -131,16 +131,21 @@ describe('Configuracao de widgets no dashboard', () => {
   it('com configuracao invalida, restaurar padrao grava o padrao e libera a edicao', async () => {
     const user = userEvent.setup();
     localStorage.setItem(DASHBOARD_WIDGETS_STORAGE_KEY, '{invalido');
+    const getItem = vi.spyOn(Storage.prototype, 'getItem');
     mount();
     expect(await screen.findByRole('alert')).toHaveTextContent('Exibindo os widgets padrão');
     expect(screen.getAllByRole('heading')).toHaveLength(5);
-    await user.click(screen.getByRole('button', { name: 'Tentar novamente' }));
-    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    const retry = screen.getByRole('button', { name: 'Tentar novamente' });
+    await user.click(retry);
+    await waitFor(() => expect(getItem).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(retry).toBeEnabled());
+    expect(screen.getByRole('alert')).toHaveTextContent('Exibindo os widgets padrão');
     expect(localStorage.getItem(DASHBOARD_WIDGETS_STORAGE_KEY)).toBe('{invalido');
     await user.click(screen.getByRole('button', { name: 'Restaurar padrão' }));
     await screen.findByRole('status');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Editar widgets' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Editar widgets' })).toHaveFocus();
     const stored = JSON.parse(localStorage.getItem(DASHBOARD_WIDGETS_STORAGE_KEY)!);
     expect(stored.widgets).toHaveLength(5);
     expect(stored.widgets.every(({ enabled }: { enabled: boolean }) => enabled)).toBe(true);
