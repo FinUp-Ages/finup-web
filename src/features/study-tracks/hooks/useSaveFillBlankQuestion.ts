@@ -8,6 +8,7 @@ import { toFillBlankPayload, toFillBlankQuestion } from '../api/fillBlankContrac
 import { updateQuestion } from '../api/updateQuestion';
 import { toSaveQuestionErrorMessage } from '../model/questionErrorMessages';
 import type { FillBlankFormValues, FillBlankQuestion, QuestionDTO } from '../types';
+import { categoryQueryKeys } from './categoryQueryKeys';
 import { questionQueryKeys } from './questionQueryKeys';
 
 type SaveFillBlankQuestionOptions = {
@@ -37,6 +38,8 @@ export function useSaveFillBlankQuestion({ categoryId, questionId }: SaveFillBla
             : [...questions, dto];
         },
       );
+      // Criar ou editar o rascunho pode mudar as contagens exibidas nas categorias.
+      void queryClient.invalidateQueries({ queryKey: categoryQueryKeys.list(), exact: true });
     },
   });
 
