@@ -8,12 +8,14 @@
     "Nao alterar configuracao ou periodo dos demais widgets.",
     "Task isolada na branch feat/new-clients-filter, criada a partir de feat/configurable-widgets; cada task deve ter sua propria branch.",
     "Refinamento visual solicitado: filtro compacto no cabecalho, numero em destaque e variacao em selo com texto auxiliar. Aplicado apenas ao widget com filtro.",
-    "Igualar altura de Clientes novos aos demais indicadores (164px no estado de sucesso), reduzindo espacamentos internos e altura do filtro sem cortar texto."
+    "Igualar altura de Clientes novos aos demais indicadores (164px no estado de sucesso), reduzindo espacamentos internos e altura do filtro sem cortar texto.",
+    "QA review do PR #15 em 2026-10-23: branch rebaseada sobre develop e24c74c (PR #13 ja mergeado por squash), mantendo so a commit da task; correcoes do PR #13 na develop preservadas."
   ],
   "plan": [
     "Adicionar filtro acessivel e consulta por periodo",
     "Adaptar mock e texto comparativo",
-    "Testar filtro, estados, variacoes e mock/HTTP; executar checks e revisar diff"
+    "Testar filtro, estados, variacoes e mock/HTTP; executar checks e revisar diff",
+    "Ajustes do QA review: rebase sobre develop, teste de isolamento de Usuarios ativos e assercao do teste de resposta atrasada"
   ],
   "files_in_scope": [
     "src/features/dashboard/components/WidgetsIndicadores.tsx",
@@ -26,14 +28,17 @@
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run lint": "passed",
-    "npm run typecheck": "passed",
-    "npm test": "66 testes passando, incluindo 10 novos",
-    "npm run build": "passed",
+    "npm run lint": "passed (2026-10-23, apos rebase sobre develop)",
+    "npm run typecheck": "passed (2026-10-23, apos rebase sobre develop)",
+    "npm test": "69 testes passando em Node 20.17.0 (58 da develop + 11 da task), 2026-10-23",
+    "npm run build": "passed (2026-10-23, apos rebase sobre develop)",
     "git diff --check": "passed",
-    "interface": "Preview isolado dos componentes reais no navegador: Custo operacional, Clientes novos e Receita bruta medidos em 271x164px. Filtro e texto sem corte. Build, lint, typecheck e 66 testes aprovados apos ajuste.",
-    "limitacoes": "Dashboard autenticado apos refinamento visual e integracao com backend real nao verificados nesta etapa."
+    "interface": "Preview isolado dos componentes reais no navegador: Custo operacional, Clientes novos e Receita bruta medidos em 271x164px. Filtro e texto sem corte (2026-10-21, antes do rebase).",
+    "limitacoes": "Dashboard autenticado apos o rebase e integracao com backend real nao verificados."
   },
-  "review": "Diff revisado localmente, validacoes aprovadas e commit autorizado pelo solicitante em 2026-10-21. Pendente push, PR, aprovacao do time e merge.",
-  "updated_at": "2026-10-21"
+  "review": "QA review do PR #15 em 2026-10-23: requisitos do card atendidos; conflitos com a develop resolvidos por rebase; diff contra a develop restrito aos arquivos em escopo. Pendentes: teste manual em /app/costs, confirmacao de design do layout do card com filtro, atualizacao da descricao do PR e aprovacao do time.",
+  "updated_at": "2026-10-23",
+  "open_questions": [
+    "Layout do card com filtro (numero maior e variacao em selo) difere dos demais indicadores; confirmar com design/PO."
+  ]
 }

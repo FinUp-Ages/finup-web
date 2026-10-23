@@ -2,7 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { WidgetClientesNovos } from './WidgetsIndicadores';
+import type { ReactNode } from 'react';
+import { WidgetClientesNovos, WidgetUsuariosAtivos } from './WidgetsIndicadores';
 import { getMetricsSummary } from '../api/getMetricsSummary';
 import { getMetricsSummaryMock } from '../api/metricsSummaryMock';
 import type { MetricsSummaryDTO } from '../types';
@@ -10,13 +11,10 @@ import type { MetricsSummaryDTO } from '../types';
 vi.mock('../api/getMetricsSummary', () => ({ getMetricsSummary: vi.fn() }));
 const getSummary = vi.mocked(getMetricsSummary);
 
-function mount() {
+function mount(ui: ReactNode = <WidgetClientesNovos />) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={client}>
-      <WidgetClientesNovos />
-    </QueryClientProvider>,
-  );
+  render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+  return client;
 }
 
 beforeEach(() => {
@@ -51,13 +49,32 @@ describe('Clientes novos com filtro', () => {
           })
         : Promise.resolve(getMetricsSummaryMock(period)),
     );
-    mount();
+    const client = mount();
     expect(screen.getByRole('status')).toHaveTextContent('Carregando');
     await userEvent.selectOptions(screen.getByRole('combobox'), '90d');
     expect(await screen.findByText('42')).toBeInTheDocument();
     resolve30(getMetricsSummaryMock('30d'));
-    await waitFor(() => expect(screen.queryByText('12')).not.toBeInTheDocument());
+    // Espera a resposta de 30d chegar ao cache antes de afirmar que ela nao aparece.
+    await waitFor(() =>
+      expect(client.getQueryData(['dashboard', 'metrics-summary', '30d'])).toBeDefined(),
+    );
+    expect(screen.queryByText('12')).not.toBeInTheDocument();
     expect(screen.getByText('42')).toBeInTheDocument();
+  });
+
+  it('troca o periodo sem alterar Usuarios ativos, que segue em 30d', async () => {
+    mount(
+      <>
+        <WidgetUsuariosAtivos />
+        <WidgetClientesNovos />
+      </>,
+    );
+    expect(await screen.findByText('320')).toBeInTheDocument();
+    expect(await screen.findByText('12')).toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByRole('combobox'), '7d');
+    expect(await screen.findByText('4')).toBeInTheDocument();
+    expect(screen.getByText('320')).toBeInTheDocument();
+    expect(getSummary.mock.calls.filter(([period]) => period === '30d')).toHaveLength(1);
   });
 
   it('permite tentar novamente no periodo selecionado e apresenta valor zero', async () => {
