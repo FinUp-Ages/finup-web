@@ -11,7 +11,7 @@ import { getMetricsSummaryMock } from './metricsSummaryMock';
 
 export async function getMetricsSummary(period: MetricsPeriod): Promise<MetricsSummaryDTO> {
   if (env.useMocks) {
-    return getMetricsSummaryMock();
+    return getMetricsSummaryMock(period);
   }
 
   const { data } = await httpClient.get<MetricsSummaryDTO>('/api/v1/admin/metrics/summary', {

@@ -1,56 +1,44 @@
 {
   "stage": "REVIEWING",
-  "task": "86e3m989y — Trilha: lista de perguntas da categoria",
-  "objective": "Listar perguntas por categoria com título, tipo, status, estados de carregamento, vazio e erro, ações de criação dos três tipos e acesso à edição, seguindo o contrato C6 e VITE_USE_MOCKS.",
+  "task": "Frontend: widget Clientes novos com filtro (C3)",
+  "objective": "Exibir newUsers do summary por 7d, 30d e 90d, com variacao, loading, erro e alternancia mock/HTTP pela flag existente.",
   "decisions": [
-    "Plano aprovado em 2026-10-21; branch feat/86e3m989y-lista-perguntas-categoria criada de origin/develop em 10f92ca, com árvore limpa.",
-    "Reutilizar getCategoryQuestions, questionQueryKeys.categoryQuestions, rótulos, componentes e autenticação existentes; nenhuma dependência nova.",
-    "Fluxo administrativo desktop: categorias → perguntas da categoria → criação/edição → retorno à lista da mesma categoria.",
-    "Exibir o título do draft para FILL_BLANK e LEARNING e o statement para MULTIPLE_CHOICE, cujo contrato não possui title. O status vem da API.",
-    "Os formulários MULTIPLE_CHOICE (86e3m98f5) e LEARNING (86e3m98f4) pertencem a outras tasks e ainda não estão na develop. Preparar suas ações e rotas de integração, com aviso de indisponibilidade enquanto os formulários não chegam; não implementar os formulários nesta task nem marcar a integração como validada.",
-    "Manter a lista visível em falhas de atualização, com mensagem e nova tentativa; não compartilhar dados entre categorias.",
-    "Não modificar backend/mobile nem realizar pushes, merges, rebases ou atualizações no ClickUp. Solicitante autorizou o commit local da implementação e dos ajustes finais.",
-    "Ajuste solicitado na revisão: adicionar Gerenciar perguntas nas ações da categoria, preservando o link no nome; calcular as contagens dos mocks a partir das perguntas existentes e invalidar o cache de categorias após salvar uma pergunta. Publicada com alterações entra em ambas as contagens, conforme o C6.",
-    "Solicitante autorizou concluir a preparação para integração: concentrar as rotas da Trilha em app/routes/studyTracksRoutes.tsx, testar a configuração real e documentar a conexão dos formulários das outras tasks, sem assumir sua implementação."
+    "Filtro local ao widget; padrao 30d preservado.",
+    "Reutilizar registro NEW_CLIENTS, TanStack Query e servico C3.",
+    "Nao alterar configuracao ou periodo dos demais widgets.",
+    "Task isolada na branch feat/new-clients-filter, criada a partir de feat/configurable-widgets; cada task deve ter sua propria branch.",
+    "Refinamento visual solicitado: filtro compacto no cabecalho, numero em destaque e variacao em selo com texto auxiliar. Aplicado apenas ao widget com filtro.",
+    "Igualar altura de Clientes novos aos demais indicadores (164px no estado de sucesso), reduzindo espacamentos internos e altura do filtro sem cortar texto.",
+    "QA review do PR #15 em 2026-10-23: branch rebaseada sobre develop e24c74c (PR #13 ja mergeado por squash), mantendo so a commit da task; correcoes do PR #13 na develop preservadas."
+  ],
+  "plan": [
+    "Adicionar filtro acessivel e consulta por periodo",
+    "Adaptar mock e texto comparativo",
+    "Testar filtro, estados, variacoes e mock/HTTP; executar checks e revisar diff",
+    "Ajustes do QA review: rebase sobre develop, teste de isolamento de Usuarios ativos e assercao do teste de resposta atrasada"
   ],
   "files_in_scope": [
-    "src/features/study-tracks/",
-    "src/app/routes/",
-    "README.md",
+    "src/features/dashboard/components/WidgetsIndicadores.tsx",
+    "src/features/dashboard/components/WidgetIndicador.tsx",
+    "src/features/dashboard/hooks/useIndicadores.ts",
+    "src/features/dashboard/api/getMetricsSummary.ts",
+    "src/features/dashboard/api/metricsSummaryMock.ts",
+    "src/features/dashboard/components/WidgetClientesNovos.test.tsx",
+    "src/features/dashboard/api/getMetricsSummary.test.ts",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm test": "passed: 80 testes em 9 arquivos. Regressões cobrem criação com lista em cache, categoria vazia e erro anterior da consulta; edição inexistente continua exibindo o erro correto.",
-    "npm run lint": "passed após a correção do alerta indevido na criação.",
-    "npm run typecheck": "passed após a correção.",
-    "npm run build": "passed após a correção.",
-    "prettier": "passed nos arquivos da correção.",
-    "diff": "Diff revisado: 27 arquivos em relação à develop, restritos à feature, rotas, README e estado do workflow; nenhuma alteração no backend/mobile.",
-    "desktop": "Fluxos e teclado validados em testes; layout e contagens revisados nas capturas de categorias e perguntas enviadas pelo solicitante. Conferência visual final de foco e diferentes larguras fica no roteiro de revisão.",
-    "integracao": "Ações, URLs, parâmetros, retorno e cache da listagem prontos para integração. Avisos temporários dos formulários externos explicitamente documentados e testados; sem implementar as outras tasks.",
-    "route_contract": "8 novos testes da configuração real das rotas passaram.",
-    "creation_regression": "Teste da rota real reproduziu o alerta antes da correção e passou após restringir estados de consulta ao modo de edição. Dois novos testes verificam lista e erro previamente armazenados em cache; formulário de criação fica vazio e não dispara GET."
+    "npm run lint": "passed (2026-10-23, apos rebase sobre develop)",
+    "npm run typecheck": "passed (2026-10-23, apos rebase sobre develop)",
+    "npm test": "69 testes passando em Node 20.17.0 (58 da develop + 11 da task), 2026-10-23",
+    "npm run build": "passed (2026-10-23, apos rebase sobre develop)",
+    "git diff --check": "passed",
+    "interface": "Preview isolado dos componentes reais no navegador: Custo operacional, Clientes novos e Receita bruta medidos em 271x164px. Filtro e texto sem corte (2026-10-21, antes do rebase).",
+    "limitacoes": "Dashboard autenticado apos o rebase e integracao com backend real nao verificados."
   },
-  "review": "Escopo da listagem pronto para revisão e integração. Alerta indevido na criação corrigido; 80 testes, lint, typecheck e build passaram. Commit local dos ajustes finais autorizado pelo solicitante. Code review e merge permanecem pendentes; nenhum envio ao remoto ou atualização no ClickUp autorizado.",
+  "review": "QA review do PR #15 em 2026-10-23: requisitos do card atendidos; conflitos com a develop resolvidos por rebase; diff contra a develop restrito aos arquivos em escopo. Pendentes: teste manual em /app/costs, confirmacao de design do layout do card com filtro, atualizacao da descricao do PR e aprovacao do time.",
+  "updated_at": "2026-10-23",
   "open_questions": [
-    "Validar os fluxos completos de MULTIPLE_CHOICE e LEARNING quando os respectivos formulários forem integrados.",
-    "Validar o GET real quando a API de perguntas 86e3m95y3 estiver disponível; preservar o formato de leitura já adotado pelo frontend."
-  ],
-  "updated_at": "2026-10-21",
-  "integration_readiness": {
-    "status": "READY_FOR_INTEGRATION",
-    "scope": "Ações da listagem e rotas dos três tipos, parâmetros categoryId/questionId, retorno à categoria e cache compartilhado.",
-    "contract": "README.md — Contrato da listagem: pronto para integração; app/routes/studyTracksRoutes.tsx.",
-    "verified": "8 testes da configuração real de rotas passaram: categorias/lista/retorno, criação dos três tipos, edição dos três tipos e IDs codificados.",
-    "external_deliveries": "Os formulários MULTIPLE_CHOICE e LEARNING e a validação completa com esses formulários permanecem nas respectivas tasks. GET real depende da entrega da API; mocks são permitidos pelo aceite."
-  },
-  "acceptance_review": {
-    "lista_titulo_tipo_status": "READY",
-    "get_c6_e_mocks": "READY_WITH_MOCKS",
-    "acoes_e_contrato_de_integracao": "READY_FOR_INTEGRATION",
-    "estados_e_padroes_visuais": "IMPLEMENTED_AND_TESTED",
-    "portugues_e_teclado": "IMPLEMENTED_AND_TESTED",
-    "build_lint_typecheck_testes": "PASSED",
-    "code_review_e_merge": "PENDING_EXTERNAL_REVIEW"
-  }
+    "Layout do card com filtro (numero maior e variacao em selo) difere dos demais indicadores; confirmar com design/PO."
+  ]
 }

@@ -81,3 +81,13 @@ export function useCustoOperacional() {
 
   return toResultado(query, 'Não foi possível carregar o custo operacional.');
 }
+
+/** Clientes novos usa newUsers do mesmo summary C3 compartilhado no cache. */
+export function useClientesNovos(period: MetricsPeriod = PERIODO_INDICADORES) {
+  const query = useQuery({
+    queryKey: ['dashboard', 'metrics-summary', period],
+    queryFn: () => getMetricsSummary(period),
+    select: (dto) => toIndicador(dto.newUsers, formatoNumero),
+  });
+  return toResultado(query, 'Não foi possível carregar os clientes novos.');
+}
