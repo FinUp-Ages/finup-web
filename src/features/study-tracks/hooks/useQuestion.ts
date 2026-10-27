@@ -15,6 +15,7 @@ import type { QuestionDTO } from '../types';
 import { questionQueryKeys } from './questionQueryKeys';
 
 export function useQuestion(categoryId: string, questionId: string | undefined) {
+  const isEditing = Boolean(questionId);
   // Estavel por pergunta: o TanStack Query so roda o select de novo quando a lista muda.
   const selectQuestion = useCallback(
     (questions: QuestionDTO[]) => {
@@ -27,25 +28,27 @@ export function useQuestion(categoryId: string, questionId: string | undefined) 
   const query = useQuery({
     queryKey: questionQueryKeys.categoryQuestions(categoryId),
     queryFn: () => getCategoryQuestions(categoryId),
-    enabled: Boolean(questionId),
+    enabled: isEditing,
     select: selectQuestion,
   });
 
   // Falha num recarregamento com a pergunta ja na tela nao vira erro: o formulario continua.
   const hasData = query.data !== undefined;
-  const notFound = query.isSuccess && query.data === null;
+  // enabled=false impede a busca, mas o observer ainda recebe o cache da categoria.
+  // Na criacao nao ha pergunta para localizar: os estados de consulta sao so da edicao.
+  const notFound = isEditing && query.isSuccess && query.data === null;
+  const loadFailed = isEditing && query.isError && !hasData;
 
   return {
-    question: query.data ?? null,
-    isLoading: Boolean(questionId) && query.isPending,
-    errorMessage:
-      query.isError && !hasData
-        ? toLoadQuestionErrorMessage(query.error)
-        : notFound
-          ? questionNotFoundMessage
-          : null,
+    question: isEditing ? (query.data ?? null) : null,
+    isLoading: isEditing && query.isPending,
+    errorMessage: loadFailed
+      ? toLoadQuestionErrorMessage(query.error)
+      : notFound
+        ? questionNotFoundMessage
+        : null,
     reload: () => {
-      void query.refetch();
+      if (isEditing) void query.refetch();
     },
   };
 }
