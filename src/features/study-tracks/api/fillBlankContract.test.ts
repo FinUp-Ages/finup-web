@@ -74,5 +74,8 @@ describe('questionRoutes', () => {
       '/api/v1/admin/study-tracks/categories/cat%201/questions',
     );
     expect(questionRoutes.question('q-1')).toBe('/api/v1/admin/study-tracks/questions/q-1');
+    expect(questionRoutes.publish('q-1')).toBe('/api/v1/admin/study-tracks/questions/q-1/publish');
+    expect(questionRoutes.unpublish('q-1')).toBe('/api/v1/admin/study-tracks/questions/q-1/unpublish');
+    expect(questionRoutes.draft('q-1')).toBe('/api/v1/admin/study-tracks/questions/q-1/draft');
   });
 });
