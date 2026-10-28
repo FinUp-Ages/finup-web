@@ -125,10 +125,10 @@ describe('questionsMock', () => {
   });
 
   it('recusa publicar pergunta com rascunho invalido com mensagem clara', async () => {
-    // pergunta-multipla-escolha tem apenas { type: 'MULTIPLE_CHOICE' } sem enunciado
-    await expect(settle(publishQuestionMock('pergunta-multipla-escolha'))).rejects.toMatchObject({
+    // pergunta-invalida tem apenas { type: 'MULTIPLE_CHOICE' } sem enunciado
+    await expect(settle(publishQuestionMock('pergunta-invalida'))).rejects.toMatchObject({
       status: 400,
-      problem: { detail: 'Rascunho incompleto para publicação.' },
+      problem: { detail: 'Informe o título.' },
     });
   });
 

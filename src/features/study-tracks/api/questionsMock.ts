@@ -92,6 +92,20 @@ const initialQuestions: StoredQuestion[] = [
     publishedAt: null,
   },
   {
+    id: 'pergunta-invalida',
+    categoryId: 'categoria-outra',
+    draft: {
+      type: 'FILL_BLANK',
+      title: '',
+      statement: '',
+      answers: [],
+      explanation: '',
+    },
+    published: null,
+    updatedAt: '2026-10-20T12:00:00Z',
+    publishedAt: null,
+  },
+  {
     id: 'conteudo-educativo',
     categoryId: 'categoria-reserva',
     draft: {
@@ -284,3 +298,4 @@ export async function discardDraftQuestionMock(questionId: string): Promise<Ques
   questions = questions.map((item) => (item.id === questionId ? updated : item));
   return toDTO(updated);
 }
+

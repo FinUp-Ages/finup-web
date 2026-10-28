@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { CreateQuestionActions } from '../components/CreateQuestionActions';
 import { QuestionsTable } from '../components/QuestionsTable';
@@ -22,6 +23,7 @@ export function CategoryQuestionsPage({
   const category = categories.find((item) => item.id === categoryId);
   const { questions, hasData, isLoading, isFetching, errorMessage, reload } =
     useCategoryQuestions(categoryId);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   return (
     <div className="text-navy">
@@ -36,6 +38,14 @@ export function CategoryQuestionsPage({
           <h1 className="text-2xl font-semibold tracking-[0.32px]">Perguntas da categoria</h1>
           {category && <p className="break-words text-sm text-navy/60">{category.name}</p>}
         </header>
+
+        {successMessage && (
+          <div aria-live="polite">
+            <p className="rounded-[4px] border border-navy/20 bg-white px-4 py-3 text-sm font-medium">
+              {successMessage}
+            </p>
+          </div>
+        )}
 
         {!isLoading && hasData && (
           <CreateQuestionActions
@@ -87,8 +97,18 @@ export function CategoryQuestionsPage({
               ) : (
                 <QuestionsTable
                   questions={questions}
+                  categoryId={categoryId}
                   editPathFor={(questionId) => editPathFor(categoryId, questionId)}
                   isFetching={isFetching}
+                  onActionSuccess={(action) => {
+                    if (action === 'publish') {
+                      setSuccessMessage('Pergunta publicada.');
+                    } else if (action === 'unpublish') {
+                      setSuccessMessage('Pergunta movida de volta para rascunho.');
+                    } else if (action === 'discard') {
+                      setSuccessMessage('Alterações do rascunho descartadas.');
+                    }
+                  }}
                 />
               ))}
           </>

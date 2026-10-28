@@ -2,14 +2,24 @@ import { Link } from 'react-router-dom';
 import { questionStatusLabels, questionTypeLabels } from '../model/questionLabels';
 import { questionTitle } from '../model/questionTitle';
 import type { QuestionDTO } from '../types';
+import { QuestionStatusActions } from './QuestionStatusActions';
+import type { QuestionActionKind } from './QuestionActionDialog';
 
 type QuestionsTableProps = {
   questions: QuestionDTO[];
+  categoryId?: string;
   editPathFor: (questionId: string) => string;
   isFetching: boolean;
+  onActionSuccess?: (action: QuestionActionKind, updated: QuestionDTO) => void;
 };
 
-export function QuestionsTable({ questions, editPathFor, isFetching }: QuestionsTableProps) {
+export function QuestionsTable({
+  questions,
+  categoryId,
+  editPathFor,
+  isFetching,
+  onActionSuccess,
+}: QuestionsTableProps) {
   return (
     <div className="overflow-x-auto rounded-[4px] border border-black/5 bg-white">
       <table
@@ -19,9 +29,9 @@ export function QuestionsTable({ questions, editPathFor, isFetching }: Questions
         <caption className="sr-only">Perguntas da categoria</caption>
         <colgroup>
           <col />
+          <col className="w-[180px]" />
           <col className="w-[200px]" />
-          <col className="w-[250px]" />
-          <col className="w-[110px]" />
+          <col className="w-[360px]" />
         </colgroup>
         <thead>
           <tr className="h-[57px] border-b border-black/5">
@@ -54,13 +64,22 @@ export function QuestionsTable({ questions, editPathFor, isFetching }: Questions
                   </span>
                 </td>
                 <td className="px-4">
-                  <Link
-                    to={editPathFor(question.id)}
-                    aria-label={`Editar pergunta ${title}`}
-                    className="inline-flex h-[42px] items-center rounded-[4px] border border-black/10 bg-white px-3 hover:bg-surface-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
-                  >
-                    Editar
-                  </Link>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      to={editPathFor(question.id)}
+                      aria-label={`Editar pergunta ${title}`}
+                      className="inline-flex h-[38px] items-center rounded-[4px] border border-black/10 bg-white px-3 text-sm font-medium hover:bg-surface-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+                    >
+                      Editar
+                    </Link>
+                    <QuestionStatusActions
+                      questionId={question.id}
+                      status={question.status}
+                      categoryId={categoryId}
+                      questionTitle={title}
+                      onSuccess={onActionSuccess}
+                    />
+                  </div>
                 </td>
               </tr>
             );
