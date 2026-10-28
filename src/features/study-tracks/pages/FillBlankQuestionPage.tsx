@@ -13,6 +13,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { FillBlankQuestionForm } from '../components/FillBlankQuestionForm';
+import { QuestionStatusActions } from '../components/QuestionStatusActions';
 import { useQuestion } from '../hooks/useQuestion';
 import { useSaveFillBlankQuestion } from '../hooks/useSaveFillBlankQuestion';
 import { questionStatusLabels, questionTypeLabels } from '../model/questionLabels';
@@ -109,14 +110,34 @@ function FillBlankQuestionScreen({
           >
             ← Trilha de estudos
           </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-[0.32px]">
-              {isEditing ? 'Editar pergunta' : 'Nova pergunta'}: {typeLabel}
-            </h1>
-            {question && (
-              <span className="rounded-full border border-navy/20 bg-white px-3 py-1 text-xs font-medium">
-                {questionStatusLabels[question.status]}
-              </span>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold tracking-[0.32px]">
+                {isEditing ? 'Editar pergunta' : 'Nova pergunta'}: {typeLabel}
+              </h1>
+              {question && (
+                <span className="rounded-full border border-navy/20 bg-white px-3 py-1 text-xs font-medium">
+                  {questionStatusLabels[question.status]}
+                </span>
+              )}
+            </div>
+
+            {isEditing && question && (
+              <QuestionStatusActions
+                questionId={question.id}
+                status={question.status}
+                categoryId={categoryId}
+                questionTitle={question.values.title}
+                onSuccess={(action) => {
+                  if (action === 'publish') {
+                    setSuccessMessage('Pergunta publicada.');
+                  } else if (action === 'unpublish') {
+                    setSuccessMessage('Pergunta movida de volta para rascunho.');
+                  } else if (action === 'discard') {
+                    setSuccessMessage('Alterações do rascunho descartadas.');
+                  }
+                }}
+              />
             )}
           </div>
           {!isEditing && <p className="text-sm text-navy/70">A pergunta é salva como rascunho.</p>}
@@ -180,7 +201,7 @@ function FillBlankQuestionScreen({
 
         {canShowForm && (
           <FillBlankQuestionForm
-            key={question?.id ?? 'new'}
+            key={`${question?.id ?? 'new'}-${question?.status ?? ''}-${question?.values.title ?? ''}`}
             initialValues={question?.values ?? emptyValues}
             submitLabel={isEditing ? 'Salvar rascunho' : 'Criar rascunho'}
             isSaving={isSaving}

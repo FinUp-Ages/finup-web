@@ -190,3 +190,61 @@ export async function updateQuestionMock(
   questions = questions.map((item) => (item.id === questionId ? updated : item));
   return toDTO(updated);
 }
+
+
+export async function publishQuestionMock(questionId: string): Promise<QuestionDTO> {
+  await wait();
+  const current = questions.find((item) => item.id === questionId);
+  if (!current) {
+    throw problem(404, 'Not Found', 'Pergunta não encontrada.');
+  }
+  if (current.draft.type === 'FILL_BLANK') {
+    assertValidPayload(current.draft as FillBlankQuestionPayload);
+  } else if (!('statement' in current.draft) || !(current.draft as { statement?: string }).statement) {
+    throw problem(400, 'Bad Request', 'Rascunho incompleto para publicação.');
+  }
+  const now = new Date().toISOString();
+  const updated: StoredQuestion = {
+    ...current,
+    published: current.draft,
+    publishedAt: now,
+    updatedAt: now,
+  };
+  questions = questions.map((item) => (item.id === questionId ? updated : item));
+  return toDTO(updated);
+}
+
+export async function unpublishQuestionMock(questionId: string): Promise<QuestionDTO> {
+  await wait();
+  const current = questions.find((item) => item.id === questionId);
+  if (!current) {
+    throw problem(404, 'Not Found', 'Pergunta não encontrada.');
+  }
+  const now = new Date().toISOString();
+  const updated: StoredQuestion = {
+    ...current,
+    published: null,
+    publishedAt: null,
+    updatedAt: now,
+  };
+  questions = questions.map((item) => (item.id === questionId ? updated : item));
+  return toDTO(updated);
+}
+
+export async function discardDraftQuestionMock(questionId: string): Promise<QuestionDTO> {
+  await wait();
+  const current = questions.find((item) => item.id === questionId);
+  if (!current) {
+    throw problem(404, 'Not Found', 'Pergunta não encontrada.');
+  }
+  if (!current.published || sameContent(current.draft, current.published)) {
+    throw problem(400, 'Bad Request', 'Não há alterações pendentes no rascunho para descartar.');
+  }
+  const updated: StoredQuestion = {
+    ...current,
+    draft: current.published,
+    updatedAt: new Date().toISOString(),
+  };
+  questions = questions.map((item) => (item.id === questionId ? updated : item));
+  return toDTO(updated);
+}
