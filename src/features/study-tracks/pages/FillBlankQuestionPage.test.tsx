@@ -10,6 +10,7 @@ import { updateQuestion } from '../api/updateQuestion';
 import { publishQuestion } from '../api/publishQuestion';
 import { unpublishQuestion } from '../api/unpublishQuestion';
 import { discardDraftQuestion } from '../api/discardDraftQuestion';
+import { questionQueryKeys } from '../hooks/questionQueryKeys';
 import type { FillBlankQuestionPayload, QuestionDTO, QuestionStatus } from '../types';
 import { FillBlankQuestionPage } from './FillBlankQuestionPage';
 
@@ -54,10 +55,12 @@ function LocationProbe() {
 }
 
 /** `history` sao as entradas anteriores do navegador, antes de `url`. */
-function renderAt(url: string, history: string[] = []) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
+function renderAt(url: string, history: string[] = [], cachedClient?: QueryClient) {
+  const queryClient =
+    cachedClient ??
+    new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
   const page = (
     <FillBlankQuestionPage
       backTo="/studies"
@@ -98,6 +101,36 @@ beforeEach(() => {
 });
 
 describe('FillBlankQuestionPage - criacao', () => {
+  it('nao mostra erro nem preenche o formulario com a lista da categoria ja em cache', () => {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(questionQueryKeys.categoryQuestions('cat-1'), [questionDTO()]);
+
+    renderAt(createUrl, [], queryClient);
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Título')).toHaveValue('');
+    expect(screen.getByLabelText('Enunciado')).toHaveValue('');
+    expect(getCategoryQuestions).not.toHaveBeenCalled();
+  });
+
+  it('nao herda um erro da consulta da categoria ao abrir a criacao', async () => {
+    const queryClient = new QueryClient();
+    const error = new ApiError(500, null);
+    await expect(
+      queryClient.fetchQuery({
+        queryKey: questionQueryKeys.categoryQuestions('cat-1'),
+        queryFn: () => Promise.reject(error),
+        retry: false,
+      }),
+    ).rejects.toBe(error);
+
+    renderAt(createUrl, [], queryClient);
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Título')).toHaveValue('');
+    expect(getCategoryQuestions).not.toHaveBeenCalled();
+  });
+
   it('exibe os campos com rotulos e nao carrega perguntas', () => {
     renderAt(createUrl);
 

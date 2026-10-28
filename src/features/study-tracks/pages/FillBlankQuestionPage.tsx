@@ -21,7 +21,8 @@ import type { FillBlankFormValues } from '../types';
 
 type FillBlankQuestionPageProps = {
   /** Tela da Trilha de estudos, destino do link de voltar. */
-  backTo: string;
+  backTo: string | ((categoryId: string) => string);
+  backLabel?: string;
   /** Caminho de edicao de uma pergunta, usado depois de criar. */
   editPathFor: (categoryId: string, questionId: string) => string;
 };
@@ -49,6 +50,7 @@ type FillBlankQuestionScreenProps = FillBlankQuestionPageProps & {
 
 function FillBlankQuestionScreen({
   backTo,
+  backLabel = 'Trilha de estudos',
   editPathFor,
   categoryId,
   questionId,
@@ -95,7 +97,7 @@ function FillBlankQuestionScreen({
     });
   }
 
-  const typeLabel = questionTypeLabels.FILL_BLANK;
+  const typeLabel = questionTypeLabels[question?.type ?? 'FILL_BLANK'];
   const isOtherType = question !== null && question.type !== 'FILL_BLANK';
   const isPublished = question !== null && question.status !== 'DRAFT';
   const canShowForm = !isEditing || (question !== null && !isOtherType);
@@ -105,10 +107,10 @@ function FillBlankQuestionScreen({
       <section className="mx-auto flex w-full min-w-[720px] max-w-[760px] flex-col gap-6">
         <header className="flex flex-col gap-2">
           <Link
-            to={backTo}
+            to={typeof backTo === 'function' ? backTo(categoryId) : backTo}
             className="w-fit text-sm underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
           >
-            ← Trilha de estudos
+            ← {backLabel}
           </Link>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">

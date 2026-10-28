@@ -7,12 +7,12 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { AuthenticatedAdminLayout } from '@/app/routes/AuthenticatedAdminLayout';
 import { navigation } from '@/app/routes/navigation';
-import { paths, studiesEditQuestionPath } from '@/app/routes/paths';
+import { paths } from '@/app/routes/paths';
 import { ProtectedRoute } from '@/app/routes/ProtectedRoute';
+import { studyTracksRoutes } from '@/app/routes/studyTracksRoutes';
 import { AdminSectionPage } from '@/features/admin';
 import { LoginPage } from '@/features/auth';
 import { DashboardPage } from '@/features/dashboard';
-import { FillBlankQuestionPage, StudyCategoriesPage } from '@/features/study-tracks';
 import { UsersPage } from '@/features/users';
 import { WelcomePage } from '@/features/welcome';
 
@@ -31,19 +31,7 @@ const router = createBrowserRouter([
       { path: paths.team, element: <UsersPage /> },
       { path: paths.analytics, element: <AdminSectionPage title="Analytics" /> },
       { path: paths.costs, element: <DashboardPage /> },
-      { path: paths.studies, element: <StudyCategoriesPage /> },
-      {
-        path: paths.studiesNewFillBlankQuestion,
-        element: (
-          <FillBlankQuestionPage backTo={paths.studies} editPathFor={studiesEditQuestionPath} />
-        ),
-      },
-      {
-        path: paths.studiesEditQuestion,
-        element: (
-          <FillBlankQuestionPage backTo={paths.studies} editPathFor={studiesEditQuestionPath} />
-        ),
-      },
+      ...studyTracksRoutes,
     ],
   },
 ]);

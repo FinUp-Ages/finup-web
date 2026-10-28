@@ -4,6 +4,8 @@
  */
 export { FillBlankQuestionPage } from './pages/FillBlankQuestionPage';
 export { StudyCategoriesPage } from './pages/StudyCategoriesPage';
+export { CategoryQuestionsPage } from './pages/CategoryQuestionsPage';
+export { QuestionFormPendingPage } from './pages/QuestionFormPendingPage';
 export type { CategoryDTO, QuestionStatus, QuestionType } from './types';
 export { QuestionStatusActions } from './components/QuestionStatusActions';
 export { QuestionActionDialog } from './components/QuestionActionDialog';

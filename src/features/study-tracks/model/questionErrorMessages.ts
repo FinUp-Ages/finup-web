@@ -34,6 +34,21 @@ export function toLoadQuestionErrorMessage(error: unknown): string {
   return 'Não foi possível carregar a pergunta.';
 }
 
+export function toLoadCategoryQuestionsErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.status === null) {
+      return OFFLINE_MESSAGE;
+    }
+    if (error.status === 404) {
+      return 'Categoria não encontrada.';
+    }
+    if (error.status === 403) {
+      return 'Você não tem permissão para acessar as perguntas desta categoria.';
+    }
+  }
+  return 'Não foi possível carregar as perguntas. Tente novamente.';
+}
+
 export function toSaveQuestionErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     if (error.status === null) {
