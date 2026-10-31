@@ -124,12 +124,13 @@ describe('questionsMock', () => {
     expect(published.publishedAt).toBeTruthy();
   });
 
-  it('recusa publicar pergunta com rascunho invalido com mensagem clara', async () => {
-    // pergunta-multipla-escolha tem apenas { type: 'MULTIPLE_CHOICE' } sem enunciado
-    await expect(settle(publishQuestionMock('conteudo-educativo'))).rejects.toMatchObject({
-      status: 400,
-      problem: { detail: 'Rascunho incompleto para publicação.' },
-    });
+  it('publica rascunhos completos dos tipos que ainda nao tem formulario', async () => {
+    // Multipla escolha com enunciado e alternativa correta; conteudo educativo com titulo e texto.
+    const multipleChoice = await settle(publishQuestionMock('pergunta-multipla-escolha'));
+    const learning = await settle(publishQuestionMock('conteudo-educativo'));
+
+    expect(multipleChoice.status).toBe('PUBLISHED');
+    expect(learning.status).toBe('PUBLISHED');
   });
 
   it('volta a pergunta para rascunho com status DRAFT e published nulo', async () => {
@@ -151,10 +152,17 @@ describe('questionsMock', () => {
     expect(discarded.draft).toEqual(before.published);
   });
 
-  it('recusa descartar alteracoes quando nao ha alteracoes pendentes', async () => {
-    await expect(settle(discardDraftQuestionMock('pergunta-publicada'))).rejects.toMatchObject({
-      status: 400,
-      problem: { detail: 'Não há alterações pendentes no rascunho para descartar.' },
+  it('sem alteracoes pendentes, descartar mantem a pergunta publicada', async () => {
+    const discarded = await settle(discardDraftQuestionMock('pergunta-publicada'));
+
+    expect(discarded.status).toBe('PUBLISHED');
+    expect(discarded.draft).toEqual(discarded.published);
+  });
+
+  it('recusa descartar alteracoes de pergunta sem versao publicada', async () => {
+    await expect(settle(discardDraftQuestionMock('pergunta-rascunho'))).rejects.toMatchObject({
+      status: 409,
+      problem: { detail: 'A pergunta não tem versão publicada, então não há edição a descartar.' },
     });
   });
 

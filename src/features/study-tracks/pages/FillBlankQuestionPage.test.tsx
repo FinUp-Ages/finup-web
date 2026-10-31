@@ -98,6 +98,9 @@ beforeEach(() => {
   vi.mocked(createQuestion).mockReset();
   vi.mocked(updateQuestion).mockReset();
   vi.mocked(getCategoryQuestions).mockReset();
+  vi.mocked(publishQuestion).mockReset();
+  vi.mocked(unpublishQuestion).mockReset();
+  vi.mocked(discardDraftQuestion).mockReset();
 });
 
 describe('FillBlankQuestionPage - criacao', () => {
@@ -514,5 +517,53 @@ describe('FillBlankQuestionPage - edicao', () => {
     expect(screen.getByText('Publicada')).toBeVisible();
     // O formulario deve recarregar com os valores publicados
     expect(await screen.findByDisplayValue('Título Original Publicado')).toBeVisible();
+  });
+
+  it('bloqueia publicar com edicoes nao salvas e libera depois de salvar o rascunho', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO()]);
+    vi.mocked(updateQuestion).mockResolvedValue(
+      questionDTO('DRAFT', { ...draftContent, title: 'Novo título' }),
+    );
+    const { user } = renderAt(editUrl);
+
+    const title = await screen.findByLabelText('Título');
+    const publish = screen.getByRole('button', { name: 'Publicar' });
+    expect(publish).toBeEnabled();
+
+    await user.clear(title);
+    await user.type(title, 'Novo título');
+
+    // O PUT ainda nao foi feito: publicar levaria ao ar o rascunho antigo do servidor.
+    expect(publish).toBeDisabled();
+    expect(publish).toHaveAccessibleDescription(
+      'Salve o rascunho antes de publicar, voltar para rascunho ou descartar.',
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+
+    expect(await screen.findByText('Rascunho salvo.')).toBeVisible();
+    expect(publish).toBeEnabled();
+    expect(publish).not.toHaveAccessibleDescription();
+    expect(title).toHaveValue('Novo título');
+    expect(publishQuestion).not.toHaveBeenCalled();
+  });
+
+  it('libera as acoes quando a edicao volta ao conteudo salvo', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO('PUBLISHED_WITH_CHANGES')]);
+    const { user } = renderAt(editUrl);
+
+    const title = await screen.findByLabelText('Título');
+    await user.type(title, ' extra');
+
+    for (const name of ['Publicar', 'Voltar para rascunho', 'Descartar alterações']) {
+      expect(screen.getByRole('button', { name })).toBeDisabled();
+    }
+
+    await user.clear(title);
+    await user.type(title, 'Rendimento do CDB');
+
+    for (const name of ['Publicar', 'Voltar para rascunho', 'Descartar alterações']) {
+      expect(screen.getByRole('button', { name })).toBeEnabled();
+    }
   });
 });

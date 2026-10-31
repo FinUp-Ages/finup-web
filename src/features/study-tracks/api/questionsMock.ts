@@ -227,6 +227,23 @@ export async function updateQuestionMock(
   return toDTO(updated);
 }
 
+/**
+ * O backend valida o draft antes de publicar (400 se invalido). FILL_BLANK usa as regras do
+ * formulario; os demais tipos ainda nao tem formulario e exigem so os campos obrigatorios.
+ */
+function assertPublishableDraft(draft: QuestionContentDTO): void {
+  if (draft.type === 'FILL_BLANK') {
+    assertValidPayload(draft);
+    return;
+  }
+  const isComplete =
+    draft.type === 'MULTIPLE_CHOICE'
+      ? Boolean(draft.statement?.trim()) && Boolean(draft.options?.some((option) => option.correct))
+      : Boolean(draft.title?.trim()) && Boolean(draft.body?.trim());
+  if (!isComplete) {
+    throw problem(400, 'Bad Request', 'Rascunho incompleto para publicação.');
+  }
+}
 
 export async function publishQuestionMock(questionId: string): Promise<QuestionDTO> {
   await wait();
@@ -234,11 +251,7 @@ export async function publishQuestionMock(questionId: string): Promise<QuestionD
   if (!current) {
     throw problem(404, 'Not Found', 'Pergunta não encontrada.');
   }
-  if (current.draft.type === 'FILL_BLANK') {
-    assertValidPayload(current.draft as FillBlankQuestionPayload);
-  } else if (!('statement' in current.draft) || !(current.draft as { statement?: string }).statement) {
-    throw problem(400, 'Bad Request', 'Rascunho incompleto para publicação.');
-  }
+  assertPublishableDraft(current.draft);
   const now = new Date().toISOString();
   const updated: StoredQuestion = {
     ...current,
@@ -273,8 +286,13 @@ export async function discardDraftQuestionMock(questionId: string): Promise<Ques
   if (!current) {
     throw problem(404, 'Not Found', 'Pergunta não encontrada.');
   }
-  if (!current.published || sameContent(current.draft, current.published)) {
-    throw problem(400, 'Bad Request', 'Não há alterações pendentes no rascunho para descartar.');
+  // C6: descartar so vale com versao publicada (409). Sem alteracoes pendentes, nao muda nada.
+  if (!current.published) {
+    throw problem(
+      409,
+      'Conflict',
+      'A pergunta não tem versão publicada, então não há edição a descartar.',
+    );
   }
   const updated: StoredQuestion = {
     ...current,
