@@ -13,6 +13,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { FillBlankQuestionForm } from '../components/FillBlankQuestionForm';
+import { QuestionStatusActions } from '../components/QuestionStatusActions';
 import { useQuestion } from '../hooks/useQuestion';
 import { useSaveFillBlankQuestion } from '../hooks/useSaveFillBlankQuestion';
 import { questionStatusLabels, questionTypeLabels } from '../model/questionLabels';
@@ -70,6 +71,9 @@ function FillBlankQuestionScreen({
     errorMessage: saveErrorMessage,
   } = useSaveFillBlankQuestion({ categoryId, questionId });
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  // Muda so ao descartar alteracoes, quando o rascunho do servidor troca por baixo do formulario.
+  const [formRevision, setFormRevision] = useState(0);
 
   // O aviso de criacao vem no state da navegacao. Depois de exibido, o state e limpo para o
   // aviso nao repetir ao recarregar.
@@ -100,6 +104,13 @@ function FillBlankQuestionScreen({
   const isOtherType = question !== null && question.type !== 'FILL_BLANK';
   const isPublished = question !== null && question.status !== 'DRAFT';
   const canShowForm = !isEditing || (question !== null && !isOtherType);
+  // Publicar, voltar para rascunho e descartar agem no rascunho do servidor, nao no que esta no
+  // formulario: com edicoes nao salvas, o admin publicaria um conteudo diferente do que ve na tela.
+  const actionsDisabledReason = isSaving
+    ? 'Aguarde o rascunho terminar de salvar.'
+    : hasUnsavedChanges
+      ? 'Salve o rascunho antes de publicar, voltar para rascunho ou descartar.'
+      : null;
 
   return (
     <div className="text-navy">
@@ -111,14 +122,37 @@ function FillBlankQuestionScreen({
           >
             ← {backLabel}
           </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-[0.32px]">
-              {isEditing ? 'Editar pergunta' : 'Nova pergunta'}: {typeLabel}
-            </h1>
-            {question && (
-              <span className="rounded-full border border-navy/20 bg-white px-3 py-1 text-xs font-medium">
-                {questionStatusLabels[question.status]}
-              </span>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold tracking-[0.32px]">
+                {isEditing ? 'Editar pergunta' : 'Nova pergunta'}: {typeLabel}
+              </h1>
+              {question && (
+                <span className="rounded-full border border-navy/20 bg-white px-3 py-1 text-xs font-medium">
+                  {questionStatusLabels[question.status]}
+                </span>
+              )}
+            </div>
+
+            {isEditing && question && (
+              <QuestionStatusActions
+                questionId={question.id}
+                status={question.status}
+                categoryId={categoryId}
+                questionTitle={question.values.title}
+                disabledReason={actionsDisabledReason}
+                onSuccess={(action) => {
+                  if (action === 'publish') {
+                    setSuccessMessage('Pergunta publicada.');
+                  } else if (action === 'unpublish') {
+                    setSuccessMessage('Pergunta movida de volta para rascunho.');
+                  } else if (action === 'discard') {
+                    // O rascunho voltou ao conteudo publicado: o formulario monta de novo com ele.
+                    setFormRevision((revision) => revision + 1);
+                    setSuccessMessage('Alterações do rascunho descartadas.');
+                  }
+                }}
+              />
             )}
           </div>
           {!isEditing && <p className="text-sm text-navy/70">A pergunta é salva como rascunho.</p>}
@@ -182,11 +216,12 @@ function FillBlankQuestionScreen({
 
         {canShowForm && (
           <FillBlankQuestionForm
-            key={question?.id ?? 'new'}
+            key={`${question?.id ?? 'new'}-${formRevision}`}
             initialValues={question?.values ?? emptyValues}
             submitLabel={isEditing ? 'Salvar rascunho' : 'Criar rascunho'}
             isSaving={isSaving}
             onSubmit={handleSubmit}
+            onDirtyChange={setHasUnsavedChanges}
           />
         )}
       </section>

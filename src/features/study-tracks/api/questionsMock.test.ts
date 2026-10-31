@@ -6,6 +6,9 @@ import {
   MISSING_CATEGORY_ID,
   resetQuestionsMock,
   updateQuestionMock,
+  publishQuestionMock,
+  unpublishQuestionMock,
+  discardDraftQuestionMock,
 } from './questionsMock';
 
 const payload: FillBlankQuestionPayload = {
@@ -112,4 +115,61 @@ describe('questionsMock', () => {
       settle(createQuestionMock('categoria-reserva', { ...payload, answers: [] })),
     ).rejects.toMatchObject({ status: 400 });
   });
+
+  it('publica a pergunta, copiando o draft para published com status PUBLISHED', async () => {
+    const published = await settle(publishQuestionMock('pergunta-rascunho'));
+
+    expect(published.status).toBe('PUBLISHED');
+    expect(published.published).toEqual(published.draft);
+    expect(published.publishedAt).toBeTruthy();
+  });
+
+  it('publica rascunhos completos dos tipos que ainda nao tem formulario', async () => {
+    // Multipla escolha com enunciado e alternativa correta; conteudo educativo com titulo e texto.
+    const multipleChoice = await settle(publishQuestionMock('pergunta-multipla-escolha'));
+    const learning = await settle(publishQuestionMock('conteudo-educativo'));
+
+    expect(multipleChoice.status).toBe('PUBLISHED');
+    expect(learning.status).toBe('PUBLISHED');
+  });
+
+  it('volta a pergunta para rascunho com status DRAFT e published nulo', async () => {
+    const unpublished = await settle(unpublishQuestionMock('pergunta-publicada'));
+
+    expect(unpublished.status).toBe('DRAFT');
+    expect(unpublished.published).toBeNull();
+    expect(unpublished.publishedAt).toBeNull();
+  });
+
+  it('descarta alteracoes pendentes revertendo o draft para o conteudo publicado', async () => {
+    const [before] = (await settle(getCategoryQuestionsMock('categoria-reserva'))).filter(
+      (q) => q.id === 'pergunta-com-alteracoes',
+    );
+
+    const discarded = await settle(discardDraftQuestionMock('pergunta-com-alteracoes'));
+
+    expect(discarded.status).toBe('PUBLISHED');
+    expect(discarded.draft).toEqual(before.published);
+  });
+
+  it('sem alteracoes pendentes, descartar mantem a pergunta publicada', async () => {
+    const discarded = await settle(discardDraftQuestionMock('pergunta-publicada'));
+
+    expect(discarded.status).toBe('PUBLISHED');
+    expect(discarded.draft).toEqual(discarded.published);
+  });
+
+  it('recusa descartar alteracoes de pergunta sem versao publicada', async () => {
+    await expect(settle(discardDraftQuestionMock('pergunta-rascunho'))).rejects.toMatchObject({
+      status: 409,
+      problem: { detail: 'A pergunta não tem versão publicada, então não há edição a descartar.' },
+    });
+  });
+
+  it('responde 404 para acoes em pergunta inexistente', async () => {
+    await expect(settle(publishQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
+    await expect(settle(unpublishQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
+    await expect(settle(discardDraftQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
+  });
+
 });

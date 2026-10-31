@@ -226,3 +226,79 @@ export async function updateQuestionMock(
   questions = questions.map((item) => (item.id === questionId ? updated : item));
   return toDTO(updated);
 }
+
+/**
+ * O backend valida o draft antes de publicar (400 se invalido). FILL_BLANK usa as regras do
+ * formulario; os demais tipos ainda nao tem formulario e exigem so os campos obrigatorios.
+ */
+function assertPublishableDraft(draft: QuestionContentDTO): void {
+  if (draft.type === 'FILL_BLANK') {
+    assertValidPayload(draft);
+    return;
+  }
+  const isComplete =
+    draft.type === 'MULTIPLE_CHOICE'
+      ? Boolean(draft.statement?.trim()) && Boolean(draft.options?.some((option) => option.correct))
+      : Boolean(draft.title?.trim()) && Boolean(draft.body?.trim());
+  if (!isComplete) {
+    throw problem(400, 'Bad Request', 'Rascunho incompleto para publicação.');
+  }
+}
+
+export async function publishQuestionMock(questionId: string): Promise<QuestionDTO> {
+  await wait();
+  const current = questions.find((item) => item.id === questionId);
+  if (!current) {
+    throw problem(404, 'Not Found', 'Pergunta não encontrada.');
+  }
+  assertPublishableDraft(current.draft);
+  const now = new Date().toISOString();
+  const updated: StoredQuestion = {
+    ...current,
+    published: current.draft,
+    publishedAt: now,
+    updatedAt: now,
+  };
+  questions = questions.map((item) => (item.id === questionId ? updated : item));
+  return toDTO(updated);
+}
+
+export async function unpublishQuestionMock(questionId: string): Promise<QuestionDTO> {
+  await wait();
+  const current = questions.find((item) => item.id === questionId);
+  if (!current) {
+    throw problem(404, 'Not Found', 'Pergunta não encontrada.');
+  }
+  const now = new Date().toISOString();
+  const updated: StoredQuestion = {
+    ...current,
+    published: null,
+    publishedAt: null,
+    updatedAt: now,
+  };
+  questions = questions.map((item) => (item.id === questionId ? updated : item));
+  return toDTO(updated);
+}
+
+export async function discardDraftQuestionMock(questionId: string): Promise<QuestionDTO> {
+  await wait();
+  const current = questions.find((item) => item.id === questionId);
+  if (!current) {
+    throw problem(404, 'Not Found', 'Pergunta não encontrada.');
+  }
+  // C6: descartar so vale com versao publicada (409). Sem alteracoes pendentes, nao muda nada.
+  if (!current.published) {
+    throw problem(
+      409,
+      'Conflict',
+      'A pergunta não tem versão publicada, então não há edição a descartar.',
+    );
+  }
+  const updated: StoredQuestion = {
+    ...current,
+    draft: current.published,
+    updatedAt: new Date().toISOString(),
+  };
+  questions = questions.map((item) => (item.id === questionId ? updated : item));
+  return toDTO(updated);
+}

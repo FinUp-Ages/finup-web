@@ -1,44 +1,47 @@
 {
   "stage": "REVIEWING",
-  "task": "Frontend: widget Clientes novos com filtro (C3)",
-  "objective": "Exibir newUsers do summary por 7d, 30d e 90d, com variacao, loading, erro e alternancia mock/HTTP pela flag existente.",
+  "task": "Frontend: Trilha - publicar, despublicar e descartar alteracoes (C6)",
+  "objective": "Botoes Publicar (POST /questions/{id}/publish), Voltar para rascunho (POST /questions/{id}/unpublish) e Descartar alteracoes (DELETE /questions/{id}/draft, so em PUBLISHED_WITH_CHANGES), todos com confirmacao, erros claros, selo da lista atualizado e mock via VITE_USE_MOCKS.",
   "decisions": [
-    "Filtro local ao widget; padrao 30d preservado.",
-    "Reutilizar registro NEW_CLIENTS, TanStack Query e servico C3.",
-    "Nao alterar configuracao ou periodo dos demais widgets.",
-    "Task isolada na branch feat/new-clients-filter, criada a partir de feat/configurable-widgets; cada task deve ter sua propria branch.",
-    "Refinamento visual solicitado: filtro compacto no cabecalho, numero em destaque e variacao em selo com texto auxiliar. Aplicado apenas ao widget com filtro.",
-    "Igualar altura de Clientes novos aos demais indicadores (164px no estado de sucesso), reduzindo espacamentos internos e altura do filtro sem cortar texto.",
-    "QA review do PR #15 em 2026-10-23: branch rebaseada sobre develop e24c74c (PR #13 ja mergeado por squash), mantendo so a commit da task; correcoes do PR #13 na develop preservadas."
+    "Acoes na tela de edicao da pergunta; o selo da lista atualiza pelo mesmo cache da categoria (setQueryData) e as contagens das categorias sao invalidadas.",
+    "Code review do PR #16 em 2026-10-30: as acoes agem no rascunho do servidor, entao ficam desabilitadas com edicoes nao salvas no formulario ou durante o salvamento, com o motivo exibido abaixo dos botoes.",
+    "Formulario remonta so ao descartar alteracoes (revisao local), sem remontar a cada salvamento.",
+    "Mock alinhado ao backend C6 (finup-backend develop, PR #58): publicar valida o draft por tipo; descartar sem versao publicada responde 409 e, sem alteracoes pendentes, mantem a pergunta publicada.",
+    "Teste manual em 2026-10-30 com backend local na branch feat/categorias-trilhas-estudo-admin: publicar respondeu 404 (No static resource) porque essa branch nao tem o PR #58. Para testar em modo HTTP, o backend precisa estar na develop."
   ],
   "plan": [
-    "Adicionar filtro acessivel e consulta por periodo",
-    "Adaptar mock e texto comparativo",
-    "Testar filtro, estados, variacoes e mock/HTTP; executar checks e revisar diff",
-    "Ajustes do QA review: rebase sobre develop, teste de isolamento de Usuarios ativos e assercao do teste de resposta atrasada"
+    "Rotas, chamadas HTTP/mock e hook de mutacoes do C6",
+    "Modal de confirmacao e botoes por status integrados a edicao",
+    "Ajustes do code review: bloqueio com edicoes nao salvas, key do formulario, mock por tipo, limpezas e testes"
   ],
   "files_in_scope": [
-    "src/features/dashboard/components/WidgetsIndicadores.tsx",
-    "src/features/dashboard/components/WidgetIndicador.tsx",
-    "src/features/dashboard/hooks/useIndicadores.ts",
-    "src/features/dashboard/api/getMetricsSummary.ts",
-    "src/features/dashboard/api/metricsSummaryMock.ts",
-    "src/features/dashboard/components/WidgetClientesNovos.test.tsx",
-    "src/features/dashboard/api/getMetricsSummary.test.ts",
+    "src/features/study-tracks/api/publishQuestion.ts",
+    "src/features/study-tracks/api/unpublishQuestion.ts",
+    "src/features/study-tracks/api/discardDraftQuestion.ts",
+    "src/features/study-tracks/api/fillBlankContract.ts",
+    "src/features/study-tracks/api/questionsMock.ts",
+    "src/features/study-tracks/hooks/useQuestionActions.ts",
+    "src/features/study-tracks/model/questionErrorMessages.ts",
+    "src/features/study-tracks/components/QuestionActionDialog.tsx",
+    "src/features/study-tracks/components/QuestionStatusActions.tsx",
+    "src/features/study-tracks/components/FillBlankQuestionForm.tsx",
+    "src/features/study-tracks/pages/FillBlankQuestionPage.tsx",
+    "src/features/study-tracks/**/*.test.ts(x) relacionados",
+    "src/test/setup.ts",
+    "src/features/dashboard/pages/DashboardPage.test.tsx (remocao do stub de dialog duplicado)",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run lint": "passed (2026-10-23, apos rebase sobre develop)",
-    "npm run typecheck": "passed (2026-10-23, apos rebase sobre develop)",
-    "npm test": "69 testes passando em Node 20.17.0 (58 da develop + 11 da task), 2026-10-23",
-    "npm run build": "passed (2026-10-23, apos rebase sobre develop)",
+    "npm run lint": "passed (2026-10-30)",
+    "npm run typecheck": "passed (2026-10-30)",
+    "npm test": "128 testes passando em Node 20.17.0 (2026-10-30)",
+    "npm run build": "passed (2026-10-30)",
     "git diff --check": "passed",
-    "interface": "Preview isolado dos componentes reais no navegador: Custo operacional, Clientes novos e Receita bruta medidos em 271x164px. Filtro e texto sem corte (2026-10-21, antes do rebase).",
-    "limitacoes": "Dashboard autenticado apos o rebase e integracao com backend real nao verificados."
+    "limitacoes": "Fluxo autenticado no navegador (login Cognito) e integracao com o backend real nao verificados; estados cobertos por testes de componente e de pagina."
   },
-  "review": "QA review do PR #15 em 2026-10-23: requisitos do card atendidos; conflitos com a develop resolvidos por rebase; diff contra a develop restrito aos arquivos em escopo. Pendentes: teste manual em /app/costs, confirmacao de design do layout do card com filtro, atualizacao da descricao do PR e aprovacao do time.",
-  "updated_at": "2026-10-23",
+  "review": "Code review do PR #16 em 2026-10-30: requisitos do card atendidos. Corrigido o risco de publicar conteudo diferente do exibido com edicoes nao salvas. Pendentes: teste manual no painel com o backend na develop, atualizar a descricao do PR conforme o template e aprovacao do time.",
+  "updated_at": "2026-10-30",
   "open_questions": [
-    "Layout do card com filtro (numero maior e variacao em selo) difere dos demais indicadores; confirmar com design/PO."
+    "Os botoes devem aparecer tambem na lista de perguntas da categoria? Hoje ficam so na edicao."
   ]
 }

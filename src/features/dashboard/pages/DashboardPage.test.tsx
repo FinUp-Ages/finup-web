@@ -32,18 +32,6 @@ function mount(client = createClient()) {
 beforeEach(() => {
   localStorage.clear();
   vi.restoreAllMocks();
-  Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
-    configurable: true,
-    value: function (this: HTMLDialogElement) {
-      this.open = true;
-    },
-  });
-  Object.defineProperty(HTMLDialogElement.prototype, 'close', {
-    configurable: true,
-    value: function (this: HTMLDialogElement) {
-      this.open = false;
-    },
-  });
 });
 
 describe('Configuracao de widgets no dashboard', () => {

@@ -30,6 +30,15 @@ export const questionRoutes = {
   /** PUT atualiza o rascunho. */
   question: (questionId: string) =>
     `${STUDY_TRACKS_ADMIN_PATH}/questions/${encodeURIComponent(questionId)}`,
+  /** POST publica a pergunta (copia o rascunho para a versao no ar). */
+  publish: (questionId: string) =>
+    `${STUDY_TRACKS_ADMIN_PATH}/questions/${encodeURIComponent(questionId)}/publish`,
+  /** POST volta a pergunta para rascunho (remove a versao no ar). */
+  unpublish: (questionId: string) =>
+    `${STUDY_TRACKS_ADMIN_PATH}/questions/${encodeURIComponent(questionId)}/unpublish`,
+  /** DELETE descarta alteracoes pendentes no rascunho (reverte para o publicado). */
+  draft: (questionId: string) =>
+    `${STUDY_TRACKS_ADMIN_PATH}/questions/${encodeURIComponent(questionId)}/draft`,
 };
 
 /** Formulario -> corpo FILL_BLANK, sem campos extras e com os textos aparados. */
