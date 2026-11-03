@@ -13,9 +13,11 @@
 import { ApiError } from '@/shared/config/apiError';
 import type { ProblemDetail } from '@/shared/types/problemDetail';
 import { validateFillBlankQuestion } from '../model/fillBlankValidation';
+import { validateLearningQuestion } from '../model/learningValidation';
 import type {
   CategoryDTO,
   FillBlankQuestionPayload,
+  LearningQuestionPayload,
   QuestionContentDTO,
   QuestionDTO,
   QuestionStatus,
@@ -172,11 +174,21 @@ function assertCategoryExists(categoryId: string): void {
 }
 
 /** Mesmas regras do formulario, como o backend faria no 400. */
-function assertValidPayload(payload: FillBlankQuestionPayload): void {
-  const errors = validateFillBlankQuestion(payload);
-  const firstError = errors.title ?? errors.statement ?? errors.answers;
-  if (payload.type !== 'FILL_BLANK' || firstError) {
-    throw problem(400, 'Bad Request', firstError ?? 'Corpo da pergunta inválido.');
+function assertValidPayload(payload: FillBlankQuestionPayload | LearningQuestionPayload): void {
+  if (payload.type === 'FILL_BLANK') {
+    const errors = validateFillBlankQuestion(payload);
+    const firstError = errors.title ?? errors.statement ?? errors.answers;
+    if (firstError) {
+      throw problem(400, 'Bad Request', firstError);
+    }
+  } else if (payload.type === 'LEARNING') {
+    const errors = validateLearningQuestion(payload);
+    const firstError = errors.title ?? errors.body;
+    if (firstError) {
+      throw problem(400, 'Bad Request', firstError);
+    }
+  } else {
+    throw problem(400, 'Bad Request', 'Tipo de pergunta não suportado.');
   }
 }
 
@@ -188,7 +200,7 @@ export async function getCategoryQuestionsMock(categoryId: string): Promise<Ques
 
 export async function createQuestionMock(
   categoryId: string,
-  payload: FillBlankQuestionPayload,
+  payload: FillBlankQuestionPayload | LearningQuestionPayload,
 ): Promise<QuestionDTO> {
   await wait();
   assertCategoryExists(categoryId);
@@ -208,7 +220,7 @@ export async function createQuestionMock(
 
 export async function updateQuestionMock(
   questionId: string,
-  payload: FillBlankQuestionPayload,
+  payload: FillBlankQuestionPayload | LearningQuestionPayload,
 ): Promise<QuestionDTO> {
   await wait();
   const current = questions.find((item) => item.id === questionId);

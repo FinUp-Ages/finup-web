@@ -115,7 +115,6 @@ describe('questionsMock', () => {
       settle(createQuestionMock('categoria-reserva', { ...payload, answers: [] })),
     ).rejects.toMatchObject({ status: 400 });
   });
-
   it('publica a pergunta, copiando o draft para published com status PUBLISHED', async () => {
     const published = await settle(publishQuestionMock('pergunta-rascunho'));
 
@@ -172,4 +171,49 @@ describe('questionsMock', () => {
     await expect(settle(discardDraftQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
   });
 
+  it('cria pergunta do tipo LEARNING como rascunho', async () => {
+    const created = await settle(
+      createQuestionMock('categoria-reserva', {
+        type: 'LEARNING',
+        title: 'Guia de Fundos Imobiliários',
+        body: '# Fundos Imobiliários\nFIIs pagam dividendos mensais.',
+      }),
+    );
+
+    expect(created.status).toBe('DRAFT');
+    expect(created.draft).toEqual({
+      type: 'LEARNING',
+      title: 'Guia de Fundos Imobiliários',
+      body: '# Fundos Imobiliários\nFIIs pagam dividendos mensais.',
+    });
+    expect(created.published).toBeNull();
+  });
+
+  it('atualiza rascunho de pergunta do tipo LEARNING', async () => {
+    const updated = await settle(
+      updateQuestionMock('conteudo-educativo', {
+        type: 'LEARNING',
+        title: 'Por que ter uma reserva de emergência? (Atualizado)',
+        body: 'Texto atualizado sobre reserva de emergência.',
+      }),
+    );
+
+    expect(updated.draft).toEqual({
+      type: 'LEARNING',
+      title: 'Por que ter uma reserva de emergência? (Atualizado)',
+      body: 'Texto atualizado sobre reserva de emergência.',
+    });
+  });
+
+  it('recusa criar pergunta LEARNING com corpo vazio', async () => {
+    await expect(
+      settle(
+        createQuestionMock('categoria-reserva', {
+          type: 'LEARNING',
+          title: 'Titulo',
+          body: '',
+        }),
+      ),
+    ).rejects.toMatchObject({ status: 400 });
+  });
 });

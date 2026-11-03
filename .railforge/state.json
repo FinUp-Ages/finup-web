@@ -1,47 +1,56 @@
 {
   "stage": "REVIEWING",
-  "task": "Frontend: Trilha - publicar, despublicar e descartar alteracoes (C6)",
-  "objective": "Botoes Publicar (POST /questions/{id}/publish), Voltar para rascunho (POST /questions/{id}/unpublish) e Descartar alteracoes (DELETE /questions/{id}/draft, so em PUBLISHED_WITH_CHANGES), todos com confirmacao, erros claros, selo da lista atualizado e mock via VITE_USE_MOCKS.",
+  "task": "Frontend: Trilha - conteúdo explicativo (C6)",
+  "objective": "Criar e editar o rascunho de uma pergunta LEARNING com título e corpo em markdown, pré-visualização renderizada, campos obrigatórios, estados de carregamento/erro/sucesso e mock via VITE_USE_MOCKS.",
   "decisions": [
-    "Acoes na tela de edicao da pergunta; o selo da lista atualiza pelo mesmo cache da categoria (setQueryData) e as contagens das categorias sao invalidadas.",
-    "Code review do PR #16 em 2026-10-30: as acoes agem no rascunho do servidor, entao ficam desabilitadas com edicoes nao salvas no formulario ou durante o salvamento, com o motivo exibido abaixo dos botoes.",
-    "Formulario remonta so ao descartar alteracoes (revisao local), sem remontar a cada salvamento.",
-    "Mock alinhado ao backend C6 (finup-backend develop, PR #58): publicar valida o draft por tipo; descartar sem versao publicada responde 409 e, sem alteracoes pendentes, mantem a pergunta publicada.",
-    "Teste manual em 2026-10-30 com backend local na branch feat/categorias-trilhas-estudo-admin: publicar respondeu 404 (No static resource) porque essa branch nao tem o PR #58. Para testar em modo HTTP, o backend precisa estar na develop."
+    "A edição reaproveita a lista da categoria em cache e envia POST na criação e PUT na edição, com o corpo C6 { type: LEARNING, title, body }.",
+    "A pré-visualização interpreta markdown em elementos React, sem dangerouslySetInnerHTML.",
+    "A rota de edição existente passa a despachar por tipo: FILL_BLANK na tela de lacuna e LEARNING na tela de conteúdo explicativo.",
+    "Publicar, voltar para rascunho e descartar continuam restritos à tela de preencher lacuna; esta task entrega o rascunho LEARNING."
   ],
   "plan": [
-    "Rotas, chamadas HTTP/mock e hook de mutacoes do C6",
-    "Modal de confirmacao e botoes por status integrados a edicao",
-    "Ajustes do code review: bloqueio com edicoes nao salvas, key do formulario, mock por tipo, limpezas e testes"
+    "Contrato, validação e mock do tipo LEARNING",
+    "Formulário com abas Escrever/Pré-visualizar e validação acessível",
+    "Páginas de criação e edição integradas às rotas da trilha",
+    "Testes de contrato, formulário, preview, hooks, páginas e rotas"
   ],
   "files_in_scope": [
-    "src/features/study-tracks/api/publishQuestion.ts",
-    "src/features/study-tracks/api/unpublishQuestion.ts",
-    "src/features/study-tracks/api/discardDraftQuestion.ts",
-    "src/features/study-tracks/api/fillBlankContract.ts",
+    "src/features/study-tracks/api/learningContract.ts",
+    "src/features/study-tracks/api/learningContract.test.ts",
     "src/features/study-tracks/api/questionsMock.ts",
-    "src/features/study-tracks/hooks/useQuestionActions.ts",
-    "src/features/study-tracks/model/questionErrorMessages.ts",
-    "src/features/study-tracks/components/QuestionActionDialog.tsx",
-    "src/features/study-tracks/components/QuestionStatusActions.tsx",
-    "src/features/study-tracks/components/FillBlankQuestionForm.tsx",
-    "src/features/study-tracks/pages/FillBlankQuestionPage.tsx",
-    "src/features/study-tracks/**/*.test.ts(x) relacionados",
-    "src/test/setup.ts",
-    "src/features/dashboard/pages/DashboardPage.test.tsx (remocao do stub de dialog duplicado)",
+    "src/features/study-tracks/api/questionsMock.test.ts",
+    "src/features/study-tracks/api/createQuestion.ts",
+    "src/features/study-tracks/api/updateQuestion.ts",
+    "src/features/study-tracks/components/LearningQuestionForm.tsx",
+    "src/features/study-tracks/components/LearningQuestionForm.test.tsx",
+    "src/features/study-tracks/components/MarkdownPreview.tsx",
+    "src/features/study-tracks/components/MarkdownPreview.test.tsx",
+    "src/features/study-tracks/hooks/useLearningQuestion.ts",
+    "src/features/study-tracks/hooks/useLearningQuestion.test.tsx",
+    "src/features/study-tracks/hooks/useSaveLearningQuestion.ts",
+    "src/features/study-tracks/hooks/useSaveLearningQuestion.test.tsx",
+    "src/features/study-tracks/model/learningValidation.ts",
+    "src/features/study-tracks/model/learningValidation.test.ts",
+    "src/features/study-tracks/pages/EditQuestionPage.tsx",
+    "src/features/study-tracks/pages/EditQuestionPage.test.tsx",
+    "src/features/study-tracks/pages/LearningQuestionPage.tsx",
+    "src/features/study-tracks/pages/LearningQuestionPage.test.tsx",
+    "src/features/study-tracks/index.ts",
+    "src/features/study-tracks/types.ts",
+    "src/app/routes/studyTracksRoutes.tsx",
+    "src/app/routes/studyTracksRoutes.test.tsx",
     ".railforge/state.json"
   ],
   "validation": {
-    "npm run lint": "passed (2026-10-30)",
-    "npm run typecheck": "passed (2026-10-30)",
-    "npm test": "128 testes passando em Node 20.17.0 (2026-10-30)",
-    "npm run build": "passed (2026-10-30)",
-    "git diff --check": "passed",
-    "limitacoes": "Fluxo autenticado no navegador (login Cognito) e integracao com o backend real nao verificados; estados cobertos por testes de componente e de pagina."
+    "npm run lint": "passou (2026-11-03)",
+    "npm run typecheck": "passou (2026-11-03)",
+    "npm test": "159 testes passando (2026-11-03)",
+    "npm run build": "passou (2026-11-03)",
+    "limitacoes": "Validação executada em cópia local do working tree porque o node_modules do diretório original estava corrompido; fluxo autenticado no navegador e backend real não verificados."
   },
-  "review": "Code review do PR #16 em 2026-10-30: requisitos do card atendidos. Corrigido o risco de publicar conteudo diferente do exibido com edicoes nao salvas. Pendentes: teste manual no painel com o backend na develop, atualizar a descricao do PR conforme o template e aprovacao do time.",
-  "updated_at": "2026-10-30",
+  "review": "Revisão do diff em 2026-11-03 com a develop atualizada (628e89f). Pendente de revisão do time e teste manual no painel.",
+  "updated_at": "2026-11-03",
   "open_questions": [
-    "Os botoes devem aparecer tambem na lista de perguntas da categoria? Hoje ficam so na edicao."
+    "As ações de publicar, despublicar e descartar devem aparecer também na tela de conteúdo explicativo?"
   ]
 }

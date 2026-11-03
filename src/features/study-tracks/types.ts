@@ -79,6 +79,30 @@ export interface FillBlankFormValues {
   explanation: string;
 }
 
+/** Corpo do POST e do PUT de uma pergunta "Conteúdo explicativo / educativo". */
+export interface LearningQuestionPayload {
+  type: 'LEARNING';
+  title: string;
+  body: string;
+}
+
+/** União dos payloads suportados de pergunta. */
+export type QuestionPayload = FillBlankQuestionPayload | LearningQuestionPayload;
+
+/** Valores editados no formulario "Conteúdo explicativo". */
+export interface LearningFormValues {
+  title: string;
+  body: string;
+}
+
+/** Conteúdo explicativo carregado para edicao. */
+export interface LearningQuestion {
+  id: string;
+  type: 'LEARNING';
+  status: QuestionStatus;
+  values: LearningFormValues;
+}
+
 /** Pergunta carregada para edicao, no formato da tela (os valores vem do rascunho). */
 export interface FillBlankQuestion {
   id: string;
