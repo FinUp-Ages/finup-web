@@ -4,13 +4,13 @@
  */
 import { env } from '@/shared/config/env';
 import { httpClient } from '@/shared/config/httpClient';
-import type { FillBlankQuestionPayload, QuestionDTO } from '../types';
+import type { QuestionDTO, QuestionPayload } from '../types';
 import { questionRoutes } from './fillBlankContract';
 import { createQuestionMock } from './questionsMock';
 
 export async function createQuestion(
   categoryId: string,
-  payload: FillBlankQuestionPayload,
+  payload: QuestionPayload,
 ): Promise<QuestionDTO> {
   if (env.useMocks) {
     return createQuestionMock(categoryId, payload);
