@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/shared/config/apiError';
 import { getCategoryQuestions } from '../api/getCategoryQuestions';
-import type { QuestionDTO } from '../types';
+import type { QuestionContentDTO, QuestionDTO } from '../types';
 import { EditQuestionPage } from './EditQuestionPage';
 
 vi.mock('../api/getCategoryQuestions', () => ({ getCategoryQuestions: vi.fn() }));
@@ -45,9 +45,17 @@ const mockQuestions: QuestionDTO[] = [
     status: 'DRAFT',
     draft: {
       type: 'LEARNING',
-      title: 'Título Educativo',
-      body: 'Corpo educativo',
+      title: 'Título Explicativo',
+      body: 'Texto explicativo',
     },
+    published: null,
+    updatedAt: '2026-10-20T12:00:00Z',
+    publishedAt: null,
+  },
+  {
+    id: 'q-unknown',
+    status: 'DRAFT',
+    draft: { type: 'ORDERING' } as unknown as QuestionContentDTO,
     published: null,
     updatedAt: '2026-10-20T12:00:00Z',
     publishedAt: null,
@@ -113,18 +121,24 @@ describe('EditQuestionPage', () => {
     expect(screen.getByDisplayValue('O CDB rende ___ do CDI')).toBeVisible();
   });
 
-  it('exibe mensagem quando o tipo ainda não tem formulário suportado', async () => {
+  it('renderiza LearningQuestionPage quando a pergunta é do tipo LEARNING', async () => {
     vi.mocked(getCategoryQuestions).mockResolvedValue(mockQuestions);
     renderAt('/studies/categories/cat-1/questions/q-learning/edit');
 
     expect(
       await screen.findByRole('heading', { name: 'Editar pergunta: Conteúdo educativo' }),
     ).toBeVisible();
-    expect(
-      screen.getByText(
-        'Esta pergunta é do tipo Conteúdo educativo, que ainda não pode ser editado no painel.',
-      ),
-    ).toBeVisible();
+    expect(screen.getByDisplayValue('Título Explicativo')).toBeVisible();
+    expect(screen.getByDisplayValue('Texto explicativo')).toBeVisible();
+  });
+
+  it('exibe aviso quando o tipo da pergunta não é conhecido pelo painel', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue(mockQuestions);
+    renderAt('/studies/categories/cat-1/questions/q-unknown/edit');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Esta pergunta é do tipo ORDERING, que ainda não pode ser editado no painel.',
+    );
   });
 
   it('exibe mensagem de erro quando a categoria não é encontrada', async () => {
@@ -143,4 +157,3 @@ describe('EditQuestionPage', () => {
     );
   });
 });
-

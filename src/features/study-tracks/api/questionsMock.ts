@@ -8,16 +8,18 @@
  * - pergunta-publicada: FILL_BLANK publicada, sem alteracoes (editar vira PUBLISHED_WITH_CHANGES);
  * - pergunta-com-alteracoes: FILL_BLANK publicada com rascunho diferente;
  * - pergunta-multipla-escolha: MULTIPLE_CHOICE em DRAFT;
- * - conteudo-educativo: tipo com formulario em outra task.
+ * - conteudo-educativo: LEARNING em DRAFT.
  * A categoria "categoria-inexistente" responde 404.
  */
 import { ApiError } from '@/shared/config/apiError';
 import type { ProblemDetail } from '@/shared/types/problemDetail';
 import { validateFillBlankQuestion } from '../model/fillBlankValidation';
+import { validateLearningQuestion } from '../model/learningValidation';
 import { validateMultipleChoiceQuestion } from '../model/multipleChoiceValidation';
 import type {
   CategoryDTO,
   FillBlankQuestionPayload,
+  LearningQuestionPayload,
   MultipleChoiceQuestionPayload,
   QuestionContentDTO,
   QuestionDTO,
@@ -195,6 +197,15 @@ function assertValidPayload(payload: QuestionPayload): void {
     return;
   }
 
+  if (payload.type === 'LEARNING') {
+    const errors = validateLearningQuestion(payload);
+    const firstError = errors.title ?? errors.body;
+    if (firstError) {
+      throw problem(400, 'Bad Request', firstError);
+    }
+    return;
+  }
+
   throw problem(400, 'Bad Request', 'Corpo da pergunta inválido.');
 }
 
@@ -246,8 +257,8 @@ export async function updateQuestionMock(
 }
 
 /**
- * O backend valida o draft antes de publicar (400 se invalido). FILL_BLANK e MULTIPLE_CHOICE
- * usam as regras dos seus formularios; o tipo LEARNING exige seus campos obrigatorios.
+ * O backend valida o draft antes de publicar (400 se invalido), com as mesmas regras dos
+ * formularios de cada tipo.
  */
 function assertPublishableDraft(draft: QuestionContentDTO): void {
   if (draft.type === 'FILL_BLANK') {
@@ -263,10 +274,11 @@ function assertPublishableDraft(draft: QuestionContentDTO): void {
     } satisfies MultipleChoiceQuestionPayload);
     return;
   }
-  const isComplete = Boolean(draft.title?.trim()) && Boolean(draft.body?.trim());
-  if (!isComplete) {
-    throw problem(400, 'Bad Request', 'Rascunho incompleto para publicação.');
-  }
+  assertValidPayload({
+    type: 'LEARNING',
+    title: draft.title ?? '',
+    body: draft.body ?? '',
+  } satisfies LearningQuestionPayload);
 }
 
 export async function publishQuestionMock(questionId: string): Promise<QuestionDTO> {

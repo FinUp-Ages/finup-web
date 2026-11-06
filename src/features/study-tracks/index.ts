@@ -4,8 +4,9 @@
  */
 export { FillBlankQuestionPage } from './pages/FillBlankQuestionPage';
 export { MultipleChoiceQuestionPage } from './pages/MultipleChoiceQuestionPage';
+export { LearningQuestionPage } from './pages/LearningQuestionPage';
 export { EditQuestionPage } from './pages/EditQuestionPage';
 export { StudyCategoriesPage } from './pages/StudyCategoriesPage';
 export { CategoryQuestionsPage } from './pages/CategoryQuestionsPage';
 export { QuestionFormPendingPage } from './pages/QuestionFormPendingPage';
-export type { CategoryDTO, QuestionStatus, QuestionType } from './types';
+export type { CategoryDTO, QuestionStatus, QuestionType, LearningQuestion, LearningFormValues } from './types';

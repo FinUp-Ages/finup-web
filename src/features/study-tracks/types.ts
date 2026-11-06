@@ -78,8 +78,18 @@ export type QuestionContentDTO =
   | MultipleChoiceContentDTO
   | LearningContentDTO;
 
+/** Corpo do POST e do PUT de uma pergunta "Conteúdo explicativo / educativo". */
+export interface LearningQuestionPayload {
+  type: 'LEARNING';
+  title: string;
+  body: string;
+}
+
 /** Uniao dos payloads suportados no POST e PUT de perguntas. */
-export type QuestionPayload = FillBlankQuestionPayload | MultipleChoiceQuestionPayload;
+export type QuestionPayload =
+  | FillBlankQuestionPayload
+  | MultipleChoiceQuestionPayload
+  | LearningQuestionPayload;
 
 /** Resposta do POST e do PUT e item do GET da categoria. */
 export interface QuestionDTO {
@@ -97,6 +107,20 @@ export interface FillBlankFormValues {
   statement: string;
   answers: string[];
   explanation: string;
+}
+
+/** Valores editados no formulario "Conteúdo explicativo". */
+export interface LearningFormValues {
+  title: string;
+  body: string;
+}
+
+/** Conteúdo explicativo carregado para edicao. */
+export interface LearningQuestion {
+  id: string;
+  type: 'LEARNING';
+  status: QuestionStatus;
+  values: LearningFormValues;
 }
 
 /** Pergunta carregada para edicao, no formato da tela (os valores vem do rascunho). */

@@ -68,7 +68,7 @@ describe('contrato de integracao das rotas da Trilha', () => {
       `/app/studies/categories/categoria-reserva/questions/new/${slug}`,
     );
     expect(screen.getByRole('heading', { name: `Nova pergunta: ${label}` })).toBeVisible();
-    if (type === 'FILL_BLANK') {
+    if (type === 'FILL_BLANK' || type === 'LEARNING') {
       expect(screen.getByLabelText('Título')).toBeVisible();
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     } else if (type === 'MULTIPLE_CHOICE') {
@@ -97,7 +97,7 @@ describe('contrato de integracao das rotas da Trilha', () => {
       studiesEditQuestionPath('categoria-reserva', id),
     );
     expect(await screen.findByRole('heading', { name: `Editar pergunta: ${label}` })).toBeVisible();
-    if (id === 'pergunta-rascunho') {
+    if (id === 'pergunta-rascunho' || id === 'conteudo-educativo') {
       expect(screen.getByLabelText('Título')).toBeVisible();
     } else if (id === 'pergunta-multipla-escolha') {
       expect(screen.getByLabelText('Enunciado')).toBeVisible();
