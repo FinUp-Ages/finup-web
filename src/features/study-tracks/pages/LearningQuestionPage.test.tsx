@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createQuestion } from '../api/createQuestion';
 import { getCategoryQuestions } from '../api/getCategoryQuestions';
+import { publishQuestion } from '../api/publishQuestion';
 import { updateQuestion } from '../api/updateQuestion';
 import type { QuestionDTO } from '../types';
 import { LearningQuestionPage } from './LearningQuestionPage';
@@ -12,6 +13,9 @@ import { LearningQuestionPage } from './LearningQuestionPage';
 vi.mock('../api/createQuestion', () => ({ createQuestion: vi.fn() }));
 vi.mock('../api/updateQuestion', () => ({ updateQuestion: vi.fn() }));
 vi.mock('../api/getCategoryQuestions', () => ({ getCategoryQuestions: vi.fn() }));
+vi.mock('../api/publishQuestion', () => ({ publishQuestion: vi.fn() }));
+vi.mock('../api/unpublishQuestion', () => ({ unpublishQuestion: vi.fn() }));
+vi.mock('../api/discardDraftQuestion', () => ({ discardDraftQuestion: vi.fn() }));
 
 const existingLearning: QuestionDTO = {
   id: 'conteudo-1',
@@ -67,6 +71,7 @@ beforeEach(() => {
   vi.mocked(updateQuestion).mockReset();
   vi.mocked(getCategoryQuestions).mockReset();
   vi.mocked(getCategoryQuestions).mockResolvedValue([]);
+  vi.mocked(publishQuestion).mockReset();
 });
 
 describe('LearningQuestionPage - criacao', () => {
@@ -75,8 +80,9 @@ describe('LearningQuestionPage - criacao', () => {
     renderPage('/app/studies/categories/cat-1/questions/new/learning');
 
     expect(screen.getByRole('heading', { name: 'Nova pergunta: Conteúdo educativo' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Publicar' })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    await user.click(screen.getByRole('button', { name: 'Criar rascunho' }));
 
     expect(screen.getByText('Informe o título do conteúdo.')).toBeVisible();
     expect(screen.getByText('Informe o corpo do conteúdo em markdown.')).toBeVisible();
@@ -98,7 +104,7 @@ describe('LearningQuestionPage - criacao', () => {
       'Conceitos sobre Tesouro Direto e CDB.',
     );
 
-    await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    await user.click(screen.getByRole('button', { name: 'Criar rascunho' }));
 
     expect(createQuestion).toHaveBeenCalledWith('cat-1', {
       type: 'LEARNING',
@@ -166,5 +172,68 @@ describe('LearningQuestionPage - edicao', () => {
     expect(
       screen.getByText(/Esta pergunta está publicada. As alterações ficam no rascunho/),
     ).toBeVisible();
+  });
+
+  it('bloqueia publicar com edicoes nao salvas e libera depois de salvar o rascunho', async () => {
+    const user = userEvent.setup();
+    vi.mocked(getCategoryQuestions).mockResolvedValue([existingLearning]);
+    vi.mocked(updateQuestion).mockResolvedValue({
+      ...existingLearning,
+      draft: {
+        type: 'LEARNING',
+        title: 'Reserva atualizada',
+        body: '# O que é\nUma reserva serve para imprevistos.',
+      },
+    });
+
+    renderPage('/app/studies/categories/cat-1/questions/conteudo-1/edit');
+
+    const title = await screen.findByDisplayValue('Reserva de Emergência');
+    const publish = screen.getByRole('button', { name: 'Publicar' });
+    expect(publish).toBeEnabled();
+
+    await user.clear(title);
+    await user.type(title, 'Reserva atualizada');
+
+    expect(publish).toBeDisabled();
+    expect(publish).toHaveAccessibleDescription(
+      'Salve o rascunho antes de publicar, voltar para rascunho ou descartar.',
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+
+    expect(await screen.findByText('Rascunho salvo.')).toBeVisible();
+    expect(publish).toBeEnabled();
+  });
+
+  it('publica o conteudo com confirmacao e atualiza o selo de status', async () => {
+    const user = userEvent.setup();
+    let current: QuestionDTO = existingLearning;
+    vi.mocked(getCategoryQuestions).mockImplementation(async () => [current]);
+    vi.mocked(publishQuestion).mockImplementation(async (id) => {
+      current = {
+        ...current,
+        id,
+        status: 'PUBLISHED',
+        published: current.draft,
+        publishedAt: '2026-10-23T12:00:00Z',
+      };
+      return current;
+    });
+
+    renderPage('/app/studies/categories/cat-1/questions/conteudo-1/edit');
+    await screen.findByDisplayValue('Reserva de Emergência');
+    expect(screen.getByText('Rascunho')).toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'Publicar' }));
+    const dialog = screen.getByRole('dialog');
+    const confirm = screen
+      .getAllByRole('button', { name: 'Publicar' })
+      .find((button) => dialog.contains(button));
+    await user.click(confirm!);
+
+    expect(publishQuestion).toHaveBeenCalledWith('conteudo-1');
+    expect(await screen.findByText('Pergunta publicada.')).toBeVisible();
+    expect(screen.getByText('Publicada')).toBeVisible();
   });
 });

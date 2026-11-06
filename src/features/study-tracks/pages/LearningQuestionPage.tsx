@@ -9,6 +9,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LearningQuestionForm } from '../components/LearningQuestionForm';
+import { QuestionStatusActions } from '../components/QuestionStatusActions';
 import { useLearningQuestion } from '../hooks/useLearningQuestion';
 import { useSaveLearningQuestion } from '../hooks/useSaveLearningQuestion';
 import { questionStatusLabels, questionTypeLabels } from '../model/questionLabels';
@@ -60,14 +61,14 @@ function LearningQuestionScreen({
     errorMessage: loadErrorMessage,
     reload,
   } = useLearningQuestion(categoryId, questionId);
-
   const {
     save,
     isSaving,
     errorMessage: saveErrorMessage,
   } = useSaveLearningQuestion({ categoryId, questionId });
-
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [formRevision, setFormRevision] = useState(0);
 
   useEffect(() => {
     if ((location.state as LocationState)?.created) {
@@ -91,9 +92,14 @@ function LearningQuestionScreen({
     });
   }
 
-  const typeLabel = questionTypeLabels['LEARNING'];
+  const typeLabel = questionTypeLabels.LEARNING;
   const isPublished = question !== null && question.status !== 'DRAFT';
   const canShowForm = !isEditing || question !== null;
+  const actionsDisabledReason = isSaving
+    ? 'Aguarde o rascunho terminar de salvar.'
+    : hasUnsavedChanges
+      ? 'Salve o rascunho antes de publicar, voltar para rascunho ou descartar.'
+      : null;
 
   return (
     <div className="text-navy">
@@ -105,14 +111,36 @@ function LearningQuestionScreen({
           >
             ← {backLabel}
           </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-[0.32px]">
-              {isEditing ? 'Editar pergunta' : 'Nova pergunta'}: {typeLabel}
-            </h1>
-            {question && (
-              <span className="rounded-full border border-navy/20 bg-white px-3 py-1 text-xs font-medium">
-                {questionStatusLabels[question.status]}
-              </span>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold tracking-[0.32px]">
+                {isEditing ? 'Editar pergunta' : 'Nova pergunta'}: {typeLabel}
+              </h1>
+              {question && (
+                <span className="rounded-full border border-navy/20 bg-white px-3 py-1 text-xs font-medium">
+                  {questionStatusLabels[question.status]}
+                </span>
+              )}
+            </div>
+
+            {isEditing && question && (
+              <QuestionStatusActions
+                questionId={question.id}
+                status={question.status}
+                categoryId={categoryId}
+                questionTitle={question.values.title}
+                disabledReason={actionsDisabledReason}
+                onSuccess={(action) => {
+                  if (action === 'publish') {
+                    setSuccessMessage('Pergunta publicada.');
+                  } else if (action === 'unpublish') {
+                    setSuccessMessage('Pergunta movida de volta para rascunho.');
+                  } else if (action === 'discard') {
+                    setFormRevision((revision) => revision + 1);
+                    setSuccessMessage('Alterações do rascunho descartadas.');
+                  }
+                }}
+              />
             )}
           </div>
           {!isEditing && <p className="text-sm text-navy/70">A pergunta é salva como rascunho.</p>}
@@ -149,27 +177,29 @@ function LearningQuestionScreen({
 
         <div aria-live="polite">
           {successMessage && (
-            <p
-              role="status"
-              className="mb-4 rounded-[4px] border border-navy/20 bg-white px-4 py-3 text-sm"
-            >
+            <p className="rounded-[4px] border border-navy/20 bg-white px-4 py-3 text-sm font-medium">
               {successMessage}
             </p>
           )}
         </div>
 
         {saveErrorMessage && (
-          <p role="alert" className="rounded-[4px] border border-login-error bg-white px-4 py-3 text-sm">
+          <p
+            role="alert"
+            className="rounded-[4px] border border-login-error bg-white px-4 py-3 text-sm text-login-error"
+          >
             {saveErrorMessage}
           </p>
         )}
 
         {canShowForm && (
           <LearningQuestionForm
-            initialValues={question ? question.values : emptyValues}
-            submitLabel="Salvar rascunho"
+            key={`${question?.id ?? 'new'}-${formRevision}`}
+            initialValues={question?.values ?? emptyValues}
+            submitLabel={isEditing ? 'Salvar rascunho' : 'Criar rascunho'}
             isSaving={isSaving}
             onSubmit={handleSubmit}
+            onDirtyChange={setHasUnsavedChanges}
           />
         )}
       </section>

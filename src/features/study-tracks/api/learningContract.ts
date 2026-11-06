@@ -9,22 +9,24 @@ import type {
   QuestionDTO,
 } from '../types';
 
-/** Converte valores do formulário para o payload de envio (POST/PUT). */
+/**
+ * Converte valores do formulário para o payload de envio (POST/PUT).
+ * O corpo vai como foi digitado: o C6 preserva o Markdown (indentação inicial pode ser código).
+ */
 export function toLearningPayload(values: LearningFormValues): LearningQuestionPayload {
   return {
     type: 'LEARNING',
     title: values.title.trim(),
-    body: values.body.trim(),
+    body: values.body,
   };
 }
 
 /** Converte o DTO retornado pela API no modelo de tela de Conteúdo explicativo. */
 export function toLearningQuestion(dto: QuestionDTO): LearningQuestion | null {
-  if (dto.draft.type !== 'LEARNING') {
+  const { draft } = dto;
+  if (draft.type !== 'LEARNING') {
     return null;
   }
-
-  const draft = dto.draft as { title?: string; body?: string };
 
   return {
     id: dto.id,

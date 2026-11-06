@@ -3,16 +3,16 @@ import type { QuestionDTO } from '../types';
 import { toLearningPayload, toLearningQuestion } from './learningContract';
 
 describe('learningContract', () => {
-  it('converte valores de formulario para LearningQuestionPayload limpando espacos', () => {
+  it('converte valores de formulario para LearningQuestionPayload aparando so o titulo', () => {
     const payload = toLearningPayload({
       title: '  Reserva de Emergência  ',
-      body: '  # Titulo\nTexto explicativo  ',
+      body: '    const codigo = 1;\n\n# Titulo\nTexto explicativo',
     });
 
     expect(payload).toEqual({
       type: 'LEARNING',
       title: 'Reserva de Emergência',
-      body: '# Titulo\nTexto explicativo',
+      body: '    const codigo = 1;\n\n# Titulo\nTexto explicativo',
     });
   });
 

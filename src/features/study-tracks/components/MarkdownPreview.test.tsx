@@ -37,6 +37,24 @@ describe('MarkdownPreview', () => {
     expect(screen.getByText(/const a = 1;/)).toBeVisible();
   });
 
+  it('mantem bloco de codigo inteiro mesmo com linha em branco dentro dele', () => {
+    const markdown = 'Antes\n\n```js\nconst a = 1;\n\nconst b = 2;\n```\n\nDepois';
+    const { container } = render(<MarkdownPreview content={markdown} />);
+
+    const blocks = container.querySelectorAll('pre');
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0].textContent).toBe('const a = 1;\n\nconst b = 2;');
+    expect(screen.getByText('Antes')).toBeVisible();
+    expect(screen.getByText('Depois')).toBeVisible();
+  });
+
+  it('nao cria link para protocolos inseguros', () => {
+    render(<MarkdownPreview content="Clique [aqui](javascript:alert(1))" />);
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByText(/aqui/)).toBeVisible();
+  });
+
   it('renderiza citacao e links com seguranca', () => {
     const markdown = '> Nota de atencao\n\nVisite o [FinUp](https://finup.com.br)';
     render(<MarkdownPreview content={markdown} />);

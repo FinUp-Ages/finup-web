@@ -47,10 +47,14 @@ function parseInline(text: string): ReactNode[] {
     if (linkMatch) {
       const [, linkText, href] = linkMatch;
       const isSafe = /^https?:\/\//i.test(href) || href.startsWith('/');
+      if (!isSafe) {
+        // Protocolos como javascript: nao viram link; mostra so o texto.
+        return <span key={index}>{linkText}</span>;
+      }
       return (
         <a
           key={index}
-          href={isSafe ? href : '#'}
+          href={href}
           target="_blank"
           rel="noopener noreferrer"
           className="font-medium text-navy underline hover:text-navy/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-navy"
@@ -64,15 +68,57 @@ function parseInline(text: string): ReactNode[] {
   });
 }
 
+const FENCE = '```';
+
+/**
+ * Separa o markdown em blocos por linha em branco, mantendo cada bloco de código cercado por
+ * ``` inteiro, mesmo com linhas em branco dentro dele.
+ */
+function splitBlocks(content: string): string[] {
+  const blocks: string[] = [];
+  let current: string[] = [];
+  let insideFence = false;
+
+  const flush = () => {
+    if (current.length > 0) {
+      blocks.push(current.join('\n'));
+      current = [];
+    }
+  };
+
+  for (const line of content.replace(/\r\n?/g, '\n').split('\n')) {
+    const isFence = line.trim().startsWith(FENCE);
+    if (insideFence) {
+      current.push(line);
+      if (isFence) {
+        insideFence = false;
+        flush();
+      }
+    } else if (isFence) {
+      flush();
+      current.push(line);
+      insideFence = true;
+    } else if (!line.trim()) {
+      flush();
+    } else {
+      current.push(line);
+    }
+  }
+  flush();
+  return blocks;
+}
+
 /** Renderiza um bloco simples de markdown de forma tipada e segura. */
 function renderBlock(block: string, index: number): ReactNode {
   const trimmed = block.trim();
   if (!trimmed) return null;
 
-  // Bloco de código
-  if (trimmed.startsWith('```') && trimmed.endsWith('```')) {
-    const lines = trimmed.slice(3, -3).split('\n');
-    const code = (lines[0]?.trim() ? lines.slice(1) : lines).join('\n');
+  // Bloco de código: a primeira linha é a cerca (com a linguagem opcional), a última fecha.
+  if (trimmed.startsWith(FENCE)) {
+    const lines = block.split('\n');
+    const lastLine = lines[lines.length - 1] ?? '';
+    const hasClosingFence = lines.length > 1 && lastLine.trim().startsWith(FENCE);
+    const code = lines.slice(1, hasClosingFence ? -1 : undefined).join('\n');
     return (
       <pre
         key={index}
@@ -169,7 +215,7 @@ export function MarkdownPreview({ content, className = '' }: MarkdownPreviewProp
     );
   }
 
-  const blocks = content.split(/\n\s*\n/);
+  const blocks = splitBlocks(content);
 
   return (
     <div
