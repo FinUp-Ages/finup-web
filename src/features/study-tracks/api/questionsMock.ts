@@ -7,17 +7,21 @@
  * - pergunta-rascunho: FILL_BLANK em DRAFT;
  * - pergunta-publicada: FILL_BLANK publicada, sem alteracoes (editar vira PUBLISHED_WITH_CHANGES);
  * - pergunta-com-alteracoes: FILL_BLANK publicada com rascunho diferente;
- * - pergunta-multipla-escolha e conteudo-educativo: tipos com formularios em outras tasks.
+ * - pergunta-multipla-escolha: MULTIPLE_CHOICE em DRAFT;
+ * - conteudo-educativo: tipo com formulario em outra task.
  * A categoria "categoria-inexistente" responde 404.
  */
 import { ApiError } from '@/shared/config/apiError';
 import type { ProblemDetail } from '@/shared/types/problemDetail';
 import { validateFillBlankQuestion } from '../model/fillBlankValidation';
+import { validateMultipleChoiceQuestion } from '../model/multipleChoiceValidation';
 import type {
   CategoryDTO,
   FillBlankQuestionPayload,
+  MultipleChoiceQuestionPayload,
   QuestionContentDTO,
   QuestionDTO,
+  QuestionPayload,
   QuestionStatus,
 } from '../types';
 
@@ -172,12 +176,26 @@ function assertCategoryExists(categoryId: string): void {
 }
 
 /** Mesmas regras do formulario, como o backend faria no 400. */
-function assertValidPayload(payload: FillBlankQuestionPayload): void {
-  const errors = validateFillBlankQuestion(payload);
-  const firstError = errors.title ?? errors.statement ?? errors.answers;
-  if (payload.type !== 'FILL_BLANK' || firstError) {
-    throw problem(400, 'Bad Request', firstError ?? 'Corpo da pergunta inválido.');
+function assertValidPayload(payload: QuestionPayload): void {
+  if (payload.type === 'FILL_BLANK') {
+    const errors = validateFillBlankQuestion(payload);
+    const firstError = errors.title ?? errors.statement ?? errors.answers;
+    if (firstError) {
+      throw problem(400, 'Bad Request', firstError);
+    }
+    return;
   }
+
+  if (payload.type === 'MULTIPLE_CHOICE') {
+    const errors = validateMultipleChoiceQuestion(payload);
+    const firstError = errors.statement ?? errors.options ?? errors.correctOption;
+    if (firstError) {
+      throw problem(400, 'Bad Request', firstError);
+    }
+    return;
+  }
+
+  throw problem(400, 'Bad Request', 'Corpo da pergunta inválido.');
 }
 
 export async function getCategoryQuestionsMock(categoryId: string): Promise<QuestionDTO[]> {
@@ -188,7 +206,7 @@ export async function getCategoryQuestionsMock(categoryId: string): Promise<Ques
 
 export async function createQuestionMock(
   categoryId: string,
-  payload: FillBlankQuestionPayload,
+  payload: QuestionPayload,
 ): Promise<QuestionDTO> {
   await wait();
   assertCategoryExists(categoryId);
@@ -208,7 +226,7 @@ export async function createQuestionMock(
 
 export async function updateQuestionMock(
   questionId: string,
-  payload: FillBlankQuestionPayload,
+  payload: QuestionPayload,
 ): Promise<QuestionDTO> {
   await wait();
   const current = questions.find((item) => item.id === questionId);
@@ -228,18 +246,24 @@ export async function updateQuestionMock(
 }
 
 /**
- * O backend valida o draft antes de publicar (400 se invalido). FILL_BLANK usa as regras do
- * formulario; os demais tipos ainda nao tem formulario e exigem so os campos obrigatorios.
+ * O backend valida o draft antes de publicar (400 se invalido). FILL_BLANK e MULTIPLE_CHOICE
+ * usam as regras dos seus formularios; o tipo LEARNING exige seus campos obrigatorios.
  */
 function assertPublishableDraft(draft: QuestionContentDTO): void {
   if (draft.type === 'FILL_BLANK') {
     assertValidPayload(draft);
     return;
   }
-  const isComplete =
-    draft.type === 'MULTIPLE_CHOICE'
-      ? Boolean(draft.statement?.trim()) && Boolean(draft.options?.some((option) => option.correct))
-      : Boolean(draft.title?.trim()) && Boolean(draft.body?.trim());
+  if (draft.type === 'MULTIPLE_CHOICE') {
+    assertValidPayload({
+      type: 'MULTIPLE_CHOICE',
+      statement: draft.statement ?? '',
+      options: draft.options ?? [],
+      explanation: draft.explanation ?? '',
+    } satisfies MultipleChoiceQuestionPayload);
+    return;
+  }
+  const isComplete = Boolean(draft.title?.trim()) && Boolean(draft.body?.trim());
   if (!isComplete) {
     throw problem(400, 'Bad Request', 'Rascunho incompleto para publicação.');
   }

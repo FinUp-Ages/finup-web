@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FillBlankQuestionPayload } from '../types';
+import type { FillBlankQuestionPayload, MultipleChoiceQuestionPayload } from '../types';
 import {
   createQuestionMock,
   getCategoryQuestionsMock,
@@ -17,6 +17,16 @@ const payload: FillBlankQuestionPayload = {
   statement: 'A reserva precisa de alta ___',
   answers: ['liquidez'],
   explanation: '',
+};
+
+const multipleChoicePayload: MultipleChoiceQuestionPayload = {
+  type: 'MULTIPLE_CHOICE',
+  statement: 'Onde guardar a reserva?',
+  options: [
+    { text: 'Tesouro Selic', correct: true },
+    { text: 'Imóvel sem liquidez', correct: false },
+  ],
+  explanation: 'Precisa ter alta liquidez.',
 };
 
 /** Avanca a latencia simulada do mock e devolve a promessa ja resolvida ou rejeitada. */
@@ -57,6 +67,47 @@ describe('questionsMock', () => {
     expect(created.id).toMatch(/^pergunta-nova-\d+$/);
     const questions = await settle(getCategoryQuestionsMock('categoria-reserva'));
     expect(questions).toContainEqual(created);
+  });
+
+  it('cria e atualiza pergunta MULTIPLE_CHOICE no formato do C6', async () => {
+    const created = await settle(
+      createQuestionMock('categoria-reserva', multipleChoicePayload),
+    );
+    expect(created).toMatchObject({
+      status: 'DRAFT',
+      draft: multipleChoicePayload,
+      published: null,
+    });
+
+    const updatedPayload: MultipleChoiceQuestionPayload = {
+      ...multipleChoicePayload,
+      statement: 'Enunciado atualizado?',
+    };
+    const updated = await settle(updateQuestionMock(created.id, updatedPayload));
+    expect(updated.draft).toEqual(updatedPayload);
+  });
+
+  it('responde 400 para MULTIPLE_CHOICE invalida (menos de duas alternativas ou sem correta)', async () => {
+    await expect(
+      settle(
+        createQuestionMock('categoria-reserva', {
+          ...multipleChoicePayload,
+          options: [{ text: 'Única', correct: true }],
+        }),
+      ),
+    ).rejects.toMatchObject({ status: 400 });
+
+    await expect(
+      settle(
+        createQuestionMock('categoria-reserva', {
+          ...multipleChoicePayload,
+          options: [
+            { text: 'Opção A', correct: false },
+            { text: 'Opção B', correct: false },
+          ],
+        }),
+      ),
+    ).rejects.toMatchObject({ status: 400 });
   });
 
   it('lista com o status derivado de draft e published', async () => {
@@ -124,7 +175,7 @@ describe('questionsMock', () => {
     expect(published.publishedAt).toBeTruthy();
   });
 
-  it('publica rascunhos completos dos tipos que ainda nao tem formulario', async () => {
+  it('publica rascunhos completos de MULTIPLE_CHOICE e LEARNING', async () => {
     // Multipla escolha com enunciado e alternativa correta; conteudo educativo com titulo e texto.
     const multipleChoice = await settle(publishQuestionMock('pergunta-multipla-escolha'));
     const learning = await settle(publishQuestionMock('conteudo-educativo'));
@@ -171,5 +222,4 @@ describe('questionsMock', () => {
     await expect(settle(unpublishQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
     await expect(settle(discardDraftQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
   });
-
 });

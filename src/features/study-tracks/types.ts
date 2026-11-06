@@ -43,11 +43,25 @@ export interface FillBlankQuestionPayload {
   explanation: string;
 }
 
+/** Alternativa de uma pergunta "Objetiva" (Múltipla escolha) no contrato C6. */
+export interface MultipleChoiceOptionDTO {
+  text: string;
+  correct: boolean;
+}
+
+/** Corpo do POST e do PUT de uma pergunta "Objetiva" (Múltipla escolha). */
+export interface MultipleChoiceQuestionPayload {
+  type: 'MULTIPLE_CHOICE';
+  statement: string;
+  options: MultipleChoiceOptionDTO[];
+  explanation: string;
+}
+
 /** Metadados de leitura dos tipos cujos formularios pertencem a outras tasks. */
 export interface MultipleChoiceContentDTO {
   type: 'MULTIPLE_CHOICE';
   statement?: string;
-  options?: { text: string; correct: boolean }[];
+  options?: MultipleChoiceOptionDTO[];
   explanation?: string;
 }
 
@@ -59,7 +73,13 @@ export interface LearningContentDTO {
 
 /** Conteudo de `draft` e `published`, incluindo os metadados usados pela listagem. */
 export type QuestionContentDTO =
-  FillBlankQuestionPayload | MultipleChoiceContentDTO | LearningContentDTO;
+  | FillBlankQuestionPayload
+  | MultipleChoiceQuestionPayload
+  | MultipleChoiceContentDTO
+  | LearningContentDTO;
+
+/** Uniao dos payloads suportados no POST e PUT de perguntas. */
+export type QuestionPayload = FillBlankQuestionPayload | MultipleChoiceQuestionPayload;
 
 /** Resposta do POST e do PUT e item do GET da categoria. */
 export interface QuestionDTO {
@@ -85,4 +105,19 @@ export interface FillBlankQuestion {
   type: QuestionType;
   status: QuestionStatus;
   values: FillBlankFormValues;
+}
+
+/** Valores editados no formulario de pergunta "Objetiva" (Múltipla escolha). */
+export interface MultipleChoiceFormValues {
+  statement: string;
+  options: MultipleChoiceOptionDTO[];
+  explanation: string;
+}
+
+/** Pergunta "Objetiva" carregada para edicao, no formato da tela (os valores vem do rascunho). */
+export interface MultipleChoiceQuestion {
+  id: string;
+  type: QuestionType;
+  status: QuestionStatus;
+  values: MultipleChoiceFormValues;
 }
