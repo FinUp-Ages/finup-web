@@ -3,6 +3,7 @@
  * Rotas e outras features importam somente daqui (@/features/study-tracks).
  */
 export { FillBlankQuestionPage } from './pages/FillBlankQuestionPage';
+export { MultipleChoiceQuestionPage } from './pages/MultipleChoiceQuestionPage';
 export { LearningQuestionPage } from './pages/LearningQuestionPage';
 export { EditQuestionPage } from './pages/EditQuestionPage';
 export { StudyCategoriesPage } from './pages/StudyCategoriesPage';

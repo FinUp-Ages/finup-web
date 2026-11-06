@@ -71,6 +71,9 @@ describe('contrato de integracao das rotas da Trilha', () => {
     if (type === 'FILL_BLANK' || type === 'LEARNING') {
       expect(screen.getByLabelText('Título')).toBeVisible();
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    } else if (type === 'MULTIPLE_CHOICE') {
+      expect(screen.getByLabelText('Enunciado')).toBeVisible();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     } else {
       expect(screen.getByRole('status')).toHaveTextContent(
         'O formulário deste tipo ainda não está disponível.',
@@ -96,6 +99,8 @@ describe('contrato de integracao das rotas da Trilha', () => {
     expect(await screen.findByRole('heading', { name: `Editar pergunta: ${label}` })).toBeVisible();
     if (id === 'pergunta-rascunho' || id === 'conteudo-educativo') {
       expect(screen.getByLabelText('Título')).toBeVisible();
+    } else if (id === 'pergunta-multipla-escolha') {
+      expect(screen.getByLabelText('Enunciado')).toBeVisible();
     } else {
       expect(screen.getByRole('alert')).toHaveTextContent('ainda não pode ser editado no painel');
       expect(screen.queryByLabelText('Título')).not.toBeInTheDocument();

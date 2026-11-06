@@ -4,19 +4,23 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/shared/config/apiError';
 import { getCategoryQuestions } from '../api/getCategoryQuestions';
-import type { QuestionDTO } from '../types';
+import type { QuestionContentDTO, QuestionDTO } from '../types';
 import { EditQuestionPage } from './EditQuestionPage';
 
 vi.mock('../api/getCategoryQuestions', () => ({ getCategoryQuestions: vi.fn() }));
 
 const mockQuestions: QuestionDTO[] = [
   {
-    id: 'q-learning',
+    id: 'q-multiple-choice',
     status: 'DRAFT',
     draft: {
-      type: 'LEARNING',
-      title: 'Título Explicativo',
-      body: 'Texto explicativo',
+      type: 'MULTIPLE_CHOICE',
+      statement: 'Onde guardar a reserva?',
+      options: [
+        { text: 'Tesouro Selic', correct: true },
+        { text: 'Ações', correct: false },
+      ],
+      explanation: 'Explicação',
     },
     published: null,
     updatedAt: '2026-10-20T12:00:00Z',
@@ -37,11 +41,21 @@ const mockQuestions: QuestionDTO[] = [
     publishedAt: null,
   },
   {
-    id: 'q-multiple-choice',
+    id: 'q-learning',
     status: 'DRAFT',
     draft: {
-      type: 'MULTIPLE_CHOICE',
+      type: 'LEARNING',
+      title: 'Título Explicativo',
+      body: 'Texto explicativo',
     },
+    published: null,
+    updatedAt: '2026-10-20T12:00:00Z',
+    publishedAt: null,
+  },
+  {
+    id: 'q-unknown',
+    status: 'DRAFT',
+    draft: { type: 'ORDERING' } as unknown as QuestionContentDTO,
     published: null,
     updatedAt: '2026-10-20T12:00:00Z',
     publishedAt: null,
@@ -80,20 +94,20 @@ beforeEach(() => {
 describe('EditQuestionPage', () => {
   it('mostra carregando enquanto busca as perguntas da categoria', () => {
     vi.mocked(getCategoryQuestions).mockReturnValue(new Promise(() => undefined));
-    renderAt('/studies/categories/cat-1/questions/q-learning/edit');
+    renderAt('/studies/categories/cat-1/questions/q-multiple-choice/edit');
 
     expect(screen.getByRole('status')).toHaveTextContent('Carregando pergunta...');
   });
 
-  it('renderiza LearningQuestionPage quando a pergunta é do tipo LEARNING', async () => {
+  it('renderiza MultipleChoiceQuestionPage quando a pergunta é do tipo MULTIPLE_CHOICE', async () => {
     vi.mocked(getCategoryQuestions).mockResolvedValue(mockQuestions);
-    renderAt('/studies/categories/cat-1/questions/q-learning/edit');
+    renderAt('/studies/categories/cat-1/questions/q-multiple-choice/edit');
 
     expect(
-      await screen.findByRole('heading', { name: 'Editar pergunta: Conteúdo educativo' }),
+      await screen.findByRole('heading', { name: 'Editar pergunta: Múltipla escolha' }),
     ).toBeVisible();
-    expect(screen.getByDisplayValue('Título Explicativo')).toBeVisible();
-    expect(screen.getByDisplayValue('Texto explicativo')).toBeVisible();
+    expect(screen.getByDisplayValue('Onde guardar a reserva?')).toBeVisible();
+    expect(screen.getByDisplayValue('Tesouro Selic')).toBeVisible();
   });
 
   it('renderiza FillBlankQuestionPage quando a pergunta é do tipo FILL_BLANK', async () => {
@@ -107,23 +121,29 @@ describe('EditQuestionPage', () => {
     expect(screen.getByDisplayValue('O CDB rende ___ do CDI')).toBeVisible();
   });
 
-  it('exibe mensagem quando o tipo não tem formulário suportado', async () => {
+  it('renderiza LearningQuestionPage quando a pergunta é do tipo LEARNING', async () => {
     vi.mocked(getCategoryQuestions).mockResolvedValue(mockQuestions);
-    renderAt('/studies/categories/cat-1/questions/q-multiple-choice/edit');
+    renderAt('/studies/categories/cat-1/questions/q-learning/edit');
 
     expect(
-      await screen.findByRole('heading', { name: 'Editar pergunta: Múltipla escolha' }),
+      await screen.findByRole('heading', { name: 'Editar pergunta: Conteúdo educativo' }),
     ).toBeVisible();
-    expect(
-      screen.getByText(
-        'Esta pergunta é do tipo Múltipla escolha, que ainda não pode ser editado no painel.',
-      ),
-    ).toBeVisible();
+    expect(screen.getByDisplayValue('Título Explicativo')).toBeVisible();
+    expect(screen.getByDisplayValue('Texto explicativo')).toBeVisible();
+  });
+
+  it('exibe aviso quando o tipo da pergunta não é conhecido pelo painel', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue(mockQuestions);
+    renderAt('/studies/categories/cat-1/questions/q-unknown/edit');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Esta pergunta é do tipo ORDERING, que ainda não pode ser editado no painel.',
+    );
   });
 
   it('exibe mensagem de erro quando a categoria não é encontrada', async () => {
     vi.mocked(getCategoryQuestions).mockRejectedValue(new ApiError(404, { status: 404 }));
-    renderAt('/studies/categories/cat-1/questions/q-learning/edit');
+    renderAt('/studies/categories/cat-1/questions/q-multiple-choice/edit');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Categoria não encontrada.');
   });

@@ -3,8 +3,8 @@ import {
   CategoryQuestionsPage,
   EditQuestionPage,
   FillBlankQuestionPage,
+  MultipleChoiceQuestionPage,
   LearningQuestionPage,
-  QuestionFormPendingPage,
   StudyCategoriesPage,
 } from '@/features/study-tracks';
 import {
@@ -46,7 +46,11 @@ export const studyTracksRoutes: RouteObject[] = [
   {
     path: paths.studiesNewMultipleChoiceQuestion,
     element: (
-      <QuestionFormPendingPage type="MULTIPLE_CHOICE" backPathFor={studiesCategoryQuestionsPath} />
+      <MultipleChoiceQuestionPage
+        backTo={studiesCategoryQuestionsPath}
+        backLabel="Perguntas da categoria"
+        editPathFor={studiesEditQuestionPath}
+      />
     ),
   },
   {

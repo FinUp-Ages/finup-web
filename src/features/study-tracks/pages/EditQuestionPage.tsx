@@ -11,6 +11,7 @@ import { questionTypeLabels } from '../model/questionLabels';
 import type { QuestionDTO } from '../types';
 import { FillBlankQuestionPage } from './FillBlankQuestionPage';
 import { LearningQuestionPage } from './LearningQuestionPage';
+import { MultipleChoiceQuestionPage } from './MultipleChoiceQuestionPage';
 
 type EditQuestionPageProps = {
   backTo: string | ((categoryId: string) => string);
@@ -19,11 +20,9 @@ type EditQuestionPageProps = {
 };
 
 /**
- * Rota despachante de edição de perguntas da trilha.
- * Consulta o tipo da pergunta na lista da categoria e direciona para o formulário correspondente:
- * - FILL_BLANK: FillBlankQuestionPage
- * - LEARNING: LearningQuestionPage
- * - Demais tipos: mensagem informativa de formulário ainda indisponível.
+ * Rota despachante de edicao de perguntas da trilha.
+ * Consulta o tipo da pergunta na lista da categoria e direciona para o formulario correspondente
+ * (FILL_BLANK, MULTIPLE_CHOICE ou LEARNING). Um tipo desconhecido mostra um aviso.
  */
 export function EditQuestionPage({
   backTo,
@@ -31,6 +30,7 @@ export function EditQuestionPage({
   editPathFor,
 }: EditQuestionPageProps) {
   const { categoryId = '', questionId = '' } = useParams();
+  const backUrl = typeof backTo === 'function' ? backTo(categoryId) : backTo;
 
   const selectQuestion = useCallback(
     (questions: QuestionDTO[]) => questions.find((q) => q.id === questionId) ?? null,
@@ -45,11 +45,9 @@ export function EditQuestionPage({
   });
 
   const question = query.data;
-  const isPending = query.isPending;
   const isError = query.isError && question === undefined;
-  const notFound = query.isSuccess && question === null;
 
-  if (isPending) {
+  if (query.isPending) {
     return (
       <div className="text-navy">
         <section className="mx-auto flex w-full max-w-[760px] flex-col gap-6">
@@ -61,15 +59,14 @@ export function EditQuestionPage({
     );
   }
 
-  if (isError || notFound) {
-    const errorMsg = notFound ? questionNotFoundMessage : toLoadQuestionErrorMessage(query.error);
-    const backUrl = typeof backTo === 'function' ? backTo(categoryId) : backTo;
+  if (isError || !question) {
+    const errorMsg = isError ? toLoadQuestionErrorMessage(query.error) : questionNotFoundMessage;
     return (
       <div className="text-navy">
         <section className="mx-auto flex w-full max-w-[760px] flex-col gap-6">
           <Link
             to={backUrl}
-            className="w-fit text-sm underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-navy"
+            className="w-fit text-sm underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
           >
             ← {backLabel}
           </Link>
@@ -91,46 +88,33 @@ export function EditQuestionPage({
     );
   }
 
-  if (question?.draft.type === 'LEARNING') {
-    return (
-      <LearningQuestionPage
-        backTo={backTo}
-        backLabel={backLabel}
-        editPathFor={editPathFor}
-      />
-    );
+  const pageProps = { backTo, backLabel, editPathFor };
+  switch (question.draft.type) {
+    case 'FILL_BLANK':
+      return <FillBlankQuestionPage {...pageProps} />;
+    case 'MULTIPLE_CHOICE':
+      return <MultipleChoiceQuestionPage {...pageProps} />;
+    case 'LEARNING':
+      return <LearningQuestionPage {...pageProps} />;
   }
 
-  if (question?.draft.type === 'FILL_BLANK') {
-    return (
-      <FillBlankQuestionPage
-        backTo={backTo}
-        backLabel={backLabel}
-        editPathFor={editPathFor}
-      />
-    );
-  }
-
-  const typeLabel = questionTypeLabels[question?.draft.type ?? 'MULTIPLE_CHOICE'];
-  const backUrl = typeof backTo === 'function' ? backTo(categoryId) : backTo;
+  // Tipo que o painel ainda nao conhece (ex.: um tipo novo no backend).
+  const unknownType = (question.draft as { type: string }).type;
+  const typeLabel =
+    questionTypeLabels[unknownType as keyof typeof questionTypeLabels] ?? unknownType;
   return (
     <div className="text-navy">
       <section className="mx-auto flex w-full max-w-[760px] flex-col gap-6">
         <header className="flex flex-col gap-2">
           <Link
             to={backUrl}
-            className="w-fit text-sm underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-navy"
+            className="w-fit text-sm underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
           >
             ← {backLabel}
           </Link>
-          <h1 className="text-2xl font-semibold tracking-[0.32px]">
-            Editar pergunta: {typeLabel}
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-[0.32px]">Editar pergunta: {typeLabel}</h1>
         </header>
-        <p
-          role="alert"
-          className="rounded-[4px] border border-navy/20 bg-white px-4 py-3 text-sm"
-        >
+        <p role="alert" className="rounded-[4px] border border-navy/20 bg-white px-4 py-3 text-sm">
           Esta pergunta é do tipo {typeLabel}, que ainda não pode ser editado no painel.
         </p>
       </section>
