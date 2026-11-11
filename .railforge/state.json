@@ -1,7 +1,7 @@
 {
-  "stage": "IMPLEMENTING",
-  "task": "Frontend: corrigir altura da sidebar administrativa",
-  "objective": "Manter a sidebar com altura fixa na viewport em todas as seções, preservando o acesso ao usuário e ao logout enquanto o conteúdo principal rola.",
+  "stage": "COMPLETED",
+  "task": "Frontend: mover tipo de pergunta para modal de criação",
+  "objective": "Exibir a escolha do tipo de pergunta dentro da modal aberta por Nova pergunta e navegar para o formulário somente após a confirmação.",
   "decisions": [
     "A edição reaproveita a lista da categoria em cache e envia POST na criação e PUT na edição, com o corpo C6 { type: LEARNING, title, body }.",
     "A pré-visualização interpreta markdown em elementos React, sem dangerouslySetInnerHTML; blocos ``` ficam inteiros mesmo com linha em branco e links com protocolo inseguro viram texto.",
@@ -11,12 +11,19 @@
     "Code review de 2026-11-06: ao validar na aba Pré-visualizar, o formulário volta para Escrever antes de focar o campo inválido; o textarea fica montado (oculto) para o rótulo e o foco."
   ],
   "plan": [
-    "Fixar a sidebar na altura da viewport e manter seu conteúdo navegável",
+    "Mover o seletor de tipo da página para a modal de criação",
+    "Preservar cancelamento, foco e confirmação da modal",
     "Executar lint, typecheck, testes e build",
     "Revisar o diff e registrar a validação"
   ],
-  "validation": {},
-  "review": "",
+  "validation": {
+    "npm run lint": "passou (2026-11-10)",
+    "npm run typecheck": "passou (2026-11-10)",
+    "npm run build": "passou (2026-11-10)",
+    "npm test -- --run": "196 testes passando em 28 arquivos (2026-11-10)",
+    "git diff --check": "passou (2026-11-10)"
+  },
+  "review": "O seletor de tipo foi removido da página e incorporado à modal aberta por Nova pergunta. Cancelar fecha a modal sem navegar; Continuar preserva o tipo selecionado e navega para o formulário correspondente.",
   "updated_at": "2026-11-10",
   "open_questions": []
 }
