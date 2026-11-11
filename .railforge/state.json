@@ -1,7 +1,7 @@
 {
-  "stage": "REVIEWING",
-  "task": "Frontend: Trilha - conteúdo explicativo (C6)",
-  "objective": "Criar e editar o rascunho de uma pergunta LEARNING com título e corpo em markdown, pré-visualização renderizada, campos obrigatórios, estados de carregamento/erro/sucesso e mock via VITE_USE_MOCKS.",
+  "stage": "IMPLEMENTING",
+  "task": "Frontend: corrigir altura da sidebar administrativa",
+  "objective": "Manter a sidebar com altura fixa na viewport em todas as seções, preservando o acesso ao usuário e ao logout enquanto o conteúdo principal rola.",
   "decisions": [
     "A edição reaproveita a lista da categoria em cache e envia POST na criação e PUT na edição, com o corpo C6 { type: LEARNING, title, body }.",
     "A pré-visualização interpreta markdown em elementos React, sem dangerouslySetInnerHTML; blocos ``` ficam inteiros mesmo com linha em branco e links com protocolo inseguro viram texto.",
@@ -11,50 +11,12 @@
     "Code review de 2026-11-06: ao validar na aba Pré-visualizar, o formulário volta para Escrever antes de focar o campo inválido; o textarea fica montado (oculto) para o rótulo e o foco."
   ],
   "plan": [
-    "Contrato, validação e mock do tipo LEARNING",
-    "Formulário com abas Escrever/Pré-visualizar e validação acessível",
-    "Páginas de criação e edição integradas às rotas da trilha",
-    "Testes de contrato, formulário, preview, hooks, páginas e rotas",
-    "Ajustes do code review: integração com o PR #18, foco e abas, Markdown preservado, ações de status"
+    "Fixar a sidebar na altura da viewport e manter seu conteúdo navegável",
+    "Executar lint, typecheck, testes e build",
+    "Revisar o diff e registrar a validação"
   ],
-  "files_in_scope": [
-    "src/features/study-tracks/api/learningContract.ts",
-    "src/features/study-tracks/api/learningContract.test.ts",
-    "src/features/study-tracks/api/questionsMock.ts",
-    "src/features/study-tracks/api/questionsMock.test.ts",
-    "src/features/study-tracks/api/createQuestion.ts",
-    "src/features/study-tracks/api/updateQuestion.ts",
-    "src/features/study-tracks/components/LearningQuestionForm.tsx",
-    "src/features/study-tracks/components/LearningQuestionForm.test.tsx",
-    "src/features/study-tracks/components/MarkdownPreview.tsx",
-    "src/features/study-tracks/components/MarkdownPreview.test.tsx",
-    "src/features/study-tracks/hooks/useLearningQuestion.ts",
-    "src/features/study-tracks/hooks/useLearningQuestion.test.tsx",
-    "src/features/study-tracks/hooks/useSaveLearningQuestion.ts",
-    "src/features/study-tracks/hooks/useSaveLearningQuestion.test.tsx",
-    "src/features/study-tracks/model/learningValidation.ts",
-    "src/features/study-tracks/model/learningValidation.test.ts",
-    "src/features/study-tracks/pages/EditQuestionPage.tsx",
-    "src/features/study-tracks/pages/EditQuestionPage.test.tsx",
-    "src/features/study-tracks/pages/LearningQuestionPage.tsx",
-    "src/features/study-tracks/pages/LearningQuestionPage.test.tsx",
-    "src/features/study-tracks/index.ts",
-    "src/features/study-tracks/types.ts",
-    "src/app/routes/studyTracksRoutes.tsx",
-    "src/app/routes/studyTracksRoutes.test.tsx",
-    ".railforge/state.json"
-  ],
-  "validation": {
-    "npm run lint": "passou (2026-11-06)",
-    "npm run typecheck": "passou (2026-11-06)",
-    "npm test": "196 testes passando em Node 20.17.0, com o PR #18 incluído (2026-11-06)",
-    "npm run build": "passou (2026-11-06)",
-    "git diff --check": "passou",
-    "limitacoes": "Fluxo autenticado no navegador (login Cognito) e backend real não verificados; estados cobertos por testes de componente e de página."
-  },
-  "review": "Code review dos PRs #17 e #18 em 2026-11-06: corrigidos o conflito com o #18 (EditQuestionPage e QuestionPayload duplicado), o foco ao validar na pré-visualização, o foco visível e as setas nas abas, o trim do corpo, blocos de código no preview e a falta das ações de status. PR #18 já está na develop. Pendentes: teste manual no painel e aprovação do time.",
-  "updated_at": "2026-11-06",
-  "open_questions": [
-    "QuestionFormPendingPage ficou sem uso nas rotas depois de MULTIPLE_CHOICE e LEARNING; remover numa limpeza à parte?"
-  ]
+  "validation": {},
+  "review": "",
+  "updated_at": "2026-11-10",
+  "open_questions": []
 }
