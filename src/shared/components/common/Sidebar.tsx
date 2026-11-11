@@ -32,7 +32,7 @@ type SidebarProps = {
 
 export function Sidebar({ groups, user, onLogout }: SidebarProps) {
   return (
-    <aside className="flex min-h-screen w-[332px] shrink-0 flex-col bg-navy px-6 pb-6 pt-[60px] font-inter text-on-navy">
+    <aside className="sticky top-0 flex h-screen max-h-screen w-[332px] shrink-0 flex-col overflow-y-auto bg-navy px-6 pb-6 pt-[60px] font-inter text-on-navy">
       <img src={logo} alt="FinUp" className="h-[43px] w-auto shrink-0 self-start" />
 
       <nav aria-label="Navegação principal" className="mt-10 flex flex-col gap-6">

@@ -155,6 +155,7 @@ describe('CategoryQuestionsPage', () => {
     await user.click(manage);
     await screen.findByText('Nenhuma pergunta cadastrada nesta categoria.');
     await user.click(screen.getByRole('button', { name: 'Nova pergunta' }));
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
     await user.type(screen.getByLabelText('Título'), 'Rendimento do investimento');
     await user.type(screen.getByLabelText('Enunciado'), content.statement);
     await user.type(screen.getByLabelText('Respostas aceitas'), '100%{Enter}');
@@ -180,11 +181,11 @@ describe('CategoryQuestionsPage', () => {
     await user.tab();
     expect(screen.getByRole('link', { name: /Categorias da trilha/ })).toHaveFocus();
     await user.tab();
-    expect(screen.getByRole('combobox', { name: 'Tipo de pergunta' })).toHaveFocus();
-    await user.tab();
     expect(screen.getByRole('button', { name: 'Nova pergunta' })).toHaveFocus();
     await user.keyboard('{Enter}');
 
+    expect(screen.getByRole('combobox', { name: 'Tipo de pergunta' })).toHaveFocus();
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
     expect(screen.getByRole('heading', { name: 'Nova pergunta: Preencher lacuna' })).toBeVisible();
   });
 
@@ -252,8 +253,10 @@ describe('CategoryQuestionsPage', () => {
 
     expect(await screen.findByText('Nenhuma pergunta cadastrada nesta categoria.')).toBeVisible();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
-    expect(screen.getAllByRole('option')).toHaveLength(3);
+    expect(screen.queryByRole('combobox', { name: 'Tipo de pergunta' })).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Nova pergunta' }));
+    expect(screen.getAllByRole('option')).toHaveLength(3);
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
     expect(screen.getByRole('heading', { name: 'Nova pergunta: Preencher lacuna' })).toBeVisible();
     expect(screen.getByLabelText('Título')).toBeVisible();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -342,8 +345,9 @@ describe('CategoryQuestionsPage', () => {
     const { user } = renderAt();
     await screen.findByRole('table');
 
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Tipo de pergunta' }), type);
     await user.click(screen.getByRole('button', { name: 'Nova pergunta' }));
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Tipo de pergunta' }), type);
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
 
     expect(screen.getByRole('heading', { name: `Nova pergunta: ${label}` })).toBeVisible();
     expect(screen.getByRole('status')).toHaveTextContent(
@@ -395,6 +399,7 @@ describe('CategoryQuestionsPage', () => {
     const { user } = renderAt();
     await screen.findByRole('table');
     await user.click(screen.getByRole('button', { name: 'Nova pergunta' }));
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
     await user.type(screen.getByLabelText('Título'), 'Nova reserva');
     await user.type(screen.getByLabelText('Enunciado'), content.statement);
     await user.type(screen.getByLabelText('Respostas aceitas'), '100%{Enter}');

@@ -60,9 +60,9 @@ describe('contrato de integracao das rotas da Trilha', () => {
   ])('preserva categoria e destino de criacao %s para a integracao', async (type, slug, label) => {
     const user = renderAt(studiesCategoryQuestionsPath('categoria-reserva'));
     await screen.findByRole('table');
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Tipo de pergunta' }), type);
-
     await user.click(screen.getByRole('button', { name: 'Nova pergunta' }));
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Tipo de pergunta' }), type);
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
 
     expect(screen.getByTestId('path')).toHaveTextContent(
       `/app/studies/categories/categoria-reserva/questions/new/${slug}`,
