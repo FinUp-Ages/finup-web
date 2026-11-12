@@ -60,16 +60,19 @@ describe('contrato de integracao das rotas da Trilha', () => {
   ])('preserva categoria e destino de criacao %s para a integracao', async (type, slug, label) => {
     const user = renderAt(studiesCategoryQuestionsPath('categoria-reserva'));
     await screen.findByRole('table');
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Tipo de pergunta' }), type);
-
     await user.click(screen.getByRole('button', { name: 'Nova pergunta' }));
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Tipo de pergunta' }), type);
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
 
     expect(screen.getByTestId('path')).toHaveTextContent(
       `/app/studies/categories/categoria-reserva/questions/new/${slug}`,
     );
     expect(screen.getByRole('heading', { name: `Nova pergunta: ${label}` })).toBeVisible();
-    if (type === 'FILL_BLANK') {
+    if (type === 'FILL_BLANK' || type === 'LEARNING') {
       expect(screen.getByLabelText('Título')).toBeVisible();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    } else if (type === 'MULTIPLE_CHOICE') {
+      expect(screen.getByLabelText('Enunciado')).toBeVisible();
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     } else {
       expect(screen.getByRole('status')).toHaveTextContent(
@@ -94,8 +97,10 @@ describe('contrato de integracao das rotas da Trilha', () => {
       studiesEditQuestionPath('categoria-reserva', id),
     );
     expect(await screen.findByRole('heading', { name: `Editar pergunta: ${label}` })).toBeVisible();
-    if (id === 'pergunta-rascunho') {
+    if (id === 'pergunta-rascunho' || id === 'conteudo-educativo') {
       expect(screen.getByLabelText('Título')).toBeVisible();
+    } else if (id === 'pergunta-multipla-escolha') {
+      expect(screen.getByLabelText('Enunciado')).toBeVisible();
     } else {
       expect(screen.getByRole('alert')).toHaveTextContent('ainda não pode ser editado no painel');
       expect(screen.queryByLabelText('Título')).not.toBeInTheDocument();

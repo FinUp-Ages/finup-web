@@ -1,6 +1,7 @@
-import { useId, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
+import { toFillBlankPayload } from '../api/fillBlankContract';
 import {
   BLANK_MARKER,
   fillBlankFieldOrder,
@@ -21,6 +22,8 @@ type FillBlankQuestionFormProps = {
   submitLabel: string;
   isSaving?: boolean;
   onSubmit: (values: FillBlankFormValues) => void;
+  /** Avisa quando o formulario passa a ter (ou deixa de ter) edicoes que ainda nao foram salvas. */
+  onDirtyChange?: (isDirty: boolean) => void;
 };
 
 /** Formulario da pergunta "Preencher lacuna": valida no envio e foca o primeiro campo invalido. */
@@ -29,10 +32,20 @@ export function FillBlankQuestionForm({
   submitLabel,
   isSaving = false,
   onSubmit,
+  onDirtyChange,
 }: FillBlankQuestionFormProps) {
   const [values, setValues] = useState(initialValues);
   const [pendingAnswer, setPendingAnswer] = useState('');
   const [errors, setErrors] = useState<FillBlankErrors>({});
+
+  // Compara o que seria enviado (textos aparados) com o initialValues atual: depois de salvar, a
+  // pergunta salva volta pelo cache e o formulario deixa de ter edicoes pendentes.
+  const isDirty =
+    JSON.stringify(toFillBlankPayload(values)) !==
+      JSON.stringify(toFillBlankPayload(initialValues)) || pendingAnswer.trim() !== '';
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   const titleId = useId();
   const statementId = useId();

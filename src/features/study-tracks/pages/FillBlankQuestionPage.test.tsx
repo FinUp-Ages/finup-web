@@ -7,6 +7,9 @@ import { ApiError } from '@/shared/config/apiError';
 import { createQuestion } from '../api/createQuestion';
 import { getCategoryQuestions } from '../api/getCategoryQuestions';
 import { updateQuestion } from '../api/updateQuestion';
+import { publishQuestion } from '../api/publishQuestion';
+import { unpublishQuestion } from '../api/unpublishQuestion';
+import { discardDraftQuestion } from '../api/discardDraftQuestion';
 import { questionQueryKeys } from '../hooks/questionQueryKeys';
 import type { FillBlankQuestionPayload, QuestionDTO, QuestionStatus } from '../types';
 import { FillBlankQuestionPage } from './FillBlankQuestionPage';
@@ -14,6 +17,9 @@ import { FillBlankQuestionPage } from './FillBlankQuestionPage';
 vi.mock('../api/createQuestion', () => ({ createQuestion: vi.fn() }));
 vi.mock('../api/updateQuestion', () => ({ updateQuestion: vi.fn() }));
 vi.mock('../api/getCategoryQuestions', () => ({ getCategoryQuestions: vi.fn() }));
+vi.mock('../api/publishQuestion', () => ({ publishQuestion: vi.fn() }));
+vi.mock('../api/unpublishQuestion', () => ({ unpublishQuestion: vi.fn() }));
+vi.mock('../api/discardDraftQuestion', () => ({ discardDraftQuestion: vi.fn() }));
 
 const draftContent: FillBlankQuestionPayload = {
   type: 'FILL_BLANK',
@@ -92,6 +98,9 @@ beforeEach(() => {
   vi.mocked(createQuestion).mockReset();
   vi.mocked(updateQuestion).mockReset();
   vi.mocked(getCategoryQuestions).mockReset();
+  vi.mocked(publishQuestion).mockReset();
+  vi.mocked(unpublishQuestion).mockReset();
+  vi.mocked(discardDraftQuestion).mockReset();
 });
 
 describe('FillBlankQuestionPage - criacao', () => {
@@ -399,5 +408,162 @@ describe('FillBlankQuestionPage - edicao', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Múltipla escolha');
     expect(screen.queryByLabelText('Título')).not.toBeInTheDocument();
+  });
+
+  it('permite publicar a pergunta com confirmacao e atualiza o selo de status', async () => {
+    let currentQuestion = questionDTO('DRAFT');
+    vi.mocked(getCategoryQuestions).mockImplementation(async () => [currentQuestion]);
+    vi.mocked(publishQuestion).mockImplementation(async (id) => {
+      currentQuestion = {
+        ...currentQuestion,
+        id,
+        status: 'PUBLISHED',
+        published: currentQuestion.draft,
+        publishedAt: '2026-10-23T12:00:00Z',
+      };
+      return currentQuestion;
+    });
+
+    const { user } = renderAt(editUrl);
+    await screen.findByDisplayValue('Rendimento do CDB');
+    expect(screen.getByText('Rascunho')).toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'Publicar' }));
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toBeInTheDocument();
+
+    const confirmBtn = screen.getAllByRole('button', { name: 'Publicar' }).find(
+      (btn) => dialog.contains(btn),
+    );
+    await user.click(confirmBtn!);
+
+    expect(publishQuestion).toHaveBeenCalledWith('q-1');
+    expect(await screen.findByText('Pergunta publicada.')).toBeVisible();
+    expect(screen.getByText('Publicada')).toBeVisible();
+  });
+
+  it('permite voltar pergunta publicada para rascunho com confirmacao', async () => {
+    let currentQuestion = questionDTO('PUBLISHED');
+    vi.mocked(getCategoryQuestions).mockImplementation(async () => [currentQuestion]);
+    vi.mocked(unpublishQuestion).mockImplementation(async (id) => {
+      currentQuestion = {
+        ...currentQuestion,
+        id,
+        status: 'DRAFT',
+        published: null,
+        publishedAt: null,
+      };
+      return currentQuestion;
+    });
+
+    const { user } = renderAt(editUrl);
+    await screen.findByDisplayValue('Rendimento do CDB');
+    expect(screen.getByText('Publicada')).toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'Voltar para rascunho' }));
+    const dialog = screen.getByRole('dialog');
+
+    const confirmBtn = screen.getAllByRole('button', { name: 'Voltar para rascunho' }).find(
+      (btn) => dialog.contains(btn),
+    );
+    await user.click(confirmBtn!);
+
+    expect(unpublishQuestion).toHaveBeenCalledWith('q-1');
+    expect(await screen.findByText('Pergunta movida de volta para rascunho.')).toBeVisible();
+    expect(screen.getByText('Rascunho')).toBeVisible();
+  });
+
+  it('em pergunta com alteracoes, descarta alteracoes pendentes com confirmacao', async () => {
+    const originalPublished = {
+      type: 'FILL_BLANK' as const,
+      title: 'Título Original Publicado',
+      statement: 'Original ___',
+      answers: ['original'],
+      explanation: '',
+    };
+    let currentQuestion: QuestionDTO = {
+      id: 'q-1',
+      status: 'PUBLISHED_WITH_CHANGES',
+      draft: draftContent,
+      published: originalPublished,
+      updatedAt: '2026-10-23T12:00:00Z',
+      publishedAt: '2026-10-20T12:00:00Z',
+    };
+    vi.mocked(getCategoryQuestions).mockImplementation(async () => [currentQuestion]);
+    vi.mocked(discardDraftQuestion).mockImplementation(async (id) => {
+      currentQuestion = {
+        ...currentQuestion,
+        id,
+        status: 'PUBLISHED',
+        draft: originalPublished,
+      };
+      return currentQuestion;
+    });
+
+    const { user } = renderAt(editUrl);
+    await screen.findByDisplayValue('Rendimento do CDB');
+    expect(screen.getByText('Publicada com alterações')).toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'Descartar alterações' }));
+    const dialog = screen.getByRole('dialog');
+
+    const confirmBtn = screen.getAllByRole('button', { name: 'Descartar alterações' }).find(
+      (btn) => dialog.contains(btn),
+    );
+    await user.click(confirmBtn!);
+
+    expect(discardDraftQuestion).toHaveBeenCalledWith('q-1');
+    expect(await screen.findByText('Alterações do rascunho descartadas.')).toBeVisible();
+    expect(screen.getByText('Publicada')).toBeVisible();
+    // O formulario deve recarregar com os valores publicados
+    expect(await screen.findByDisplayValue('Título Original Publicado')).toBeVisible();
+  });
+
+  it('bloqueia publicar com edicoes nao salvas e libera depois de salvar o rascunho', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO()]);
+    vi.mocked(updateQuestion).mockResolvedValue(
+      questionDTO('DRAFT', { ...draftContent, title: 'Novo título' }),
+    );
+    const { user } = renderAt(editUrl);
+
+    const title = await screen.findByLabelText('Título');
+    const publish = screen.getByRole('button', { name: 'Publicar' });
+    expect(publish).toBeEnabled();
+
+    await user.clear(title);
+    await user.type(title, 'Novo título');
+
+    // O PUT ainda nao foi feito: publicar levaria ao ar o rascunho antigo do servidor.
+    expect(publish).toBeDisabled();
+    expect(publish).toHaveAccessibleDescription(
+      'Salve o rascunho antes de publicar, voltar para rascunho ou descartar.',
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+
+    expect(await screen.findByText('Rascunho salvo.')).toBeVisible();
+    expect(publish).toBeEnabled();
+    expect(publish).not.toHaveAccessibleDescription();
+    expect(title).toHaveValue('Novo título');
+    expect(publishQuestion).not.toHaveBeenCalled();
+  });
+
+  it('libera as acoes quando a edicao volta ao conteudo salvo', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO('PUBLISHED_WITH_CHANGES')]);
+    const { user } = renderAt(editUrl);
+
+    const title = await screen.findByLabelText('Título');
+    await user.type(title, ' extra');
+
+    for (const name of ['Publicar', 'Voltar para rascunho', 'Descartar alterações']) {
+      expect(screen.getByRole('button', { name })).toBeDisabled();
+    }
+
+    await user.clear(title);
+    await user.type(title, 'Rendimento do CDB');
+
+    for (const name of ['Publicar', 'Voltar para rascunho', 'Descartar alterações']) {
+      expect(screen.getByRole('button', { name })).toBeEnabled();
+    }
   });
 });

@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FillBlankQuestionPayload } from '../types';
+import type { FillBlankQuestionPayload, MultipleChoiceQuestionPayload } from '../types';
 import {
   createQuestionMock,
   getCategoryQuestionsMock,
   MISSING_CATEGORY_ID,
   resetQuestionsMock,
   updateQuestionMock,
+  publishQuestionMock,
+  unpublishQuestionMock,
+  discardDraftQuestionMock,
 } from './questionsMock';
 
 const payload: FillBlankQuestionPayload = {
@@ -14,6 +17,16 @@ const payload: FillBlankQuestionPayload = {
   statement: 'A reserva precisa de alta ___',
   answers: ['liquidez'],
   explanation: '',
+};
+
+const multipleChoicePayload: MultipleChoiceQuestionPayload = {
+  type: 'MULTIPLE_CHOICE',
+  statement: 'Onde guardar a reserva?',
+  options: [
+    { text: 'Tesouro Selic', correct: true },
+    { text: 'Imóvel sem liquidez', correct: false },
+  ],
+  explanation: 'Precisa ter alta liquidez.',
 };
 
 /** Avanca a latencia simulada do mock e devolve a promessa ja resolvida ou rejeitada. */
@@ -54,6 +67,47 @@ describe('questionsMock', () => {
     expect(created.id).toMatch(/^pergunta-nova-\d+$/);
     const questions = await settle(getCategoryQuestionsMock('categoria-reserva'));
     expect(questions).toContainEqual(created);
+  });
+
+  it('cria e atualiza pergunta MULTIPLE_CHOICE no formato do C6', async () => {
+    const created = await settle(
+      createQuestionMock('categoria-reserva', multipleChoicePayload),
+    );
+    expect(created).toMatchObject({
+      status: 'DRAFT',
+      draft: multipleChoicePayload,
+      published: null,
+    });
+
+    const updatedPayload: MultipleChoiceQuestionPayload = {
+      ...multipleChoicePayload,
+      statement: 'Enunciado atualizado?',
+    };
+    const updated = await settle(updateQuestionMock(created.id, updatedPayload));
+    expect(updated.draft).toEqual(updatedPayload);
+  });
+
+  it('responde 400 para MULTIPLE_CHOICE invalida (menos de duas alternativas ou sem correta)', async () => {
+    await expect(
+      settle(
+        createQuestionMock('categoria-reserva', {
+          ...multipleChoicePayload,
+          options: [{ text: 'Única', correct: true }],
+        }),
+      ),
+    ).rejects.toMatchObject({ status: 400 });
+
+    await expect(
+      settle(
+        createQuestionMock('categoria-reserva', {
+          ...multipleChoicePayload,
+          options: [
+            { text: 'Opção A', correct: false },
+            { text: 'Opção B', correct: false },
+          ],
+        }),
+      ),
+    ).rejects.toMatchObject({ status: 400 });
   });
 
   it('lista com o status derivado de draft e published', async () => {
@@ -110,6 +164,107 @@ describe('questionsMock', () => {
   it('responde 400 para corpo invalido', async () => {
     await expect(
       settle(createQuestionMock('categoria-reserva', { ...payload, answers: [] })),
+    ).rejects.toMatchObject({ status: 400 });
+  });
+  it('publica a pergunta, copiando o draft para published com status PUBLISHED', async () => {
+    const published = await settle(publishQuestionMock('pergunta-rascunho'));
+
+    expect(published.status).toBe('PUBLISHED');
+    expect(published.published).toEqual(published.draft);
+    expect(published.publishedAt).toBeTruthy();
+  });
+
+  it('publica rascunhos completos de MULTIPLE_CHOICE e LEARNING', async () => {
+    // Multipla escolha com enunciado e alternativa correta; conteudo educativo com titulo e texto.
+    const multipleChoice = await settle(publishQuestionMock('pergunta-multipla-escolha'));
+    const learning = await settle(publishQuestionMock('conteudo-educativo'));
+
+    expect(multipleChoice.status).toBe('PUBLISHED');
+    expect(learning.status).toBe('PUBLISHED');
+  });
+
+  it('volta a pergunta para rascunho com status DRAFT e published nulo', async () => {
+    const unpublished = await settle(unpublishQuestionMock('pergunta-publicada'));
+
+    expect(unpublished.status).toBe('DRAFT');
+    expect(unpublished.published).toBeNull();
+    expect(unpublished.publishedAt).toBeNull();
+  });
+
+  it('descarta alteracoes pendentes revertendo o draft para o conteudo publicado', async () => {
+    const [before] = (await settle(getCategoryQuestionsMock('categoria-reserva'))).filter(
+      (q) => q.id === 'pergunta-com-alteracoes',
+    );
+
+    const discarded = await settle(discardDraftQuestionMock('pergunta-com-alteracoes'));
+
+    expect(discarded.status).toBe('PUBLISHED');
+    expect(discarded.draft).toEqual(before.published);
+  });
+
+  it('sem alteracoes pendentes, descartar mantem a pergunta publicada', async () => {
+    const discarded = await settle(discardDraftQuestionMock('pergunta-publicada'));
+
+    expect(discarded.status).toBe('PUBLISHED');
+    expect(discarded.draft).toEqual(discarded.published);
+  });
+
+  it('recusa descartar alteracoes de pergunta sem versao publicada', async () => {
+    await expect(settle(discardDraftQuestionMock('pergunta-rascunho'))).rejects.toMatchObject({
+      status: 409,
+      problem: { detail: 'A pergunta não tem versão publicada, então não há edição a descartar.' },
+    });
+  });
+
+  it('responde 404 para acoes em pergunta inexistente', async () => {
+    await expect(settle(publishQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
+    await expect(settle(unpublishQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
+    await expect(settle(discardDraftQuestionMock('nao-existe'))).rejects.toMatchObject({ status: 404 });
+  });
+
+  it('cria pergunta do tipo LEARNING como rascunho', async () => {
+    const created = await settle(
+      createQuestionMock('categoria-reserva', {
+        type: 'LEARNING',
+        title: 'Guia de Fundos Imobiliários',
+        body: '# Fundos Imobiliários\nFIIs pagam dividendos mensais.',
+      }),
+    );
+
+    expect(created.status).toBe('DRAFT');
+    expect(created.draft).toEqual({
+      type: 'LEARNING',
+      title: 'Guia de Fundos Imobiliários',
+      body: '# Fundos Imobiliários\nFIIs pagam dividendos mensais.',
+    });
+    expect(created.published).toBeNull();
+  });
+
+  it('atualiza rascunho de pergunta do tipo LEARNING', async () => {
+    const updated = await settle(
+      updateQuestionMock('conteudo-educativo', {
+        type: 'LEARNING',
+        title: 'Por que ter uma reserva de emergência? (Atualizado)',
+        body: 'Texto atualizado sobre reserva de emergência.',
+      }),
+    );
+
+    expect(updated.draft).toEqual({
+      type: 'LEARNING',
+      title: 'Por que ter uma reserva de emergência? (Atualizado)',
+      body: 'Texto atualizado sobre reserva de emergência.',
+    });
+  });
+
+  it('recusa criar pergunta LEARNING com corpo vazio', async () => {
+    await expect(
+      settle(
+        createQuestionMock('categoria-reserva', {
+          type: 'LEARNING',
+          title: 'Titulo',
+          body: '',
+        }),
+      ),
     ).rejects.toMatchObject({ status: 400 });
   });
 });

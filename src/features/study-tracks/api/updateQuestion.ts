@@ -6,13 +6,13 @@
  */
 import { env } from '@/shared/config/env';
 import { httpClient } from '@/shared/config/httpClient';
-import type { FillBlankQuestionPayload, QuestionDTO } from '../types';
+import type { QuestionDTO, QuestionPayload } from '../types';
 import { questionRoutes } from './fillBlankContract';
 import { updateQuestionMock } from './questionsMock';
 
 export async function updateQuestion(
   questionId: string,
-  payload: FillBlankQuestionPayload,
+  payload: QuestionPayload,
 ): Promise<QuestionDTO> {
   if (env.useMocks) {
     return updateQuestionMock(questionId, payload);

@@ -1,43 +1,29 @@
 {
-  "stage": "REVIEWING",
-  "task": "Frontend: estrutura de widgets configuraveis (C5)",
-  "objective": "Ativar, desativar e reordenar widgets no dashboard, persistindo em localStorage com servico GET/PUT C5 substituivel por HTTP.",
+  "stage": "COMPLETED",
+  "task": "Frontend: mover tipo de pergunta para modal de criação",
+  "objective": "Exibir a escolha do tipo de pergunta dentro da modal aberta por Nova pergunta e navegar para o formulário somente após a confirmação.",
   "decisions": [
-    "Branch feat/configurable-widgets a partir da develop 10f92ca.",
-    "Registro unico inclui indicadores e crescimento; componentes existentes reutilizados; Clientes novos usa newUsers do C3.",
-    "Fonte Inter. CSS e screenshots fornecidos pelo solicitante orientam cards e botao.",
-    "Figma MCP sem acesso; desenho do editor nao fornecido. Editor segue os modais existentes, com checkbox e botoes acessiveis de ordenacao.",
-    "Persistencia local por padrao, independente de VITE_USE_MOCKS; VITE_DASHBOARD_WIDGETS_API=true habilita o backend.",
-    "Salvar aplica e persiste; cancelar descarta rascunho. Falhas de leitura e gravacao permitem tentar novamente.",
-    "Code review de 2026-10-21, ajustes 1-3 autorizados pelo solicitante: leitura com falha (dado invalido ou C5 indisponivel) exibe os widgets padrao do registro com alerta, Tentar novamente e Restaurar padrao (PUT explicito do padrao); erro de refetch com configuracao em cache mantem os widgets. Demais pontos do review fora deste ajuste; Node local alinhado ao .nvmrc (20), sem mudar engines.",
-    "Segundo code review em 2026-10-21: branch apta a mergear; ajustes autorizados de foco (Editar widgets recebe o foco apos salvar ou restaurar) e de assercao do teste de Tentar novamente (espera a nova leitura)."
+    "A edição reaproveita a lista da categoria em cache e envia POST na criação e PUT na edição, com o corpo C6 { type: LEARNING, title, body }.",
+    "A pré-visualização interpreta markdown em elementos React, sem dangerouslySetInnerHTML; blocos ``` ficam inteiros mesmo com linha em branco e links com protocolo inseguro viram texto.",
+    "O corpo é enviado como digitado (só o título é aparado), porque o C6 preserva o Markdown.",
+    "Code review de 2026-11-06: a branch recebeu a develop com o PR #18 (MULTIPLE_CHOICE, 51bc03e) e o EditQuestionPage despacha FILL_BLANK, MULTIPLE_CHOICE e LEARNING; QuestionPayload é a união dos três tipos.",
+    "Code review de 2026-11-06: a tela LEARNING ganhou publicar, voltar para rascunho e descartar (QuestionStatusActions), bloqueados com edições não salvas, no mesmo padrão de FILL_BLANK e MULTIPLE_CHOICE.",
+    "Code review de 2026-11-06: ao validar na aba Pré-visualizar, o formulário volta para Escrever antes de focar o campo inválido; o textarea fica montado (oculto) para o rótulo e o foco."
   ],
   "plan": [
-    "Estender registro e adicionar adaptadores C5",
-    "Integrar editor e renderizacao ordenada",
-    "Testar persistencia, cancelamento, erros e registro; rodar lint/typecheck/build/test e revisar diff",
-    "Ajustes do code review 1-3: fallback do registro, Restaurar padrao e cache prevalecendo sobre erro de refetch, com testes"
-  ],
-  "files_in_scope": [
-    "src/features/dashboard/",
-    "src/shared/components/ui/Dialog.tsx",
-    "src/features/study-tracks/components/Dialog.tsx",
-    "src/shared/config/env.ts",
-    "src/vite-env.d.ts",
-    ".env.example",
-    "README.md",
-    ".railforge/state.json"
+    "Mover o seletor de tipo da página para a modal de criação",
+    "Preservar cancelamento, foco e confirmação da modal",
+    "Executar lint, typecheck, testes e build",
+    "Revisar o diff e registrar a validação"
   ],
   "validation": {
-    "npm run lint": "passed (2026-10-21, apos ajustes do segundo code review)",
-    "npm run typecheck": "passed (2026-10-21, apos ajustes do segundo code review)",
-    "npm run build": "passed (2026-10-21, apos ajustes do segundo code review)",
-    "npm test": "58 testes passando em Node 20.17.0, incluindo os 41 da develop; os testes dos ajustes falham na pagina anterior",
-    "navegador": "Preview isolado validado e teste manual pelo solicitante no painel autenticado: ativar/desativar, reordenar e persistir apos recarregar confirmados em 2026-10-21. Ajustes 1-3 do code review cobertos por testes; ainda nao verificados no navegador.",
-    "git diff --check": "passed",
-    "limitacoes": "Comparacao integral com Figma pendente por falta de acesso; backend C5 ainda nao integrado."
+    "npm run lint": "passou (2026-11-10)",
+    "npm run typecheck": "passou (2026-11-10)",
+    "npm run build": "passou (2026-11-10)",
+    "npm test -- --run": "196 testes passando em 28 arquivos (2026-11-10)",
+    "git diff --check": "passou (2026-11-10)"
   },
-  "review": "Segundo code review em 2026-10-21: apta a mergear, sem bloqueios; foco e assercao do teste corrigidos e commitados com autorizacao do solicitante em 2026-10-21. Pendentes de decisao: largura 1156px, chave local por usuario, Restaurar no modo HTTP, query duplicada, periodo do grafico, re-export do Dialog, largura duplicada e imagem em docs/. Aguardando verificacao no navegador, push, PR pelo template e merge.",
-  "updated_at": "2026-10-21",
-  "open_questions": ["Comparacao visual completa depende do acesso ao Figma e do design do editor."]
+  "review": "O seletor de tipo foi removido da página e incorporado à modal aberta por Nova pergunta. Cancelar fecha a modal sem navegar; Continuar preserva o tipo selecionado e navega para o formulário correspondente.",
+  "updated_at": "2026-11-10",
+  "open_questions": []
 }

@@ -1,8 +1,10 @@
 import type { RouteObject } from 'react-router-dom';
 import {
   CategoryQuestionsPage,
+  EditQuestionPage,
   FillBlankQuestionPage,
-  QuestionFormPendingPage,
+  MultipleChoiceQuestionPage,
+  LearningQuestionPage,
   StudyCategoriesPage,
 } from '@/features/study-tracks';
 import {
@@ -14,7 +16,7 @@ import {
 
 /**
  * Rotas da Trilha, montadas sob ProtectedRoute no router principal.
- * Os formularios das outras tasks sao conectados aqui, preservando paths e cache da feature.
+ * Os formulários das outras tasks são conectados aqui, preservando paths e cache da feature.
  */
 export const studyTracksRoutes: RouteObject[] = [
   {
@@ -44,17 +46,27 @@ export const studyTracksRoutes: RouteObject[] = [
   {
     path: paths.studiesNewMultipleChoiceQuestion,
     element: (
-      <QuestionFormPendingPage type="MULTIPLE_CHOICE" backPathFor={studiesCategoryQuestionsPath} />
+      <MultipleChoiceQuestionPage
+        backTo={studiesCategoryQuestionsPath}
+        backLabel="Perguntas da categoria"
+        editPathFor={studiesEditQuestionPath}
+      />
     ),
   },
   {
     path: paths.studiesNewLearningQuestion,
-    element: <QuestionFormPendingPage type="LEARNING" backPathFor={studiesCategoryQuestionsPath} />,
+    element: (
+      <LearningQuestionPage
+        backTo={studiesCategoryQuestionsPath}
+        backLabel="Perguntas da categoria"
+        editPathFor={studiesEditQuestionPath}
+      />
+    ),
   },
   {
     path: paths.studiesEditQuestion,
     element: (
-      <FillBlankQuestionPage
+      <EditQuestionPage
         backTo={studiesCategoryQuestionsPath}
         backLabel="Perguntas da categoria"
         editPathFor={studiesEditQuestionPath}
