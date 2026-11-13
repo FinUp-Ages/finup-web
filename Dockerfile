@@ -8,6 +8,9 @@ RUN npm ci
 COPY . .
 
 ARG VITE_API_BASE_URL
+ARG VITE_USE_MOCKS=false
+ARG VITE_COGNITO_REGION
+ARG VITE_COGNITO_CLIENT_ID
 RUN test -n "$VITE_API_BASE_URL" || (echo "Erro: informe --build-arg VITE_API_BASE_URL=<url da API>" && exit 1)
 RUN npm run build
 
