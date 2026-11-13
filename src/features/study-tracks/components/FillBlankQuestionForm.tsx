@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
 import { toFillBlankPayload } from '../api/fillBlankContract';
@@ -24,6 +24,10 @@ type FillBlankQuestionFormProps = {
   onSubmit: (values: FillBlankFormValues) => void;
   /** Avisa quando o formulario passa a ter (ou deixa de ter) edicoes que ainda nao foram salvas. */
   onDirtyChange?: (isDirty: boolean) => void;
+  /** Acoes extras exibidas ao lado do botao de salvar (ex.: publicar). */
+  footerActions?: ReactNode;
+  /** Na edicao, o botao de salvar fica desabilitado enquanto nao houver alteracoes. */
+  requireChanges?: boolean;
 };
 
 /** Formulario da pergunta "Preencher lacuna": valida no envio e foca o primeiro campo invalido. */
@@ -33,6 +37,8 @@ export function FillBlankQuestionForm({
   isSaving = false,
   onSubmit,
   onDirtyChange,
+  footerActions,
+  requireChanges = false,
 }: FillBlankQuestionFormProps) {
   const [values, setValues] = useState(initialValues);
   const [pendingAnswer, setPendingAnswer] = useState('');
@@ -204,10 +210,17 @@ export function FillBlankQuestionForm({
         />
       </div>
 
-      <div className="w-[240px]">
-        <Button type="submit" disabled={isSaving} aria-busy={isSaving}>
-          {isSaving ? 'Salvando...' : submitLabel}
-        </Button>
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="w-[240px]">
+          <Button
+            type="submit"
+            disabled={isSaving || (requireChanges && !isDirty)}
+            aria-busy={isSaving}
+          >
+            {isSaving ? 'Salvando...' : submitLabel}
+          </Button>
+        </div>
+        {footerActions}
       </div>
     </form>
   );

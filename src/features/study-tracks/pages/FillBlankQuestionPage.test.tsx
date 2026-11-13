@@ -329,6 +329,22 @@ describe('FillBlankQuestionPage - edicao', () => {
     expect(screen.getByText('Publicada com alterações')).toBeVisible();
   });
 
+  it('avisa que nao ha o que publicar quando o rascunho salvo fica igual ao publicado', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO('PUBLISHED')]);
+    vi.mocked(updateQuestion).mockResolvedValue(questionDTO('PUBLISHED'));
+    const { user } = renderAt(editUrl);
+
+    await user.type(await screen.findByDisplayValue('Rendimento do CDB'), ' pos');
+    await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+
+    expect(
+      await screen.findByText(
+        'Rascunho salvo. Ele está igual à versão publicada, não há alterações para publicar.',
+      ),
+    ).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Publicar' })).not.toBeInTheDocument();
+  });
+
   it('mostra o detail do problem+json quando o PUT falha', async () => {
     vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO()]);
     vi.mocked(updateQuestion).mockRejectedValue(
@@ -336,12 +352,23 @@ describe('FillBlankQuestionPage - edicao', () => {
     );
     const { user } = renderAt(editUrl);
 
-    await screen.findByDisplayValue('Rendimento do CDB');
+    await user.type(await screen.findByDisplayValue('Rendimento do CDB'), ' pos');
     await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Adicione pelo menos uma resposta aceita.',
     );
+  });
+
+  it('desabilita o salvar enquanto nao houver alteracoes e habilita ao editar', async () => {
+    vi.mocked(getCategoryQuestions).mockResolvedValue([questionDTO()]);
+    const { user } = renderAt(editUrl);
+
+    const title = await screen.findByDisplayValue('Rendimento do CDB');
+    expect(screen.getByRole('button', { name: 'Salvar rascunho' })).toBeDisabled();
+
+    await user.type(title, ' pos');
+    expect(screen.getByRole('button', { name: 'Salvar rascunho' })).toBeEnabled();
   });
 
   it('avisa quando a pergunta nao esta na lista da categoria', async () => {
@@ -387,7 +414,7 @@ describe('FillBlankQuestionPage - edicao', () => {
       questionDTO('DRAFT', { ...draftContent, answers: ['CDI', 'cdi'] }),
     ]);
     const { user } = renderAt(editUrl);
-    await screen.findByDisplayValue('Rendimento do CDB');
+    await user.type(await screen.findByDisplayValue('Rendimento do CDB'), ' pos');
 
     await user.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
 
@@ -432,9 +459,9 @@ describe('FillBlankQuestionPage - edicao', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
 
-    const confirmBtn = screen.getAllByRole('button', { name: 'Publicar' }).find(
-      (btn) => dialog.contains(btn),
-    );
+    const confirmBtn = screen
+      .getAllByRole('button', { name: 'Publicar' })
+      .find((btn) => dialog.contains(btn));
     await user.click(confirmBtn!);
 
     expect(publishQuestion).toHaveBeenCalledWith('q-1');
@@ -463,9 +490,9 @@ describe('FillBlankQuestionPage - edicao', () => {
     await user.click(screen.getByRole('button', { name: 'Voltar para rascunho' }));
     const dialog = screen.getByRole('dialog');
 
-    const confirmBtn = screen.getAllByRole('button', { name: 'Voltar para rascunho' }).find(
-      (btn) => dialog.contains(btn),
-    );
+    const confirmBtn = screen
+      .getAllByRole('button', { name: 'Voltar para rascunho' })
+      .find((btn) => dialog.contains(btn));
     await user.click(confirmBtn!);
 
     expect(unpublishQuestion).toHaveBeenCalledWith('q-1');
@@ -507,9 +534,9 @@ describe('FillBlankQuestionPage - edicao', () => {
     await user.click(screen.getByRole('button', { name: 'Descartar alterações' }));
     const dialog = screen.getByRole('dialog');
 
-    const confirmBtn = screen.getAllByRole('button', { name: 'Descartar alterações' }).find(
-      (btn) => dialog.contains(btn),
-    );
+    const confirmBtn = screen
+      .getAllByRole('button', { name: 'Descartar alterações' })
+      .find((btn) => dialog.contains(btn));
     await user.click(confirmBtn!);
 
     expect(discardDraftQuestion).toHaveBeenCalledWith('q-1');

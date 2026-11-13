@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
 import { toMultipleChoicePayload } from '../api/multipleChoiceContract';
@@ -20,6 +20,10 @@ type MultipleChoiceQuestionFormProps = {
   onSubmit: (values: MultipleChoiceFormValues) => void;
   /** Avisa quando o formulario passa a ter (ou deixa de ter) edicoes que ainda nao foram salvas. */
   onDirtyChange?: (isDirty: boolean) => void;
+  /** Acoes extras exibidas ao lado do botao de salvar (ex.: publicar). */
+  footerActions?: ReactNode;
+  /** Na edicao, o botao de salvar fica desabilitado enquanto nao houver alteracoes. */
+  requireChanges?: boolean;
 };
 
 /**
@@ -33,6 +37,8 @@ export function MultipleChoiceQuestionForm({
   isSaving = false,
   onSubmit,
   onDirtyChange,
+  footerActions,
+  requireChanges = false,
 }: MultipleChoiceQuestionFormProps) {
   const [values, setValues] = useState<MultipleChoiceFormValues>(initialValues);
   const [errors, setErrors] = useState<MultipleChoiceErrors>({});
@@ -290,12 +296,18 @@ export function MultipleChoiceQuestionForm({
         />
       </div>
 
-      <div className="w-[240px]">
-        <Button type="submit" disabled={isSaving} aria-busy={isSaving}>
-          {isSaving ? 'Salvando...' : submitLabel}
-        </Button>
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="w-[240px]">
+          <Button
+            type="submit"
+            disabled={isSaving || (requireChanges && !isDirty)}
+            aria-busy={isSaving}
+          >
+            {isSaving ? 'Salvando...' : submitLabel}
+          </Button>
+        </div>
+        {footerActions}
       </div>
     </form>
   );
 }
-

@@ -1,4 +1,5 @@
 import {
+  type ReactNode,
   useEffect,
   useId,
   useRef,
@@ -26,6 +27,10 @@ type LearningQuestionFormProps = {
   onSubmit: (values: LearningFormValues) => void;
   /** Avisa quando o formulario passa a ter (ou deixa de ter) edicoes que ainda nao foram salvas. */
   onDirtyChange?: (isDirty: boolean) => void;
+  /** Acoes extras exibidas ao lado do botao de salvar (ex.: publicar). */
+  footerActions?: ReactNode;
+  /** Na edicao, o botao de salvar fica desabilitado enquanto nao houver alteracoes. */
+  requireChanges?: boolean;
 };
 
 type BodyTab = 'write' | 'preview';
@@ -47,14 +52,15 @@ export function LearningQuestionForm({
   isSaving = false,
   onSubmit,
   onDirtyChange,
+  footerActions,
+  requireChanges = false,
 }: LearningQuestionFormProps) {
   const [values, setValues] = useState<LearningFormValues>(initialValues);
   const [errors, setErrors] = useState<LearningErrors>({});
   const [activeTab, setActiveTab] = useState<BodyTab>('write');
 
   const isDirty =
-    JSON.stringify(toLearningPayload(values)) !==
-    JSON.stringify(toLearningPayload(initialValues));
+    JSON.stringify(toLearningPayload(values)) !== JSON.stringify(toLearningPayload(initialValues));
   useEffect(() => {
     onDirtyChange?.(isDirty);
   }, [isDirty, onDirtyChange]);
@@ -217,10 +223,17 @@ export function LearningQuestionForm({
         )}
       </div>
 
-      <div className="w-[240px]">
-        <Button type="submit" disabled={isSaving} aria-busy={isSaving}>
-          {isSaving ? 'Salvando...' : submitLabel}
-        </Button>
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="w-[240px]">
+          <Button
+            type="submit"
+            disabled={isSaving || (requireChanges && !isDirty)}
+            aria-busy={isSaving}
+          >
+            {isSaving ? 'Salvando...' : submitLabel}
+          </Button>
+        </div>
+        {footerActions}
       </div>
     </form>
   );
