@@ -31,22 +31,37 @@ O login usa o AWS Cognito: preencha também `VITE_COGNITO_REGION` e `VITE_COGNIT
 
 ## Docker
 
-No PowerShell, primeiro carregue `VITE_API_BASE_URL` na sessão atual usando o mesmo valor definido em `.env.development`. Por exemplo, se o arquivo contém `VITE_API_BASE_URL=http://localhost:8080`, execute:
+No PowerShell, primeiro carregue na sessão atual as variáveis do build, usando os mesmos valores definidos em `.env.development`. Por exemplo:
 
 ```powershell
 $env:VITE_API_BASE_URL = "http://localhost:8080"
+$env:VITE_COGNITO_REGION = "<regiao-do-pool>"
+$env:VITE_COGNITO_CLIENT_ID = "<client-id-do-app-client-do-painel>"
 ```
 
 Depois, gere e execute a imagem:
 
 ```powershell
-docker build --build-arg VITE_API_BASE_URL="$env:VITE_API_BASE_URL" -t finup-web .
+docker build `
+  --build-arg VITE_API_BASE_URL="$env:VITE_API_BASE_URL" `
+  --build-arg VITE_COGNITO_REGION="$env:VITE_COGNITO_REGION" `
+  --build-arg VITE_COGNITO_CLIENT_ID="$env:VITE_COGNITO_CLIENT_ID" `
+  -t finup-web .
 docker run --rm -p 5173:80 finup-web
 ```
 
 Acesse http://localhost:5173. A imagem usa Node.js 20 (mesma versão do `.nvmrc` e da CI) para compilar a aplicação e Nginx para servir os arquivos, com suporte às rotas do React Router.
 
-A variável definida com `$env:` permanece disponível apenas na sessão atual do PowerShell. O Docker recebe seu valor pelo argumento `--build-arg`; ele não lê o arquivo `.env.development` automaticamente. O argumento é obrigatório: sem ele, o build falha. A pipeline poderá fornecer o valor correspondente a cada ambiente ao gerar a imagem. Como o Vite incorpora variáveis no bundle durante o build, a URL deve ser acessível pelo navegador do usuário e não pode conter segredos.
+Argumentos de build aceitos pela imagem:
+
+| Argumento | Obrigatório | Padrão | O que acontece sem ele |
+|---|---|---|---|
+| `VITE_API_BASE_URL` | sim | — | o build falha com mensagem de erro |
+| `VITE_COGNITO_REGION` | para o login | vazio | a imagem é gerada, mas o login falha (veja [Autenticação](#autenticação)) |
+| `VITE_COGNITO_CLIENT_ID` | para o login | vazio | a imagem é gerada, mas o login falha (veja [Autenticação](#autenticação)) |
+| `VITE_USE_MOCKS` | não | `false` | as telas chamam o backend; passe `--build-arg VITE_USE_MOCKS=true` para usar os dados simulados |
+
+As variáveis definidas com `$env:` permanecem disponíveis apenas na sessão atual do PowerShell. O Docker recebe os valores pelos argumentos `--build-arg`; ele não lê o arquivo `.env.development` automaticamente. Por isso, diferente do `.env.example`, a imagem vem com `VITE_USE_MOCKS=false` por padrão. A pipeline poderá fornecer os valores correspondentes a cada ambiente ao gerar a imagem. Como o Vite incorpora as variáveis no bundle durante o build, a URL deve ser acessível pelo navegador do usuário, e nenhum desses valores pode conter segredos.
 
 ## Scripts
 
