@@ -22,6 +22,8 @@ type MultipleChoiceQuestionFormProps = {
   onDirtyChange?: (isDirty: boolean) => void;
   /** Acoes extras exibidas ao lado do botao de salvar (ex.: publicar). */
   footerActions?: ReactNode;
+  /** Na edicao, o botao de salvar fica desabilitado enquanto nao houver alteracoes. */
+  requireChanges?: boolean;
 };
 
 /**
@@ -36,6 +38,7 @@ export function MultipleChoiceQuestionForm({
   onSubmit,
   onDirtyChange,
   footerActions,
+  requireChanges = false,
 }: MultipleChoiceQuestionFormProps) {
   const [values, setValues] = useState<MultipleChoiceFormValues>(initialValues);
   const [errors, setErrors] = useState<MultipleChoiceErrors>({});
@@ -295,7 +298,11 @@ export function MultipleChoiceQuestionForm({
 
       <div className="flex flex-wrap items-start gap-3">
         <div className="w-[240px]">
-          <Button type="submit" disabled={isSaving} aria-busy={isSaving}>
+          <Button
+            type="submit"
+            disabled={isSaving || (requireChanges && !isDirty)}
+            aria-busy={isSaving}
+          >
             {isSaving ? 'Salvando...' : submitLabel}
           </Button>
         </div>

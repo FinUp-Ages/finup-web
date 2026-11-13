@@ -8,7 +8,9 @@
     "O botão de olho é type=button com aria-label Mostrar/Ocultar senha, aria-pressed e aria-controls; fica desabilitado durante o envio.",
     "Fora do código: o VITE_COGNITO_CLIENT_ID do .env local estava sem o último caractere (ResourceNotFoundException no login); corrigido para o mesmo valor do COGNITO_ADMIN_CLIENT_ID do backend.",
     "Os três formulários de pergunta recebem a prop footerActions, exibida ao lado do botão de salvar; as páginas passam QuestionStatusActions por ela em vez do cabeçalho.",
-    "QuestionStatusActions passou a usar o mesmo tamanho do botão primário (55px, pílula) e alinhamento à esquerda; o motivo de bloqueio continua abaixo dos botões."
+    "QuestionStatusActions passou a usar o mesmo tamanho do botão primário (55px, pílula) e alinhamento à esquerda; o motivo de bloqueio continua abaixo dos botões.",
+    "Na edição, Salvar rascunho fica desabilitado sem alterações (prop requireChanges); a criação continua habilitada para mostrar a validação.",
+    "O status vem do backend comparando draft e published: se o PUT volta PUBLISHED, a mensagem avisa que o rascunho está igual ao publicado e não há o que publicar."
   ],
   "plan": [
     "Trocar a rota / e adicionar o catch-all",
@@ -21,7 +23,7 @@
     "npm run lint": "passou (2026-11-12)",
     "npm run typecheck": "passou (2026-11-12)",
     "npm run build": "passou (2026-11-12)",
-    "npx vitest run src/features/study-tracks": "6 falhas por timeout com o dev server rodando junto; os 6 arquivos afetados passam em série (--no-file-parallelism), 70 testes (2026-11-12)",
+    "npx vitest run --no-file-parallelism src/features/study-tracks": "162 testes passando (2026-11-12); em paralelo, com o dev server rodando junto, há timeouts intermitentes",
     "navegador": "login e redirecionamento para /app conferidos pelo usuário (2026-11-12)"
   },
   "review": "Pendente: verificação no navegador do botão de olho e do Publicar ao lado de Salvar rascunho.",

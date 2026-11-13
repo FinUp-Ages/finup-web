@@ -26,6 +26,8 @@ type FillBlankQuestionFormProps = {
   onDirtyChange?: (isDirty: boolean) => void;
   /** Acoes extras exibidas ao lado do botao de salvar (ex.: publicar). */
   footerActions?: ReactNode;
+  /** Na edicao, o botao de salvar fica desabilitado enquanto nao houver alteracoes. */
+  requireChanges?: boolean;
 };
 
 /** Formulario da pergunta "Preencher lacuna": valida no envio e foca o primeiro campo invalido. */
@@ -36,6 +38,7 @@ export function FillBlankQuestionForm({
   onSubmit,
   onDirtyChange,
   footerActions,
+  requireChanges = false,
 }: FillBlankQuestionFormProps) {
   const [values, setValues] = useState(initialValues);
   const [pendingAnswer, setPendingAnswer] = useState('');
@@ -209,7 +212,11 @@ export function FillBlankQuestionForm({
 
       <div className="flex flex-wrap items-start gap-3">
         <div className="w-[240px]">
-          <Button type="submit" disabled={isSaving} aria-busy={isSaving}>
+          <Button
+            type="submit"
+            disabled={isSaving || (requireChanges && !isDirty)}
+            aria-busy={isSaving}
+          >
             {isSaving ? 'Salvando...' : submitLabel}
           </Button>
         </div>

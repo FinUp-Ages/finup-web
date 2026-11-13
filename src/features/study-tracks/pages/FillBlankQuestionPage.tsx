@@ -92,6 +92,11 @@ function FillBlankQuestionScreen({
         navigate(editPathFor(categoryId, saved.id), { replace: true, state: { created: true } });
       } else if (saved.status === 'DRAFT') {
         setSuccessMessage('Rascunho salvo.');
+      } else if (saved.status === 'PUBLISHED') {
+        // O status vem do backend comparando rascunho e publicada: iguais, nao ha o que publicar.
+        setSuccessMessage(
+          'Rascunho salvo. Ele está igual à versão publicada, não há alterações para publicar.',
+        );
       } else {
         setSuccessMessage(
           'Rascunho salvo. A versão publicada só muda quando for publicada de novo.',
@@ -218,6 +223,7 @@ function FillBlankQuestionScreen({
         {canShowForm && (
           <FillBlankQuestionForm
             footerActions={statusActions}
+            requireChanges={isEditing}
             key={`${question?.id ?? 'new'}-${formRevision}`}
             initialValues={question?.values ?? emptyValues}
             submitLabel={isEditing ? 'Salvar rascunho' : 'Criar rascunho'}
