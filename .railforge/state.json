@@ -1,29 +1,32 @@
 {
-  "stage": "COMPLETED",
-  "task": "Frontend: mover tipo de pergunta para modal de criação",
-  "objective": "Exibir a escolha do tipo de pergunta dentro da modal aberta por Nova pergunta e navegar para o formulário somente após a confirmação.",
+  "stage": "VALIDATING",
+  "task": "Frontend: redirecionar a raiz, mostrar/ocultar senha no login e mover Publicar para o lado de Salvar rascunho",
+  "objective": "A raiz (/) e rotas desconhecidas levam ao painel (/app), que manda ao login sem sessão; o campo de senha ganha o botão de olho; nas telas de pergunta, as ações de status (Publicar, Voltar para rascunho, Descartar) ficam ao lado de Salvar rascunho.",
   "decisions": [
-    "A edição reaproveita a lista da categoria em cache e envia POST na criação e PUT na edição, com o corpo C6 { type: LEARNING, title, body }.",
-    "A pré-visualização interpreta markdown em elementos React, sem dangerouslySetInnerHTML; blocos ``` ficam inteiros mesmo com linha em branco e links com protocolo inseguro viram texto.",
-    "O corpo é enviado como digitado (só o título é aparado), porque o C6 preserva o Markdown.",
-    "Code review de 2026-11-06: a branch recebeu a develop com o PR #18 (MULTIPLE_CHOICE, 51bc03e) e o EditQuestionPage despacha FILL_BLANK, MULTIPLE_CHOICE e LEARNING; QuestionPayload é a união dos três tipos.",
-    "Code review de 2026-11-06: a tela LEARNING ganhou publicar, voltar para rascunho e descartar (QuestionStatusActions), bloqueados com edições não salvas, no mesmo padrão de FILL_BLANK e MULTIPLE_CHOICE.",
-    "Code review de 2026-11-06: ao validar na aba Pré-visualizar, o formulário volta para Escrever antes de focar o campo inválido; o textarea fica montado (oculto) para o rótulo e o foco."
+    "/ e * fazem Navigate para /app; o ProtectedRoute já redireciona ao /login sem sessão e o login volta para /app após entrar.",
+    "A WelcomePage (template do Vite) deixou de ser usada pelo router; a feature welcome ficou no repositório sem referência.",
+    "O botão de olho é type=button com aria-label Mostrar/Ocultar senha, aria-pressed e aria-controls; fica desabilitado durante o envio.",
+    "Fora do código: o VITE_COGNITO_CLIENT_ID do .env local estava sem o último caractere (ResourceNotFoundException no login); corrigido para o mesmo valor do COGNITO_ADMIN_CLIENT_ID do backend.",
+    "Os três formulários de pergunta recebem a prop footerActions, exibida ao lado do botão de salvar; as páginas passam QuestionStatusActions por ela em vez do cabeçalho.",
+    "QuestionStatusActions passou a usar o mesmo tamanho do botão primário (55px, pílula) e alinhamento à esquerda; o motivo de bloqueio continua abaixo dos botões."
   ],
   "plan": [
-    "Mover o seletor de tipo da página para a modal de criação",
-    "Preservar cancelamento, foco e confirmação da modal",
-    "Executar lint, typecheck, testes e build",
-    "Revisar o diff e registrar a validação"
+    "Trocar a rota / e adicionar o catch-all",
+    "Adicionar o botão de olho no campo de senha",
+    "Mover as ações de status para o rodapé dos formulários de pergunta",
+    "Executar lint, typecheck e testes",
+    "Verificar no navegador o redirecionamento, o login e o rodapé das perguntas"
   ],
   "validation": {
-    "npm run lint": "passou (2026-11-10)",
-    "npm run typecheck": "passou (2026-11-10)",
-    "npm run build": "passou (2026-11-10)",
-    "npm test -- --run": "196 testes passando em 28 arquivos (2026-11-10)",
-    "git diff --check": "passou (2026-11-10)"
+    "npm run lint": "passou (2026-11-12)",
+    "npm run typecheck": "passou (2026-11-12)",
+    "npm run build": "passou (2026-11-12)",
+    "npx vitest run src/features/study-tracks": "6 falhas por timeout com o dev server rodando junto; os 6 arquivos afetados passam em série (--no-file-parallelism), 70 testes (2026-11-12)",
+    "navegador": "login e redirecionamento para /app conferidos pelo usuário (2026-11-12)"
   },
-  "review": "O seletor de tipo foi removido da página e incorporado à modal aberta por Nova pergunta. Cancelar fecha a modal sem navegar; Continuar preserva o tipo selecionado e navega para o formulário correspondente.",
-  "updated_at": "2026-11-10",
-  "open_questions": []
+  "review": "Pendente: verificação no navegador do botão de olho e do Publicar ao lado de Salvar rascunho.",
+  "updated_at": "2026-11-12",
+  "open_questions": [
+    "Remover a feature welcome, agora sem uso?"
+  ]
 }

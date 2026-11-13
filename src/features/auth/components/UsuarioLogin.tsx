@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
 import { useAuth } from '../hooks/useAuth';
@@ -22,6 +22,7 @@ export function UsuarioLogin({ aviso }: UsuarioLoginProps) {
   const { signIn, dismissNotice } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mensagem, setMensagem] = useState({ email: '', senha: '' });
   const [erroLogin, setErroLogin] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -107,22 +108,40 @@ export function UsuarioLogin({ aviso }: UsuarioLoginProps) {
             <label htmlFor="login-password" className="sr-only">
               Senha
             </label>
-            <Input
-              ref={senhaRef}
-              id="login-password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="Senha"
-              value={senha}
-              disabled={enviando}
-              aria-invalid={mensagem.senha ? true : undefined}
-              aria-describedby={mensagem.senha ? 'login-password-erro' : undefined}
-              onChange={(event) => {
-                setSenha(event.target.value);
-                setMensagem((estadoAtual) => ({ ...estadoAtual, senha: '' }));
-              }}
-            />
+            <div className="relative">
+              <Input
+                ref={senhaRef}
+                id="login-password"
+                name="password"
+                type={mostrarSenha ? 'text' : 'password'}
+                autoComplete="current-password"
+                placeholder="Senha"
+                value={senha}
+                disabled={enviando}
+                className="pr-12"
+                aria-invalid={mensagem.senha ? true : undefined}
+                aria-describedby={mensagem.senha ? 'login-password-erro' : undefined}
+                onChange={(event) => {
+                  setSenha(event.target.value);
+                  setMensagem((estadoAtual) => ({ ...estadoAtual, senha: '' }));
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarSenha((atual) => !atual)}
+                disabled={enviando}
+                aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                aria-pressed={mostrarSenha}
+                aria-controls="login-password"
+                className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-md text-navy outline-none focus-visible:ring-2 focus-visible:ring-navy disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {mostrarSenha ? (
+                  <EyeOff aria-hidden="true" size={20} />
+                ) : (
+                  <Eye aria-hidden="true" size={20} />
+                )}
+              </button>
+            </div>
             {mensagem.senha && (
               <span id="login-password-erro" className="text-right text-xs text-login-error">
                 {mensagem.senha}

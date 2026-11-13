@@ -14,10 +14,10 @@ import { AdminSectionPage } from '@/features/admin';
 import { LoginPage } from '@/features/auth';
 import { DashboardPage } from '@/features/dashboard';
 import { UsersPage } from '@/features/users';
-import { WelcomePage } from '@/features/welcome';
 
 const router = createBrowserRouter([
-  { path: paths.home, element: <WelcomePage /> },
+  // A raiz e qualquer rota desconhecida vao para o painel; sem sessao, o ProtectedRoute manda ao login.
+  { path: paths.home, element: <Navigate to={paths.admin} replace /> },
   { path: paths.login, element: <LoginPage redirectTo={paths.admin} /> },
   {
     path: paths.admin,
@@ -34,6 +34,7 @@ const router = createBrowserRouter([
       ...studyTracksRoutes,
     ],
   },
+  { path: '*', element: <Navigate to={paths.admin} replace /> },
 ]);
 
 export function AppRouter() {

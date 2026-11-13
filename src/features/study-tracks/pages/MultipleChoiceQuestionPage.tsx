@@ -109,6 +109,27 @@ function MultipleChoiceQuestionScreen({
       ? 'Salve o rascunho antes de publicar, voltar para rascunho ou descartar.'
       : null;
 
+  const statusActions =
+    isEditing && question ? (
+      <QuestionStatusActions
+        questionId={question.id}
+        status={question.status}
+        categoryId={categoryId}
+        questionTitle={question.values.statement}
+        disabledReason={actionsDisabledReason}
+        onSuccess={(action) => {
+          if (action === 'publish') {
+            setSuccessMessage('Pergunta publicada.');
+          } else if (action === 'unpublish') {
+            setSuccessMessage('Pergunta movida de volta para rascunho.');
+          } else if (action === 'discard') {
+            setFormRevision((revision) => revision + 1);
+            setSuccessMessage('Alterações do rascunho descartadas.');
+          }
+        }}
+      />
+    ) : null;
+
   return (
     <div className="text-navy">
       <section className="mx-auto flex w-full min-w-[720px] max-w-[760px] flex-col gap-6">
@@ -130,26 +151,6 @@ function MultipleChoiceQuestionScreen({
                 </span>
               )}
             </div>
-
-            {isEditing && question && (
-              <QuestionStatusActions
-                questionId={question.id}
-                status={question.status}
-                categoryId={categoryId}
-                questionTitle={question.values.statement}
-                disabledReason={actionsDisabledReason}
-                onSuccess={(action) => {
-                  if (action === 'publish') {
-                    setSuccessMessage('Pergunta publicada.');
-                  } else if (action === 'unpublish') {
-                    setSuccessMessage('Pergunta movida de volta para rascunho.');
-                  } else if (action === 'discard') {
-                    setFormRevision((revision) => revision + 1);
-                    setSuccessMessage('Alterações do rascunho descartadas.');
-                  }
-                }}
-              />
-            )}
           </div>
           {!isEditing && <p className="text-sm text-navy/70">A pergunta é salva como rascunho.</p>}
         </header>
@@ -212,6 +213,7 @@ function MultipleChoiceQuestionScreen({
 
         {canShowForm && (
           <MultipleChoiceQuestionForm
+            footerActions={statusActions}
             key={`${question?.id ?? 'new'}-${formRevision}`}
             initialValues={question?.values ?? emptyValues}
             submitLabel={isEditing ? 'Salvar rascunho' : 'Criar rascunho'}
@@ -224,4 +226,3 @@ function MultipleChoiceQuestionScreen({
     </div>
   );
 }
-
