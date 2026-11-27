@@ -1,30 +1,24 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
-import { AuthContext } from '../session/authContext';
+import { describe, expect, it } from 'vitest';
+import { authenticated, sessionValue, withSession } from '@/test/session';
 import type { AuthState } from '../types';
 import { LoginPage } from './LoginPage';
 
 function renderLoginPage(state: AuthState, routerState?: { from: string }) {
   render(
-    <AuthContext.Provider
-      value={{ state, signIn: vi.fn(), signOut: vi.fn(), dismissNotice: vi.fn() }}
-    >
+    withSession(
+      sessionValue(state),
       <MemoryRouter initialEntries={[{ pathname: '/login', state: routerState }]}>
         <Routes>
           <Route path="/login" element={<LoginPage redirectTo="/app" />} />
           <Route path="/app" element={<p>painel</p>} />
           <Route path="/app/studies" element={<p>trilha</p>} />
         </Routes>
-      </MemoryRouter>
-    </AuthContext.Provider>,
+      </MemoryRouter>,
+    ),
   );
 }
-
-const authenticated: AuthState = {
-  status: 'authenticated',
-  admin: { id: 'u-1', name: 'Ana', email: 'ana@finup.com' },
-};
 
 describe('LoginPage', () => {
   it('mostra a espera enquanto confere a sessao salva', () => {

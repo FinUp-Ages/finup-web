@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { httpClient } from '@/shared/config/httpClient';
+import { resetEnv, setEnv } from '@/test/env';
 import { getUsers } from './getUsers';
 
-const config = vi.hoisted(() => ({ useMocks: true }));
-vi.mock('@/shared/config/env', () => ({ env: config }));
+vi.mock('@/shared/config/env', async () => (await import('@/test/env')).mockEnv());
 
 afterEach(() => {
   vi.restoreAllMocks();
-  config.useMocks = true;
+  resetEnv();
 });
 
 describe('getUsers com mocks', () => {
@@ -44,7 +44,7 @@ describe('getUsers com mocks', () => {
 
 describe('getUsers com a API real', () => {
   it('envia paginacao e filtros para GET /api/v1/admin/users', async () => {
-    config.useMocks = false;
+    setEnv({ useMocks: false });
     const data = { content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 };
     const get = vi.spyOn(httpClient, 'get').mockResolvedValue({ data });
     const params = { page: 0, size: 20, status: 'ACTIVE' as const, search: 'ana' };

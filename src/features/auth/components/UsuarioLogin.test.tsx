@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthContext, type AuthContextValue } from '../session/authContext';
+import { sessionValue, withSession } from '@/test/session';
+import type { AuthContextValue } from '../session/authContext';
 import { GENERIC_MESSAGE, LoginError } from '../session/messages';
 import { UsuarioLogin } from './UsuarioLogin';
 
@@ -9,17 +10,11 @@ const signIn = vi.fn<AuthContextValue['signIn']>();
 const dismissNotice = vi.fn();
 
 function renderLogin(aviso: string | null = null) {
-  const value: AuthContextValue = {
-    state: { status: 'unauthenticated', notice: null },
-    signIn,
-    signOut: vi.fn(),
-    dismissNotice,
-  };
-  render(
-    <AuthContext.Provider value={value}>
-      <UsuarioLogin aviso={aviso} />
-    </AuthContext.Provider>,
+  const value = sessionValue(
+    { status: 'unauthenticated', notice: null },
+    { signIn, dismissNotice },
   );
+  render(withSession(value, <UsuarioLogin aviso={aviso} />));
   return userEvent.setup();
 }
 

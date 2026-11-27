@@ -1,18 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { httpClient } from '@/shared/config/httpClient';
+import { resetEnv, setEnv } from '@/test/env';
 import { getUserGrowth } from './getUserGrowth';
 import { getUserGrowthMock } from './userGrowthMock';
 
-const config = vi.hoisted(() => ({ useMocks: true }));
-vi.mock('@/shared/config/env', () => ({ env: config }));
+vi.mock('@/shared/config/env', async () => (await import('@/test/env')).mockEnv());
 
 afterEach(() => {
   vi.restoreAllMocks();
+  resetEnv();
 });
 
 describe('User growth C3: flag mock/real', () => {
   it('com mocks, devolve os ultimos meses pedidos sem chamar HTTP', async () => {
-    config.useMocks = true;
+    setEnv({ useMocks: true });
     const get = vi.spyOn(httpClient, 'get');
 
     const growth = await getUserGrowth(6);
@@ -24,7 +25,7 @@ describe('User growth C3: flag mock/real', () => {
   });
 
   it('com a flag desligada, chama o endpoint real com os meses', async () => {
-    config.useMocks = false;
+    setEnv({ useMocks: false });
     const data = getUserGrowthMock(3);
     const get = vi.spyOn(httpClient, 'get').mockResolvedValue({ data });
 
@@ -35,7 +36,7 @@ describe('User growth C3: flag mock/real', () => {
   });
 
   it('propaga falha HTTP sem trocar por mock', async () => {
-    config.useMocks = false;
+    setEnv({ useMocks: false });
     vi.spyOn(httpClient, 'get').mockRejectedValue(new Error('offline'));
     await expect(getUserGrowth(6)).rejects.toThrow('offline');
   });

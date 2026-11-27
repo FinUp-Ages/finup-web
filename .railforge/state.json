@@ -10,7 +10,9 @@
     "Rotas reais (App, AppRouter) testadas com src/test/memoryRouterProvider.tsx: no jsdom com Node 24 o createBrowserRouter cria um Request do undici com o AbortSignal do jsdom, que o undici recusa. O helper troca só o provider; rotas, guardas e layouts são os de produção.",
     "Teste instável de MultipleChoiceQuestionPage (timeout de 5s com cobertura ligada): o preenchimento do formulário passa a colar o texto (user.paste) em vez de digitar letra a letra.",
     "coverage/ entrou no .gitignore e nos ignores do ESLint (o relatório HTML gerado não é código do projeto).",
-    "Arquivos já fora do Prettier na develop não foram reformatados; os arquivos novos seguem o .prettierrc."
+    "Arquivos já fora do Prettier na develop não foram reformatados; os arquivos novos seguem o .prettierrc.",
+    "Helpers de teste em src/test/: session.tsx (AuthContext com estado fixo, para testes de app/ não importarem o interior de features/auth) e env.ts (mockEnv/setEnv/resetEnv, mesmo formato de shared/config/env).",
+    "Exceção à regra do README de não importar axios: só os testes de shared/config (httpClient e apiError) usam AxiosError e AxiosAdapter, porque testam o próprio cliente HTTP."
   ],
   "plan": [
     "Configurar coverage com piso e script test:coverage",
@@ -29,6 +31,8 @@
     "eslint.config.js",
     "README.md",
     "src/test/memoryRouterProvider.tsx",
+    "src/test/session.tsx",
+    "src/test/env.ts",
     "src/**/*.test.ts(x) (23 arquivos novos e MultipleChoiceQuestionPage.test.tsx)",
     ".railforge/state.json"
   ],
@@ -38,15 +42,16 @@
     "Testes E2E (Playwright) e mudanças no backend ou no mobile."
   ],
   "validation": {
-    "npm run test:coverage": "passou (2026-11-27): 50 arquivos, 391 testes; linhas 97,73%, statements 97,73%, funções 97,55%, branches 95,08%. Antes: 28 arquivos, 198 testes, 66,5% de linhas. Rodado duas vezes seguidas sem falha intermitente.",
+    "npm run test:coverage": "passou (2026-11-27): 391 testes; linhas 97,73%, funções 97,55%, branches 95,08%.",
     "npm run lint": "passou (2026-11-27)",
     "npm run typecheck": "passou (2026-11-27)",
     "npm run build": "passou (2026-11-27)",
     "prettier --check (arquivos novos e alterados)": "passou (2026-11-27)"
   },
-  "review": "Pendente: revisão humana e decisão do usuário sobre o commit.",
+  "review": "2026-11-27: /code-review (standards e spec) feito; ajustes de padrão aplicados. Pendente: revisão humana do PR #22.",
   "updated_at": "2026-11-27",
   "open_questions": [
-    "Remover as features example/ e welcome/, sem uso nas rotas?"
+    "Remover as features example/ e welcome/, sem uso nas rotas?",
+    "Pendência herdada da tarefa anterior (PR #21): conferir no navegador o botão de olho da senha e o Publicar ao lado de Salvar rascunho."
   ]
 }

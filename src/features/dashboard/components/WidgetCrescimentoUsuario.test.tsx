@@ -6,7 +6,7 @@ import type { CrescimentoUsuario } from '../types';
 import { GraficoCrescimentoUsuario } from './GraficoCrescimentoUsuario';
 import { WidgetCrescimentoUsuario } from './WidgetCrescimentoUsuario';
 
-vi.mock('@/shared/config/env', () => ({ env: { useMocks: true } }));
+vi.mock('@/shared/config/env', async () => (await import('@/test/env')).mockEnv());
 
 const opcoesPeriodo = [
   { meses: 3, rotulo: 'Últimos 3 meses' },

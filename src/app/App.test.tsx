@@ -5,9 +5,7 @@ import App from './App';
 vi.mock('react-router-dom', async (importOriginal) =>
   (await import('@/test/memoryRouterProvider')).withMemoryRouter(await importOriginal()),
 );
-vi.mock('@/shared/config/env', () => ({
-  env: { useMocks: true, apiBaseUrl: '', cognito: { region: '', clientId: '' } },
-}));
+vi.mock('@/shared/config/env', async () => (await import('@/test/env')).mockEnv());
 
 describe('App', () => {
   it('sem sessao salva, qualquer rota do painel cai no login', async () => {

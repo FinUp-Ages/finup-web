@@ -12,7 +12,9 @@ import { updateCategory } from './updateCategory';
 import { updateQuestion } from './updateQuestion';
 
 // Rotas reais do C6 com VITE_USE_MOCKS desligado: cada funcao chama o metodo e o caminho certos.
-vi.mock('@/shared/config/env', () => ({ env: { useMocks: false } }));
+vi.mock('@/shared/config/env', async () =>
+  (await import('@/test/env')).mockEnv({ useMocks: false }),
+);
 
 const BASE = '/api/v1/admin/study-tracks';
 const category = { name: 'Metas', description: '' };

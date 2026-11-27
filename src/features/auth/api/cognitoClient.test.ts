@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { resetEnv, setEnv } from '@/test/env';
 import { CognitoError, cognitoRequest } from './cognitoClient';
 
-const config = vi.hoisted(() => ({ cognito: { region: 'us-east-1', clientId: 'client-painel' } }));
-vi.mock('@/shared/config/env', () => ({ env: config }));
+vi.mock('@/shared/config/env', async () =>
+  (await import('@/test/env')).mockEnv({
+    cognito: { region: 'us-east-1', clientId: 'client-painel' },
+  }),
+);
 
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -11,7 +15,7 @@ function jsonResponse(status: number, body: string, headers: Record<string, stri
 }
 
 beforeEach(() => {
-  config.cognito = { region: 'us-east-1', clientId: 'client-painel' };
+  resetEnv();
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
 });
@@ -46,7 +50,7 @@ describe('cognitoRequest', () => {
     ['regiao', { region: '', clientId: 'client-painel' }],
     ['client ID', { region: 'us-east-1', clientId: '' }],
   ])('falha sem chamar a rede quando falta %s', async (_, cognito) => {
-    config.cognito = cognito;
+    setEnv({ cognito });
     await expect(cognitoRequest('InitiateAuth', {})).rejects.toMatchObject({
       name: 'CognitoError',
       code: 'MissingConfiguration',

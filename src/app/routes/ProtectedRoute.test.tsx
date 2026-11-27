@@ -1,8 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
-import { AuthContext } from '@/features/auth/session/authContext';
-import type { AuthState } from '@/features/auth/types';
+import { describe, expect, it } from 'vitest';
+import { authenticated, sessionValue, withSession, type AuthState } from '@/test/session';
 import { AuthenticatedAdminLayout } from './AuthenticatedAdminLayout';
 import { paths } from './paths';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -15,9 +14,8 @@ function LoginProbe() {
 
 function renderAt(state: AuthState, path = '/app/studies?aba=1') {
   render(
-    <AuthContext.Provider
-      value={{ state, signIn: vi.fn(), signOut: vi.fn(), dismissNotice: vi.fn() }}
-    >
+    withSession(
+      sessionValue(state),
       <MemoryRouter initialEntries={[path]}>
         <Routes>
           <Route path={paths.login} element={<LoginProbe />} />
@@ -30,8 +28,8 @@ function renderAt(state: AuthState, path = '/app/studies?aba=1') {
             }
           />
         </Routes>
-      </MemoryRouter>
-    </AuthContext.Provider>,
+      </MemoryRouter>,
+    ),
   );
 }
 
@@ -52,7 +50,7 @@ describe('ProtectedRoute', () => {
   });
 
   it('mostra o conteudo com sessao autenticada', () => {
-    renderAt({ status: 'authenticated', admin: { id: '1', name: 'Ana', email: 'a@b.com' } });
+    renderAt(authenticated);
     expect(screen.getByText('conteudo protegido')).toBeVisible();
   });
 });
@@ -60,18 +58,12 @@ describe('ProtectedRoute', () => {
 describe('AuthenticatedAdminLayout', () => {
   it('nao renderiza nada sem sessao autenticada', () => {
     const { container } = render(
-      <AuthContext.Provider
-        value={{
-          state: { status: 'loading' },
-          signIn: vi.fn(),
-          signOut: vi.fn(),
-          dismissNotice: vi.fn(),
-        }}
-      >
+      withSession(
+        sessionValue({ status: 'loading' }),
         <MemoryRouter>
           <AuthenticatedAdminLayout navigation={[]} />
-        </MemoryRouter>
-      </AuthContext.Provider>,
+        </MemoryRouter>,
+      ),
     );
     expect(container).toBeEmptyDOMElement();
   });
