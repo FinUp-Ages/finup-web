@@ -1,34 +1,57 @@
 {
-  "stage": "VALIDATING",
-  "task": "Frontend: redirecionar a raiz, mostrar/ocultar senha no login e mover Publicar para o lado de Salvar rascunho",
-  "objective": "A raiz (/) e rotas desconhecidas levam ao painel (/app), que manda ao login sem sessão; o campo de senha ganha o botão de olho; nas telas de pergunta, as ações de status (Publicar, Voltar para rascunho, Descartar) ficam ao lado de Salvar rascunho.",
+  "stage": "REVIEWING",
+  "task": "Testes: aumentar a cobertura do painel para no mínimo 85% e medir a cobertura no CI",
+  "objective": "A cobertura de linhas do painel estava em 66%, com login (auth), usuários, rotas e configuração HTTP sem nenhum teste. A meta é passar de 85% em linhas, statements, funções e branches, com o piso aplicado pelo CI.",
   "decisions": [
-    "/ e * fazem Navigate para /app; o ProtectedRoute já redireciona ao /login sem sessão e o login volta para /app após entrar.",
-    "A WelcomePage (template do Vite) deixou de ser usada pelo router; a feature welcome ficou no repositório sem referência.",
-    "O botão de olho é type=button com aria-label Mostrar/Ocultar senha, aria-pressed e aria-controls; fica desabilitado durante o envio.",
-    "Fora do código: o VITE_COGNITO_CLIENT_ID do .env local estava sem o último caractere (ResourceNotFoundException no login); corrigido para o mesmo valor do COGNITO_ADMIN_CLIENT_ID do backend.",
-    "Os três formulários de pergunta recebem a prop footerActions, exibida ao lado do botão de salvar; as páginas passam QuestionStatusActions por ela em vez do cabeçalho.",
-    "QuestionStatusActions passou a usar o mesmo tamanho do botão primário (55px, pílula) e alinhamento à esquerda; o motivo de bloqueio continua abaixo dos botões.",
-    "Na edição, Salvar rascunho fica desabilitado sem alterações (prop requireChanges); a criação continua habilitada para mostrar a validação.",
-    "O status vem do backend comparando draft e published: se o PUT volta PUBLISHED, a mensagem avisa que o rascunho está igual ao publicado e não há o que publicar."
+    "Coverage com @vitest/coverage-v8 (mesma versão do vitest, 3.2.7) em vitest.config.ts, contando todo arquivo de src/ (all: true), inclusive os que nenhum teste importa.",
+    "Piso de 85% em linhas, statements, funções e branches; o CI troca `npm test` por `npm run test:coverage`.",
+    "Fora da conta: arquivos de teste, src/test/, .d.ts, main.tsx (bootstrap do createRoot) e as features example/ (referência do padrão, citada no README) e welcome/ (tela antiga), que nenhuma rota usa.",
+    "Nenhum código de produção mudou: só testes, configuração de teste e CI.",
+    "Rotas reais (App, AppRouter) testadas com src/test/memoryRouterProvider.tsx: no jsdom com Node 24 o createBrowserRouter cria um Request do undici com o AbortSignal do jsdom, que o undici recusa. O helper troca só o provider; rotas, guardas e layouts são os de produção.",
+    "Teste instável de MultipleChoiceQuestionPage (timeout de 5s com cobertura ligada): o preenchimento do formulário passa a colar o texto (user.paste) em vez de digitar letra a letra.",
+    "coverage/ entrou no .gitignore e nos ignores do ESLint (o relatório HTML gerado não é código do projeto).",
+    "Arquivos já fora do Prettier na develop não foram reformatados; os arquivos novos seguem o .prettierrc.",
+    "Helpers de teste em src/test/: session.tsx (AuthContext com estado fixo, para testes de app/ não importarem o interior de features/auth) e env.ts (mockEnv/setEnv/resetEnv, mesmo formato de shared/config/env).",
+    "Exceção à regra do README de não importar axios: só os testes de shared/config (httpClient e apiError) usam AxiosError e AxiosAdapter, porque testam o próprio cliente HTTP."
   ],
   "plan": [
-    "Trocar a rota / e adicionar o catch-all",
-    "Adicionar o botão de olho no campo de senha",
-    "Mover as ações de status para o rodapé dos formulários de pergunta",
-    "Executar lint, typecheck e testes",
-    "Verificar no navegador o redirecionamento, o login e o rodapé das perguntas"
+    "Configurar coverage com piso e script test:coverage",
+    "Testar auth (Cognito, sessão, AuthProvider, login), shared/config e rotas",
+    "Testar users e o crescimento de usuários do dashboard",
+    "Testar o CRUD de categorias da trilha, mensagens de erro e rotas reais da API",
+    "Corrigir o teste instável e atualizar CI e README",
+    "Executar lint, typecheck, testes com cobertura e build"
+  ],
+  "files_in_scope": [
+    "vitest.config.ts",
+    "package.json",
+    "package-lock.json",
+    ".github/workflows/ci.yml",
+    ".gitignore",
+    "eslint.config.js",
+    "README.md",
+    "src/test/memoryRouterProvider.tsx",
+    "src/test/session.tsx",
+    "src/test/env.ts",
+    "src/**/*.test.ts(x) (23 arquivos novos e MultipleChoiceQuestionPage.test.tsx)",
+    ".railforge/state.json"
+  ],
+  "non_goals": [
+    "Mudar código de produção.",
+    "Remover as features example/ e welcome/.",
+    "Testes E2E (Playwright) e mudanças no backend ou no mobile."
   ],
   "validation": {
-    "npm run lint": "passou (2026-11-12)",
-    "npm run typecheck": "passou (2026-11-12)",
-    "npm run build": "passou (2026-11-12)",
-    "npx vitest run --no-file-parallelism src/features/study-tracks": "162 testes passando (2026-11-12); em paralelo, com o dev server rodando junto, há timeouts intermitentes",
-    "navegador": "login e redirecionamento para /app conferidos pelo usuário (2026-11-12)"
+    "npm run test:coverage": "passou (2026-11-27): 391 testes; linhas 97,73%, funções 97,55%, branches 95,08%.",
+    "npm run lint": "passou (2026-11-27)",
+    "npm run typecheck": "passou (2026-11-27)",
+    "npm run build": "passou (2026-11-27)",
+    "prettier --check (arquivos novos e alterados)": "passou (2026-11-27)"
   },
-  "review": "Pendente: verificação no navegador do botão de olho e do Publicar ao lado de Salvar rascunho.",
-  "updated_at": "2026-11-12",
+  "review": "2026-11-27: /code-review (standards e spec) feito; ajustes de padrão aplicados. Pendente: revisão humana do PR #22.",
+  "updated_at": "2026-11-27",
   "open_questions": [
-    "Remover a feature welcome, agora sem uso?"
+    "Remover as features example/ e welcome/, sem uso nas rotas?",
+    "Pendência herdada da tarefa anterior (PR #21): conferir no navegador o botão de olho da senha e o Publicar ao lado de Salvar rascunho."
   ]
 }

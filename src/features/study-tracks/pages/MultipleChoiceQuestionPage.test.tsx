@@ -89,18 +89,26 @@ function renderAt(url: string, history: string[] = [], cachedClient?: QueryClien
 const createUrl = '/studies/categories/cat-1/questions/new/multiple-choice';
 const editUrl = '/studies/categories/cat-1/questions/q-mc-1/edit';
 
+/**
+ * Cola o texto no campo em vez de digitar letra a letra: o formulario recebe o mesmo onChange,
+ * e o teste nao estoura o timeout de 5s quando roda junto com a coleta de cobertura.
+ */
+async function fill(user: ReturnType<typeof userEvent.setup>, field: HTMLElement, text: string) {
+  await user.click(field);
+  await user.paste(text);
+}
+
 async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText('Enunciado'), 'Onde guardar a reserva de emergência?');
-  await user.type(
+  await fill(user, screen.getByLabelText('Enunciado'), 'Onde guardar a reserva de emergência?');
+  await fill(
+    user,
     screen.getByLabelText('Alternativa 1'),
     'Em investimento de alta liquidez e baixo risco',
   );
-  await user.type(
-    screen.getByLabelText('Alternativa 2'),
-    'Em investimento sem resgate imediato',
-  );
+  await fill(user, screen.getByLabelText('Alternativa 2'), 'Em investimento sem resgate imediato');
   await user.click(screen.getByRole('radio', { name: 'Marcar alternativa 1 como correta' }));
-  await user.type(
+  await fill(
+    user,
     screen.getByLabelText(/Explicação/),
     'A reserva precisa estar disponível para imprevistos.',
   );
