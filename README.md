@@ -74,8 +74,9 @@ As variáveis definidas com `$env:` permanecem disponíveis apenas na sessão at
 | `npm run typecheck` | TypeScript sem emitir arquivos |
 | `npm run format` | Prettier |
 | `npm test` | testes com Vitest + Testing Library (`*.test.ts(x)` em `src/`) |
+| `npm run test:coverage` | testes com cobertura (v8); falha abaixo de 85% de linhas, statements, funções ou branches. Relatório HTML em `coverage/` |
 
-Antes de abrir um PR, rode `npm run lint && npm run typecheck && npm run build` — é exatamente o que o CI executa. Rode também `npm test` (ainda fora do CI).
+Antes de abrir um PR, rode `npm run lint && npm run typecheck && npm run test:coverage && npm run build` — é exatamente o que o CI executa.
 
 ---
 
@@ -187,7 +188,6 @@ A feature `example/` é a referência completa do padrão.
 | Item | Situação |
 |---|---|
 | **Design tokens** (cores, tipografia, espaçamento) | `tailwind.config.js` está com `theme.extend` vazio, aguardando o Figma do AGES IV |
-| **Testes no CI** | Vitest + Testing Library já rodam com `npm test` (testes da Trilha); o passo no CI e os testes do login entram depois |
 | **Formulários** (React Hook Form + Zod) | fora do escopo desta primeira versão — o painel é majoritariamente formulário, então provavelmente entra cedo |
 | **Biblioteca de componentes** | `shared/components/ui/` será construída à mão, sobre Tailwind |
 ---
